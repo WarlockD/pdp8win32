@@ -1,0 +1,314 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	index.html - Online help for the KC8-EA Programmer's Console
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+	<title>KC8-EA Programmer&rsquo;s Console Help</title>
+	<meta name="description"
+		content="Describes the functioning of the KC8-EA Programmer&rsquo;s Console">
+	<meta name="AppleTitle" content="KC8-EA Programmer's Console Help">
+	<meta name="AppleIcon" content="pdp8e.png">
+	<link href="styles.css" rel="stylesheet" media="all">
+</head>
+<body>
+
+<h1>Controls and Indicators of the KC8-EA Programmer&rsquo;s Console</h1>
+
+<p>
+The controls and indicators on the Programmer&rsquo;s Console provide manual control and indicate the
+program conditions of the PDP-8/E. Controls on the Programmer&rsquo;s Console provide the operator
+with the hardware to start, stop, examine, modify, or continue a program. The indicators on the console
+provide a visual indication of the machine status and current program, the contents of the major registers,
+and the condition of the control flip-flops. A lighted indicator denotes the presence of a binary 1 in
+a specific register bit position or control flip-flop. The table below lists the functions of controls and
+indicators. The controls are divided into two groups; switches and keys. Keys are momentary, or
+spring-return, switches.
+</p>
+
+<table>
+<tr>
+	<th width="150px">Control or Indicator</th>
+	<th class="left">Function</th>
+</tr>
+<tr>
+	<td>Off / Power / Panel Lock</td>
+	<td class="left">
+		This is a key operated switch. In the counter-clockwise, or OFF, position, the
+		switch disconnects all primary power to the machiine. In the POWER, or straight up position,
+		it enables all manual controls and applies primary computer power. In the PANEL LOCK or
+		clockwise position, it disables all keys and switches with the exception of the Switch
+		Register and the SW switch. In this position, a running program is protected from
+		inadvertent switch operation and all panel indicators except the RUN light are turned off.
+	</td>
+</tr>
+<tr>
+	<td>SW</td>
+	<td class="left">
+		When this switch is up, the line on the OMNIBUS called SW is high; when the lever is down,
+		the line is low. This switch is used by special peripheral controls, such as the
+		Bootstrap Loader.
+	</td>
+</tr>
+<tr>
+	<td>Switch Register Switches<br>(SR)</td>
+	<td class="left">
+		These 12 switches provide a means of communication between operator and machine.
+		They allow a 12-bit word to be input. When the switch is up, it designates a binary 1
+		to the machine; switch down is a 0. These switches are used during manual functions or
+		under program control.
+	</td>
+</tr>
+<tr>
+	<td>Load Address Key<br>(ADDR LOAD)</td>
+	<td class="left">
+		This key loads the contents of the Switch Register into the CPMA and forces Fetch to be
+		set (no Major States while the Load Address Key is depressed).
+	</td>
+</tr>
+<tr>
+	<td>Extended Address Load<br>(EXTD ADDR LOAD)</td>
+	<td class="left">
+		This switch loads the contents of SR(6&ndash;11) into the Data Field and Instruction Field
+		registers of the Memory Extension Control. SR(9&ndash;11) goes to Data Field 0&ndash;2,
+		SR(6&ndash;8) goes to Instruction Field 0&ndash;2.
+	</td>
+</tr>
+<tr>
+	<td>Clear Key (CLEAR)</td>
+	<td class="left">
+		This key issues an Initialize Pulse, clearing the AC, Link, Interrupt system, and I/O Flags.
+	</td>
+</tr>
+<tr>
+	<td>Continue Key (CONT)</td>
+	<td class="left">
+		This key resumes the computer program by issuing a Memory Start and setting the Run
+		flip-flop. The word stored at the address currently held by the CPMA is taken as the first
+		instruction.
+	</td>
+</tr>
+<tr>
+	<td>Examine Key (EXAM)</td>
+	<td class="left">
+		Puts the contents of core memory at the address specified by the contents of the CPMA
+		into the MB. Then the contents of the PC and CPMA are incremented by one to allow
+		examination of the contents of sequential core memory addresses by repeating the operation
+		of the Examine switch.
+	</td>
+</tr>
+<tr>
+	<td>Halt Switch (HALT)</td>
+	<td class="left">
+		This switch clears the Run flip-flop and and causes the machine to stop at TS1 of the next
+		Fetch cycle. This switch is also used for single instruction stepping.
+	</td>
+</tr>
+<tr>
+	<td>Single Step Switch<br>(SING STEP)</td>
+	<td class="left">
+		This switch clears the Run flip-flop and causes the machine to stop at TS1 of the next
+		cycle. Thereafter, repeated depressing of the Continue key steps the program one cycle at
+		a time, so that the contents of registers can be observed in each state.
+	</td>
+</tr>
+<tr>
+	<td>Deposit Key (DEP)</td>
+	<td class="left">
+		Loads the contents of the SR into the MB and core memory at the address given by the
+		current contents of the CPMA. Then the contents of the PC and CPMA are incremented by one.
+		This allows storing of information in sequential memory addresses by repeated operation
+		of the Deposit switch.
+	</td>
+</tr>
+<tr>
+	<td>Indicator Selector Switch</td>
+	<td class="left">
+		This is a six-position rotary switch, used to select a register for display. The six
+		positions are as follows:
+		<ul>
+		<li>STATE &mdash; Indicates an individual function for each bit:<br>
+			<table>
+				<tr><td>0</td><td class="left">Fetch</td></tr>
+				<tr><td>1</td><td class="left">Defer</td></tr>
+				<tr><td>2</td><td class="left">Execute</td></tr>
+				<tr><td>3</td><td class="left">Instruction Register 0</td></tr>
+				<tr><td>4</td><td class="left">Instruction Register 1</td></tr>
+				<tr><td>5</td><td class="left">Instruction Register 2</td></tr>
+				<tr><td>6</td><td class="left">MD DIR</td></tr>
+				<tr><td>7</td><td class="left">Data Control</td></tr>
+				<tr><td>8</td><td class="left">SW</td></tr>
+				<tr><td>9</td><td class="left">Pause</td></tr>
+				<tr><td>10</td><td class="left">Break in Prog</td></tr>
+				<tr><td>11</td><td class="left">Break</td></tr>
+			</table>
+		</li>
+		<li>STATUS &mdash; Indicates an individual function each bit:<br>
+			<table>
+				<tr><td>0</td><td class="left">Link</td></tr>
+				<tr><td>1</td><td class="left">Greater Than Flag</td></tr>
+				<tr><td>2</td><td class="left">Interrupt Bus</td></tr>
+				<tr><td>3</td><td class="left">No Interrupt Allowed</td></tr>
+				<tr><td>4</td><td class="left">Interrupt On</td></tr>
+				<tr><td>5</td><td class="left">User Mode</td></tr>
+				<tr><td>6</td><td class="left">Instruction Field 0</td></tr>
+				<tr><td>7</td><td class="left">Instruction Field 1</td></tr>
+				<tr><td>8</td><td class="left">Instruction Field 2</td></tr>
+				<tr><td>9</td><td class="left">Data Field 0</td></tr>
+				<tr><td>10</td><td class="left">Data Field 1</td></tr>
+				<tr><td>11</td><td class="left">Data Field 2</td></tr>
+			</table>
+		</li>
+		<li>AC &mdash; Indicates bits 0&ndash;11 of the Accumulator at TS1.</li>
+		<li>MD &mdash; Indicates information just written or rewritten into memory.</li>
+		<li>MQ &mdash; Indicates contents of MQ register during TS1.</li>
+		<li>BUS &mdash; Indicates bis 0&ndash;11 of the DATA lines.</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<td>Memory Address</td>
+	<td class="left">
+		Indicates the contents of the memory address which will be accessed next.
+	</td>
+</tr>
+<tr>
+	<td>EMA</td>
+	<td class="left">
+		Indicates which Extended Memory field is being accessed.
+	</td>
+</tr>
+<tr>
+	<td>Run Light</td>
+	<td class="left">
+		When lit means machine&rsquo;s timing is enabled and capable of executing instructions.
+	</td>
+</tr>
+</table>
+
+<h1>Limitations and extensions of the simulated KC8-EA Programmer&rsquo;s Console</h1>
+
+<p>
+The simulated KC8-EA has some limitations and extensions compared to a hardware KC8-EA:
+</p>
+
+<ul>
+<li>
+	The console is able to simulate single step execution. This simulation is done console
+	internally because the PDP-8/E Simulator itself performs PDP-8/E instructions atomically.
+	While executing a Fetch and Defer memory cycle, no state changes occur in the simulators
+	PDP-8/E, only the display lights of the console reflect the accompanying state changes.
+	When the final Execute memory cycle (or, for single cycle instructions, e. g. OPRs, the
+	Fetch cycle) is performed, the simulators PDP-8/E is instructed by the console to perform
+	the complete PDP-8/E instruction at once. So, while the console is in a Defer or Execute
+	state, there may be inconsistencies between the register values visible in the CPU window
+	and the corresponding values displayed by the KC8-EA. To avoid confusion, it is suggested
+	not to alternately use single step execution of the console and the instruction stepping
+	of the simulator.
+</li>
+<li>
+	When the user depresses the Single Step switch while the PDP-8/E is running,
+	it halts at TS1 of a Fetch cycle, like with the Halt switch, and not at TS1 of any memory cycle.
+	When the Single Step or Halt switch is down, the simulator can&rsquo;t be started
+	in Step, Trace or Go mode.
+</li>
+<li>
+	When the machine is in single instruction mode (Halt switch down) and an interrupt is pending,
+	depressing the Continue switch once brings the simulator to the first instruction of the
+	interrupt service routine at location 1. On a real PDP-8/E, the switch must be operated twice
+	to reach this state. When the interrupt is caused by a privileged instruction executed in
+	user mode, the simulator halts after the privileged instruction, a hardware PDP-8/E halts
+	at location 0. The next operation of the Continue switch brings both the simulator and a
+	real PDP-8/E to the first instruction of the interrupt service routine at location 1.
+	This different behaviour is also present when stepping on memory cycle level (Single Step switch
+	down).
+</li>
+<li>
+	The state of the SW switch is not directly available for other I/O devices. But whenever the
+	user operates this switch, a Cocoa notification with the name
+	&ldquo;kc8eaSWChangedNotification&rdquo; is posted; the notification object is a number representing
+	the state of the switch, 0 for down and 1 for up.
+</li>
+<li>
+	Turning the Power key to OFF quits the PDP-8/E Simulator.
+</li>
+<li>
+	When the PDP-8/E is running, the display lights are sampled with a frequency of 60 Hz. They then
+	display the state at the end of the Fetch cycle, before the instruction is actually executed,
+	of the next PDP-8/E instruction to be performed; so the STATE display display can indicate Defer
+	and Execute cycles.
+</li>
+<li>
+	At least in the following points the display differs from a hardware PDP-8/E:
+	<ul>
+	<li>
+		The DATA CONT, BRK PROG and BRK indicators of the STATE display are always off.
+	</li>
+	<li>
+		The PAUSE indicator of the STATE display may be inprecise.
+	</li>
+	<li>
+		The NO INT indicator of the STATUS display is illuminated when the Interrupt Delay or
+		Interrupt Inhibit flag is set. On a hardware PDP-8/E, this indicator is derived from
+		signals not available with the PDP-8/E Simulator.
+	</li>
+	<li>
+		The BUS display may be inprecise under certain circumstances, e. g. for group 3 OPRs
+		of the EAE or for IOT instructions, where always the AC is shown.
+	</li>
+	<li>
+		The MD display does not reflect the additional memory access of EAE two word instructions.
+	</li>
+	<li>
+		When the PDP-8/E halts from the Step, Trace or Go mode of the simulator, the STATE, MD and
+		BUS display may be inprecise. E. g. the MD DIR is always turned on, MD shows the opcode
+		of the last instruction executed, but not the memory references eventually performed by
+		the instruction. (When you execute single PDP-8/E instructions by pressing the
+		Continue key of the console while the Halt switch is down, the display is more precise
+		because then the KC8-EA internally simulates the Fetch, Defer and Execute cycle of the
+		instruction.)
+	</li>
+	</ul>
+</li>
+<li>
+	The console keys and switches can be operated using the following keyboard shortcuts:
+	<table>
+	<tr><td>&#x2325;w</td><td class="left">Operate the SW switch</td></tr>
+	<tr><td>&#x2325;0,&hellip;,&#x2325;9, &#x2325;a, &#x2325;b</td>
+	    <td class="left">Operate the corresponding switch of the Switch Register</td></tr>
+	<tr><td>&#x2325;l</td><td class="left">Operate the Load Address key</td></tr>
+	<tr><td>&#x2325;x</td><td class="left">Operate the Extended Address Load key</td></tr>
+	<tr><td>&#x2325;c</td><td class="left">Operate the Clear key</td></tr>
+	<tr><td>&#x2325;t</td><td class="left">Operate the Continue key</td></tr>
+	<tr><td>&#x2325;e</td><td class="left">Operate the Examine key</td></tr>
+	<tr><td>&#x2325;h</td><td class="left">Operate the Halt switch</td></tr>
+	<tr><td>&#x2325;s</td><td class="left">Operate the Single Step switch</td></tr>
+	<tr><td>&#x2325;d</td><td class="left">Operate the Deposit key</td></tr>
+	<tr><td>&#x2325;&lt;</td><td class="left">Turn the Indicator Selector switch anticlockwise</td></tr>
+	<tr><td>&#x2325;&gt;</td><td class="left">Turn the Power key clockwise</td></tr>
+	</table>
+</li>
+</ul>
+
+</body>
+</html>

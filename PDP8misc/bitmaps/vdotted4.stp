@@ -1,0 +1,4 @@
+#define grid_vdotted4_width 1
+#define grid_vdotted4_height 4
+static unsigned char grid_vdotted4_bits[] = {
+   0x00, 0x01, 0x00, 0x00};

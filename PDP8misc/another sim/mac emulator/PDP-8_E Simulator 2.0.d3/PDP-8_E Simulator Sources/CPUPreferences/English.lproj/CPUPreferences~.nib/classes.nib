@@ -1,0 +1,34 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                eaeClick = id; 
+                km8eClick = id; 
+                memSizeClick = id; 
+                timeSharingOptionClick = id; 
+            }; 
+            CLASS = CPUPreferences; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                eaeCheckbox = NSButton; 
+                km8eCheckbox = NSButton; 
+                memSizeRadiobuttons = NSMatrix; 
+                timeSharingOptionCheckbox = NSButton; 
+            }; 
+            SUPERCLASS = NSPreferencePane; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            CLASS = NSPreferencePane; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                "_firstKeyView" = NSView; 
+                "_initialKeyView" = NSView; 
+                "_lastKeyView" = NSView; 
+                "_window" = NSWindow; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

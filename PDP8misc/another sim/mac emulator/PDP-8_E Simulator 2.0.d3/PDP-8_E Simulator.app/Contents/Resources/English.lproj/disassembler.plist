@@ -1,0 +1,1358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	disassembler.plist - Symbol table for the disassembler
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<dict>
+	<key>MRI</key>
+	<array>
+		<string>AND</string>
+		<string>TAD</string>
+		<string>ISZ</string>
+		<string>DCA</string>
+		<string>JMS</string>
+		<string>JMP</string>
+	</array>
+	<key>IOT</key>
+	<array>
+	<!-- 6000 -->
+		<string>SKON</string>
+		<string>ION</string>
+		<string>IOF</string>
+		<string>SRQ</string>
+		<string>GTF</string>
+		<string>RTF</string>
+		<string>SGT</string>
+		<string>CAF</string>
+	<!-- 6010 -->
+		<string>RPE</string>
+		<string>RSF</string>
+		<string>RRB</string>
+		<string></string>
+		<string>RFC</string>
+		<string></string>
+		<string>RCC</string>
+		<string></string>
+	<!-- 6020 -->
+		<string>PCE</string>
+		<string>PSF</string>
+		<string>PCF</string>
+		<string></string>
+		<string>PPC</string>
+		<string></string>
+		<string>PLS</string>
+		<string></string>
+	<!-- 6030 -->
+		<string>KCF</string>
+		<string>KSF</string>
+		<string>KCC</string>
+		<string></string>
+		<string>KRS</string>
+		<string>KIE</string>
+		<string>KRB</string>
+		<string></string>
+	<!-- 6040 -->
+		<string>TFL</string>
+		<string>TSF</string>
+		<string>TCF</string>
+		<string></string>
+		<string>TPC</string>
+		<string>TSK</string>
+		<string>TLS</string>
+		<string></string>
+	<!-- 6050 -->
+		<string>DPLA</string>
+		<string>DPGO</string>
+		<string>DPSM</string>
+		<string>DPMB</string>
+		<string>DPMD</string>
+		<string></string>
+		<string>DPCL</string>
+		<string>DPBELL</string>
+	<!-- 6060 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6070 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6100 -->
+		<string>DPI</string>
+		<string>SMP</string>
+		<string>SPL</string>
+		<string>EPI</string>
+		<string>CMP</string>
+		<string>SMPCMP</string>
+		<string>CEP</string>
+		<string>SPO</string>
+	<!-- 6110 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6120 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6130 -->
+	<!-- DK8-EP mnemonics
+		<string>CLZE</string>
+		<string>CLSK</string>
+		<string>CLOE</string>
+		<string>CLAB</string>
+		<string>CLEN</string>
+		<string>CLSA</string>
+		<string>CLBA</string>
+		<string>CLCA</string>
+	-->
+		<string></string>
+		<string>CLEI</string>
+		<string>CLDI</string>
+		<string>CLSK</string>
+		<string></string>
+		<string>CLIE</string>
+		<string>CLCF</string>
+		<string>CLSK</string>
+	<!-- 6140 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6150 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6160 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6170 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6200 -->
+		<string></string>
+		<string>CDF 0</string>
+		<string>CIF 0</string>
+		<string>CDI 0</string>
+		<string>CINT</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6210 -->
+		<string></string>
+		<string>CDF 1</string>
+		<string>CIF 1</string>
+		<string>CDI 1</string>
+		<string>RDF</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6220 -->
+		<string></string>
+		<string>CDF 2</string>
+		<string>CIF 2</string>
+		<string>CDI 2</string>
+		<string>RIF</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6230 -->
+		<string></string>
+		<string>CDF 3</string>
+		<string>CIF 3</string>
+		<string>CDI 3</string>
+		<string>RIB</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6240 -->
+		<string></string>
+		<string>CDF 4</string>
+		<string>CIF 4</string>
+		<string>CDI 4</string>
+		<string>RMF</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6250 -->
+		<string></string>
+		<string>CDF 5</string>
+		<string>CIF 5</string>
+		<string>CDI 5</string>
+		<string>SINT</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6260 -->
+		<string></string>
+		<string>CDF 6</string>
+		<string>CIF 6</string>
+		<string>CDI 6</string>
+		<string>CUF</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6270 -->
+		<string></string>
+		<string>CDF 7</string>
+		<string>CIF 7</string>
+		<string>CDI 7</string>
+		<string>SUF</string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6300 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6310 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6320 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6330 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6340 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6350 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6360 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6370 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6400 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6410 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6420 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6430 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6440 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6450 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6460 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6470 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6500 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6510 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6520 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6530 -->
+		<string>ADCL</string>
+		<string>ADLM</string>
+		<string>ADST</string>
+		<string>ADRB</string>
+		<string>ADSK</string>
+		<string>ADSE</string>
+		<string>ADLE</string>
+		<string>ADRS</string>
+	<!-- 6540 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6550 -->
+		<string></string>
+		<string>FPINT</string>
+		<string>FPICL</string>
+		<string>FPCOM</string>
+		<string>FPHLT</string>
+		<string>FPST</string>
+		<string>FPRST</string>
+		<string>FPIST</string>
+	<!-- 6560 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string>FPEP</string>
+	<!-- 6570 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6600 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6610 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6620 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6630 -->
+		<string></string>
+		<string>RCSF</string>
+		<string>RCRA</string>
+		<string></string>
+		<string>RCRB</string>
+		<string>RCNO</string>
+		<string>RCRC</string>
+		<string>RCNI</string>
+	<!-- 6640 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6650 -->
+		<string>PLCE</string>
+		<string>PLSF</string>
+		<string>PLCF</string>
+		<string>PLPU</string>
+		<string>PLLR</string>
+		<string>PLPD</string>
+		<string>PLCF PLLR</string>
+		<string>PLSE</string>
+	<!-- 6660 -->
+		<string></string>
+		<string>PSKF</string>
+		<string>PCLF</string>
+		<string>PSKE</string>
+		<string>PSTB</string>
+		<string>PSIE</string>
+		<string>PCLF PSTB</string>
+		<string>PCIE</string>
+	<!-- 6670 -->
+		<string></string>
+		<string>RCSD</string>
+		<string>RCSE</string>
+		<string></string>
+		<string>RCRD</string>
+		<string>RCSI</string>
+		<string>RCTF</string>
+		<string></string>
+	<!-- 6700 -->
+		<string></string>
+		<string>LWCR</string>
+		<string>CWCR</string>
+		<string>LCAR</string>
+		<string>CCAR</string>
+		<string>LCMR</string>
+		<string>LFGR</string>
+		<string>LDBR</string>
+	<!-- 6710 -->
+		<string></string>
+		<string>RWCR</string>
+		<string>CLT</string>
+		<string>RCAR</string>
+		<string>RMSR</string>
+		<string>RCMR</string>
+		<string>RFSR</string>
+		<string>RDBR</string>
+	<!-- 6720 -->
+		<string></string>
+		<string>SKEF</string>
+		<string>SKCB</string>
+		<string>SKJD</string>
+		<string>SKTR</string>
+		<string>CLF</string>
+		<string>(maintenance)</string>
+		<string>(maintenance)</string>
+	<!-- 6730 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6740 -->
+		<string></string>
+		<string>DSKP</string>
+		<string>DCLR</string>
+		<string>DLAG</string>
+		<string>DLCA</string>
+		<string>DRST</string>
+		<string>DLDC</string>
+		<string>DMAN</string>
+	<!-- 6750 -->
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+		<string></string>
+	<!-- 6760 -->
+		<string></string>
+		<string>DTRA</string>
+		<string>DTCA</string>
+		<string></string>
+		<string>DTXA</string>
+		<string></string>
+		<string>DTLA</string>
+		<string></string>
+	<!-- 6770 -->
+		<string></string>
+		<string>DTSF</string>
+		<string>DTRB</string> <!-- 6772 - DTRA - Read STAT REG A -->
+		<string></string>
+		<string>DTLB</string> <!-- 6774 - DTLB - Load STAT REG B -->
+		<string></string>
+		<string></string>
+		<string></string>
+	</array>
+	<key>OPR Group 1</key>
+	<array>
+	<!-- 7000 -->
+		<string>NOP</string>
+		<string>IAC</string>
+		<string>BSW</string>
+		<string>IAC BSW</string>
+		<string>RAL</string>
+		<string>IAC RAL</string>
+		<string>RTL</string>
+		<string>IAC RTL</string>
+	<!-- 7010 -->
+		<string>RAR</string>
+		<string>IAC RAR</string>
+		<string>RTR</string>
+		<string>IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7020 -->
+		<string>CML</string>
+		<string>CML IAC</string>
+		<string>CML BSW</string>
+		<string>CML IAC BSW</string>
+		<string>CML RAL</string>
+		<string>CML IAC RAL</string>
+		<string>CML RTL</string>
+		<string>CML IAC RTL</string>
+	<!-- 7030 -->
+		<string>CML RAR</string>
+		<string>CML IAC RAR</string>
+		<string>CML RTR</string>
+		<string>CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7040 -->
+		<string>CMA</string>
+		<string>CMA IAC</string>
+		<string>CMA BSW</string>
+		<string>CMA IAC BSW</string>
+		<string>CMA RAL</string>
+		<string>CMA IAC RAL</string>
+		<string>CMA RTL</string>
+		<string>CMA IAC RTL</string>
+	<!-- 7050 -->
+		<string>CMA RAR</string>
+		<string>CMA IAC RAR</string>
+		<string>CMA RTR</string>
+		<string>CMA IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7060 -->
+		<string>CMA CML</string>
+		<string>CMA CML IAC</string>
+		<string>CMA CML BSW</string>
+		<string>CMA CML IAC BSW</string>
+		<string>CMA CML RAL</string>
+		<string>CMA CML IAC RAL</string>
+		<string>CMA CML RTL</string>
+		<string>CMA CML IAC RTL</string>
+	<!-- 7070 -->
+		<string>CMA CML RAR</string>
+		<string>CMA CML IAC RAR</string>
+		<string>CMA CML RTR</string>
+		<string>CMA CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7100 -->
+		<string>CLL</string>
+		<string>CLL IAC</string>
+		<string>CLL BSW</string>
+		<string>CLL IAC BSW</string>
+		<string>CLL RAL</string>
+		<string>CLL IAC RAL</string>
+		<string>CLL RTL</string>
+		<string>CLL IAC RTL</string>
+	<!-- 7110 -->
+		<string>CLL RAR</string>
+		<string>CLL IAC RAR</string>
+		<string>CLL RTR</string>
+		<string>CLL IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7120 -->
+		<string>CLL CML</string>
+		<string>CML CML IAC</string>
+		<string>CLL CML BSW</string>
+		<string>CLL CML IAC BSW</string>
+		<string>CLL CML RAL</string>
+		<string>CLL CML IAC RAL</string>
+		<string>CLL CML RTL</string>
+		<string>CLL CML IAC RTL</string>
+	<!-- 7130 -->
+		<string>CLL CML RAR</string>
+		<string>CLL CML IAC RAR</string>
+		<string>CLL CML RTR</string>
+		<string>CLL CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7140 -->
+		<string>CLL CMA</string>
+		<string>CLL CMA IAC</string>
+		<string>CLL CMA BSW</string>
+		<string>CLL CMA IAC BSW</string>
+		<string>CLL CMA RAL</string>
+		<string>CLL CMA IAC RAL</string>
+		<string>CLL CMA RTL</string>
+		<string>CLL CMA IAC RTL</string>
+	<!-- 7150 -->
+		<string>CLL CMA RAR</string>
+		<string>CLL CMA IAC RAR</string>
+		<string>CLL CMA RTR</string>
+		<string>CLL CMA IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7160 -->
+		<string>CLL CMA CML</string>
+		<string>CLL CMA CML IAC</string>
+		<string>CLL CMA CML BSW</string>
+		<string>CLL CMA CML IAC BSW</string>
+		<string>CLL CMA CML RAL</string>
+		<string>CLL CMA CML IAC RAL</string>
+		<string>CLL CMA CML RTL</string>
+		<string>CLL CMA CML IAC RTL</string>
+	<!-- 7170 -->
+		<string>CLL CMA CML RAR</string>
+		<string>CLL CMA CML IAC RAR</string>
+		<string>CLL CMA CML RTR</string>
+		<string>CLL CMA CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7200 -->
+		<string>CLA</string>
+		<string>CLA IAC</string>
+		<string>CLA BSW</string>
+		<string>CLA IAC BSW</string>
+		<string>CLA RAL</string>
+		<string>CLA IAC RAL</string>
+		<string>CLA RTL</string>
+		<string>CLA IAC RTL</string>
+	<!-- 7210 -->
+		<string>CLA RAR</string>
+		<string>CLA IAC RAR</string>
+		<string>CLA RTR</string>
+		<string>CLA IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7220 -->
+		<string>CLA CML</string>
+		<string>CLA CML IAC</string>
+		<string>CLA CML BSW</string>
+		<string>CLA CML IAC BSW</string>
+		<string>CLA CML RAL</string>
+		<string>CLA CML IAC RAL</string>
+		<string>CLA CML RTL</string>
+		<string>CLA CML IAC RTL</string>
+	<!-- 7230 -->
+		<string>CLA CML RAR</string>
+		<string>CLA CML IAC RAR</string>
+		<string>CLA CML RTR</string>
+		<string>CLA CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7240 -->
+		<string>CLA CMA</string>
+		<string>CLA CMA IAC</string>
+		<string>CLA CMA BSW</string>
+		<string>CLA CMA IAC BSW</string>
+		<string>CLA CMA RAL</string>
+		<string>CLA CMA IAC RAL</string>
+		<string>CLA CMA RTL</string>
+		<string>CLA CMA IAC RTL</string>
+	<!-- 7250 -->
+		<string>CLA CMA RAR</string>
+		<string>CLA CMA IAC RAR</string>
+		<string>CLA CMA RTR</string>
+		<string>CLA CMA IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7260 -->
+		<string>CLA CMA CML</string>
+		<string>CLA CMA CML IAC</string>
+		<string>CLA CMA CML BSW</string>
+		<string>CLA CMA CML IAC BSW</string>
+		<string>CLA CMA CML RAL</string>
+		<string>CLA CMA CML IAC RAL</string>
+		<string>CLA CMA CML RTL</string>
+		<string>CLA CMA CML IAC RTL</string>
+	<!-- 7270 -->
+		<string>CLA CMA CML RAR</string>
+		<string>CLA CMA CML IAC RAR</string>
+		<string>CLA CMA CML RTR</string>
+		<string>CLA CMA CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7300 -->
+		<string>CLA CLL</string>
+		<string>CLA CLL IAC</string>
+		<string>CLA CLL BSW</string>
+		<string>CLA CLL IAC BSW</string>
+		<string>CLA CLL RAL</string>
+		<string>CLA CLL IAC RAL</string>
+		<string>CLA CLL RTL</string>
+		<string>CLA CLL IAC RTL</string>
+	<!-- 7310 -->
+		<string>CLA CLL RAR</string>
+		<string>CLA CLL IAC RAR</string>
+		<string>CLA CLL RTR</string>
+		<string>CLA CLL IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7320 -->
+		<string>CLA CLL CML</string>
+		<string>CLA CLL CML IAC</string>
+		<string>CLA CLL CML BSW</string>
+		<string>CLA CLL CML IAC BSW</string>
+		<string>CLA CLL CML RAL</string>
+		<string>CLA CLL CML IAC RAL</string>
+		<string>CLA CLL CML RTL</string>
+		<string>CLA CLL CML IAC RTL</string>
+	<!-- 7330 -->
+		<string>CLA CLL CML RAR</string>
+		<string>CLA CLL CML IAC RAR</string>
+		<string>CLA CLL CML RTR</string>
+		<string>CLA CLL CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7340 -->
+		<string>CLA CLL CMA</string>
+		<string>CLA CLL CMA IAC</string>
+		<string>CLA CLL CMA BSW</string>
+		<string>CLA CLL CMA IAC BSW</string>
+		<string>CLA CLL CMA RAL</string>
+		<string>CLA CLL CMA IAC RAL</string>
+		<string>CLA CLL CMA RTL</string>
+		<string>CLA CLL CMA IAC RTL</string>
+	<!-- 7350 -->
+		<string>CLA CLL CMA RAR</string>
+		<string>CLA CLL CMA IAC RAR</string>
+		<string>CLA CLL CMA RTR</string>
+		<string>CLA CLL CMA IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	<!-- 7360 -->
+		<string>CLA CLL CMA CML</string>
+		<string>CLA CLL CMA CML IAC</string>
+		<string>CLA CLL CMA CML BSW</string>
+		<string>CLA CLL CMA CML IAC BSW</string>
+		<string>CLA CLL CMA CML RAL</string>
+		<string>CLA CLL CMA CML IAC RAL</string>
+		<string>CLA CLL CMA CML RTL</string>
+		<string>CLA CLL CMA CML IAC RTL</string>
+	<!-- 7370 -->
+		<string>CLA CLL CMA CML RAR</string>
+		<string>CLA CLL CMA CML IAC RAR</string>
+		<string>CLA CLL CMA CML RTR</string>
+		<string>CLA CLL CMA CML IAC RTR</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+		<string>(reserved)</string>
+	</array>
+	<key>OPR Group 2</key>
+	<array>
+	<!-- 7400 -->
+		<string>NOP</string>
+		<string>HLT</string>
+		<string>OSR</string>
+		<string>OSR HLT</string>
+		<string>SKP</string>
+		<string>SKP HLT</string>
+		<string>SKP OSR</string>
+		<string>SKP OSR HLT</string>
+	<!-- 7420 -->
+		<string>SNL</string>
+		<string>SNL HLT</string>
+		<string>SNL OSR</string>
+		<string>SNL OSR HLT</string>
+		<string>SZL</string>
+		<string>SZL HLT</string>
+		<string>SZL OSR</string>
+		<string>SZL OSR HLT</string>
+	<!-- 7440 -->
+		<string>SZA</string>
+		<string>SZA HLT</string>
+		<string>SZA OSR</string>
+		<string>SZA OSR HLT</string>
+		<string>SNA</string>
+		<string>SNA HLT</string>
+		<string>SNA OSR</string>
+		<string>SNA OSR HLT</string>
+	<!-- 7460 -->
+		<string>SZA SNL</string>
+		<string>SZA SNL HLT</string>
+		<string>SZA SNL OSR</string>
+		<string>SZA SNL OSR HLT</string>
+		<string>SNA SZL</string>
+		<string>SNA SZL HLT</string>
+		<string>SNA SZL OSR</string>
+		<string>SNA SZL OSR HLT</string>
+	<!-- 7500 -->
+		<string>SMA</string>
+		<string>SMA HLT</string>
+		<string>SMA OSR</string>
+		<string>SMA OSR HLT</string>
+		<string>SPA</string>
+		<string>SPA HLT</string>
+		<string>SPA OSR</string>
+		<string>SPA OSR HLT</string>
+	<!-- 7520 -->
+		<string>SMA SNL</string>
+		<string>SMA SNL HLT</string>
+		<string>SMA SNL OSR</string>
+		<string>SMA SNL OSR HLT</string>
+		<string>SPA SZL</string>
+		<string>SPA SZL HLT</string>
+		<string>SPA SZL OSR</string>
+		<string>SPA SZL OSR HLT</string>
+	<!-- 7540 -->
+		<string>SMA SZA</string>
+		<string>SMA SZA HLT</string>
+		<string>SMA SZA OSR</string>
+		<string>SMA SZA OSR HLT</string>
+		<string>SPA SNA</string>
+		<string>SPA SNA HLT</string>
+		<string>SPA SNA OSR</string>
+		<string>SPA SNA OSR HLT</string>
+	<!-- 7560 -->
+		<string>SMA SZA SNL</string>
+		<string>SMA SZA SNL HLT</string>
+		<string>SMA SZA SNL OSR</string>
+		<string>SMA SZA SNL OSR HLT</string>
+		<string>SPA SNA SZL</string>
+		<string>SPA SNA SZL HLT</string>
+		<string>SPA SNA SZL OSR</string>
+		<string>SPA SNA SZL OSR HLT</string>
+	<!-- 7600 -->
+		<string>CLA</string>
+		<string>CLA HLT</string>
+		<string>CLA OSR</string>
+		<string>CLA OSR HLT</string>
+		<string>SKP CLA</string>
+		<string>SKP CLA HLT</string>
+		<string>SKP CLA OSR</string>
+		<string>SKP CLA OSR HLT</string>
+	<!-- 7620 -->
+		<string>SNL CLA</string>
+		<string>SNL CLA HLT</string>
+		<string>SNL CLA OSR</string>
+		<string>SNL CLA OSR HLT</string>
+		<string>SZL CLA</string>
+		<string>SZL CLA HLT</string>
+		<string>SZL CLA OSR</string>
+		<string>SZA CLA OSR HLT</string>
+	<!-- 7640 -->
+		<string>SZA CLA</string>
+		<string>SZA CLA HLT</string>
+		<string>SZA CLA OSR</string>
+		<string>SZA CLA OSR HLT</string>
+		<string>SNA CLA</string>
+		<string>SNA CLA HLT</string>
+		<string>SNA CLA OSR</string>
+		<string>SNA CLA OSR HLT</string>
+	<!-- 7660 -->
+		<string>SZA SNL CLA</string>
+		<string>SZA SNL CLA HLT</string>
+		<string>SZA SNL CLA OSR</string>
+		<string>SZA SNL CLA OSR HLT</string>
+		<string>SNA SZL CLA</string>
+		<string>SNA SZL CLA HLT</string>
+		<string>SNA SZL CLA OSR</string>
+		<string>SNA SZL CLA OSR HLT</string>
+	<!-- 7700 -->
+		<string>SMA CLA</string>
+		<string>SMA CLA HLT</string>
+		<string>SMA CLA OSR</string>
+		<string>SMA CLA OSR HLT</string>
+		<string>SPA CLA</string>
+		<string>SPA CLA HLT</string>
+		<string>SPA CLA OSR</string>
+		<string>SPA CLA OSR HLT</string>
+	<!-- 7720 -->
+		<string>SMA SNL CLA</string>
+		<string>SMA SNL CLA HLT</string>
+		<string>SMA SNL CLA OSR</string>
+		<string>SMA SNL CLA OSR HLT</string>
+		<string>SPA SZL CLA</string>
+		<string>SPA SZL CLA HLT</string>
+		<string>SPA SZL CLA OSR</string>
+		<string>SPA SZL CLA OSR HLT</string>
+	<!-- 7740 -->
+		<string>SMA SZA CLA</string>
+		<string>SMA SZA CLA HLT</string>
+		<string>SMA SZA CLA OSR</string>
+		<string>SMA SZA CLA OSR HLT</string>
+		<string>SPA SNA CLA</string>
+		<string>SPA SNA CLA HLT</string>
+		<string>SPA SNA CLA OSR</string>
+		<string>SPA SNA CLA OSR HLT</string>
+	<!-- 7760 -->
+		<string>SMA SZA SNL CLA</string>
+		<string>SMA SZA SNL CLA HLT</string>
+		<string>SMA SZA SNL CLA OSR</string>
+		<string>SMA SZA SNL CLA OSR HLT</string>
+		<string>SPA SNA SZL CLA</string>
+		<string>SPA SNA SZL CLA HLT</string>
+		<string>SPA SNA SZL CLA OSR</string>
+		<string>SPA SNA SZL CLA OSR HLT</string>
+	</array>
+	<key>EAE Mode A</key>
+	<array>
+	<!-- 7401 -->
+		<string>NOP</string>
+		<string>SCL</string>
+		<string>MUY</string>
+		<string>DVI</string>
+		<string>NMI</string>
+		<string>SHL</string>
+		<string>ASR</string>
+		<string>LSR</string>
+	<!-- 7421 -->
+		<string>MQL</string>
+		<string>MQL SCL</string>
+		<string>MQL MUY</string>
+		<string>MQL DVI</string>
+		<string>SWAB</string>
+		<string>MQL SHL</string>
+		<string>MQL ASR</string>
+		<string>MQL LSR</string>
+	<!-- 7441 -->
+		<string>SCA</string>
+		<string>SCA SCL</string>
+		<string>SCA MUY</string>
+		<string>SWBA</string>
+		<string>SCA NMI</string>
+		<string>SCA SHL</string>
+		<string>SCA ASR</string>
+		<string>SCA LSR</string>
+	<!-- 7461 -->
+		<string>MQL SCA</string>
+		<string>MQL SCA SCL</string>
+		<string>MQL SCA MUY</string>
+		<string>MQL SCA DVI</string>
+		<string>MQL SCA NMI</string>
+		<string>MQL SCA SHL</string>
+		<string>MQL SCA ASR</string>
+		<string>MQL SCA LSR</string>
+	<!-- 7501 -->
+		<string>MQA</string>
+		<string>MQA SCL</string>
+		<string>MQA MUY</string>
+		<string>MQA DVI</string>
+		<string>MQA NMI</string>
+		<string>MQA SHL</string>
+		<string>MQA ASR</string>
+		<string>MQA LSR</string>
+	<!-- 7521 -->
+		<string>SWP</string>
+		<string>SWP SCL</string>
+		<string>SWP MUY</string>
+		<string>SWP DVI</string>
+		<string>SWP NMI</string>
+		<string>SWP SHL</string>
+		<string>SWP ASR</string>
+		<string>SWP LSR</string>
+	<!-- 7541 -->
+		<string>MQA SCA</string>
+		<string>MQA SCA SCL</string>
+		<string>MQA SCA MUY</string>
+		<string>MQA SCA DVI</string>
+		<string>MQA SCA NMI</string>
+		<string>MQA SCA SHL</string>
+		<string>MQA SCA ASR</string>
+		<string>MQA SCA LSR</string>
+	<!-- 7561 -->
+		<string>SWP SCA</string>
+		<string>SWP SCA SCL</string>
+		<string>SWP SCA MUY</string>
+		<string>SWP SCA DVI</string>
+		<string>SWP SCA NMI</string>
+		<string>SWP SCA SHL</string>
+		<string>SWP SCA ASR</string>
+		<string>MQA MQA SCA LSR</string>
+	<!-- 7601 -->
+		<string>CLA</string>
+		<string>CLA SCL</string>
+		<string>CLA MUY</string>
+		<string>CLA DVI</string>
+		<string>CLA NMI</string>
+		<string>CLA SHL</string>
+		<string>CLA ASR</string>
+		<string>CLA LSR</string>
+	<!-- 7621 -->
+		<string>CAM</string>
+		<string>CAM SCL</string>
+		<string>CAM MUY</string>
+		<string>CAM DVI</string>
+		<string>CAM NMI</string>
+		<string>CAM SHL</string>
+		<string>CAM ASR</string>
+		<string>CAM LSR</string>
+	<!-- 7641 -->
+		<string>CLA SCA</string>
+		<string>CLA SCA SCL</string>
+		<string>CLA SCA MUY</string>
+		<string>CLA SCA DVI</string>
+		<string>CLA SCA NMI</string>
+		<string>CLA SCA SHL</string>
+		<string>CLA SCA ASR</string>
+		<string>CLA SCA LSR</string>
+	<!-- 7661 -->
+		<string>CAM SCA</string>
+		<string>CAM SCA SCL</string>
+		<string>CAM SCA MUY</string>
+		<string>CAM SCA DVI</string>
+		<string>CAM SCA NMI</string>
+		<string>CAM SCA SHL</string>
+		<string>CAM SCA ASR</string>
+		<string>CAM SCA LSR</string>
+	<!-- 7701 -->
+		<string>CLA MQA</string>
+		<string>CLA MQA SCL</string>
+		<string>CLA MQA MUY</string>
+		<string>CLA MQA DVI</string>
+		<string>CLA MQA NMI</string>
+		<string>CLA MQA SHL</string>
+		<string>CLA MQA ASR</string>
+		<string>CLA MQA LSR</string>
+	<!-- 7721 -->
+		<string>CLA SWP</string>
+		<string>CLA SWP SCL</string>
+		<string>CLA SWP MUY</string>
+		<string>CLA SWP DVI</string>
+		<string>CLA SWP NMI</string>
+		<string>CLA SWP SHL</string>
+		<string>CLA SWP ASR</string>
+		<string>CLA SWP LSR</string>
+	<!-- 7741 -->
+		<string>CLA MQA SCA</string>
+		<string>CLA MQA SCA SCL</string>
+		<string>CLA MQA SCA MUY</string>
+		<string>CLA MQA SCA DVI</string>
+		<string>CLA MQA SCA NMI</string>
+		<string>CLA MQA SCA SHL</string>
+		<string>CLA MQA SCA ASR</string>
+		<string>CLA MQA SCA LSR</string>
+	<!-- 7761 -->
+		<string>CLA SWP SCA</string>
+		<string>CLA SWP SCA SCL</string>
+		<string>CLA SWP SCA MUY</string>
+		<string>CLA SWP SCA DVI</string>
+		<string>CLA SWP SCA NMI</string>
+		<string>CLA SWP SCA SHL</string>
+		<string>CLA SWP SCA ASR</string>
+		<string>CLA SWP SCA LSR</string>
+	</array>
+	<key>EAE Mode B</key>
+	<array>
+	<!-- 7401 -->
+		<string>NOP</string>
+		<string>ACS</string>
+		<string>MUY</string>
+		<string>DVI</string>
+		<string>NMI</string>
+		<string>SHL</string>
+		<string>ASR</string>
+		<string>LSR</string>
+	<!-- 7421 -->
+		<string>MQL</string>
+		<string>MQL ACS</string>
+		<string>MQL MUY</string>
+		<string>MQL DVI</string>
+		<string>SWAB</string>
+		<string>MQL SHL</string>
+		<string>MQL ASR</string>
+		<string>MQL LSR</string>
+	<!-- 7441 -->
+		<string>SCA</string>
+		<string>DAD</string>
+		<string>DST</string>
+		<string>SWBA</string>
+		<string>DPSZ</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>SAM</string>
+	<!-- 7461 -->
+		<string>MQL SCA</string>
+		<string>MQL DAD</string>
+		<string>MQL DST</string>
+		<string>MQL (SWBA)</string>
+		<string>MQL DPSZ</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>MQL SAM</string>
+	<!-- 7501 -->
+		<string>MQA</string>
+		<string>MQA ACS</string>
+		<string>MQA MUY</string>
+		<string>MQA DVI</string>
+		<string>MQA NMI</string>
+		<string>MQA SHL</string>
+		<string>MQA ASR</string>
+		<string>MQA LSR</string>
+	<!-- 7521 -->
+		<string>SWP</string>
+		<string>SWP ACS</string>
+		<string>SWP MUY</string>
+		<string>SWP DVI</string>
+		<string>SWP NMI</string>
+		<string>SWP SHL</string>
+		<string>SWP ASR</string>
+		<string>SWP LSR</string>
+	<!-- 7541 -->
+		<string>MQA SCA</string>
+		<string>MQA DAD</string>
+		<string>MQA DST</string>
+		<string>MQA (SWBA)</string>
+		<string>MQA DPSZ</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>MQA SAM</string>
+	<!-- 7561 -->
+		<string>SWP SCA</string>
+		<string>SWP DAD</string>
+		<string>SWP DST</string>
+		<string>SWP (SWBA)</string>
+		<string>SWP DPSZ</string>
+		<string>DPIC</string>
+		<string>DCM</string>
+		<string>SWP SAM</string>
+	<!-- 7601 -->
+		<string>CLA</string>
+		<string>CLA ACS</string>
+		<string>CLA MUY</string>
+		<string>CLA DVI</string>
+		<string>CLA NMI</string>
+		<string>CLA SHL</string>
+		<string>CLA ASR</string>
+		<string>CLA LSR</string>
+	<!-- 7621 -->
+		<string>CAM</string>
+		<string>CAM ACS</string>
+		<string>CAM MUY</string>
+		<string>CAM DVI</string>
+		<string>CAM NMI</string>
+		<string>CAM SHL</string>
+		<string>CAM ASR</string>
+		<string>CAM LSR</string>
+	<!-- 7641 -->
+		<string>CLA SCA</string>
+		<string>CLA DAD</string>
+		<string>CLA DST</string>
+		<string>CLA (SWBA)</string>
+		<string>CLA DPSZ</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>(reserved - EAE Mode B)</string>
+		<string>CLA SAM</string>
+	<!-- 7661 -->
+		<string>CAM SCA</string>
+		<string>DLD</string>
+		<string>DDZ</string>
+		<string>CAM (SWBA)</string>
+		<string>CAM DPSZ</string>
+		<string>CAM DPIC</string>
+		<string>DLD</string>
+		<string>CAM SAM</string>
+	<!-- 7701 -->
+		<string>CLA MQA</string>
+		<string>CLA MQA ACS</string>
+		<string>CLA MQA MUY</string>
+		<string>CLA MQA DVI</string>
+		<string>CLA MQA NMI</string>
+		<string>CLA MQA SHL</string>
+		<string>CLA MQA ASR</string>
+		<string>CLA MQA LSR</string>
+	<!-- 7721 -->
+		<string>CLA SWP</string>
+		<string>CLA SWP ACS</string>
+		<string>CLA SWP MUY</string>
+		<string>CLA SWP DVI</string>
+		<string>CLA SWP NMI</string>
+		<string>CLA SWP SHL</string>
+		<string>CLA SWP ASR</string>
+		<string>CLA SWP LSR</string>
+	<!-- 7741 -->
+		<string>CLA MQA SCA</string>
+		<string>CLA MQA DAD</string>
+		<string>CLA MQA DST</string>
+		<string>CLA MQA (SWBA)</string>
+		<string>CLA MQA DPSZ</string>
+		<string>CLA DPIC</string>
+		<string>CLA DCM</string>
+		<string>CLA MQA SAM</string>
+	<!-- 7761 -->
+		<string>CLA SWP SCA</string>
+		<string>CLA SWP DAD</string>
+		<string>CLA SWP DST</string>
+		<string>CLA SWP (SWBA)</string>
+		<string>CLA SWP DPSZ</string>
+		<string>CLA SWP DPIC</string>
+		<string>CLA SWP DCM</string>
+		<string>CLA SWP SAM</string>
+	</array>
+</dict>
+</plist>

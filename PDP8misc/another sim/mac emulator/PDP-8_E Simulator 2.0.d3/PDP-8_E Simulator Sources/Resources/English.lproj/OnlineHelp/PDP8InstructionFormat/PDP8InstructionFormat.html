@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	PDP8InstructionFormat.html - Online help - Instruction format
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta name="AppleTitle" content="PDP-8 Instruction Format">
+	<title>PDP-8 Instruction Format</title>
+	<meta name="description" content="Describes the format of the different PDP-8 instruction types">
+	<link href="../resources/styles.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+
+<h1>PDP-8 Instruction Format</h1>
+
+<p>
+PDP-8 machine instructions are 12-bit values; each instruction
+occupies exactly one 12-bit memory word. There are eight basic
+instructions, separated in three classes:
+</p>
+
+<h2>Memory Reference Instructions (MRIs)</h2>
+
+<center>
+<table>
+	<tr>
+		<td class="opcode"></td>
+		<td class="opcode" colspan="3"><br>Opcode</td>
+		<td class="opcode"></td>
+		<td class="opcode">
+			Page<br>
+			Bit
+		</td>
+		<td class="opcode" colspan="7"><br>Page Address</td>
+	</tr>
+	<tr>
+		<td class="opcode">Bits</td>
+		<td class="opcode_tlb">0</td>
+		<td class="opcode_tb">1</td>
+		<td class="opcode_tb">2</td>
+		<td class="opcode_tlb">3</td>
+		<td class="opcode_tlb">4</td>
+		<td class="opcode_tlb">5</td>
+		<td class="opcode_tb">6</td>
+		<td class="opcode_tb">7</td>
+		<td class="opcode_tb">8</td>
+		<td class="opcode_tb">9</td>
+		<td class="opcode_tb">10</td>
+		<td class="opcode_tbr">11</td>
+	</tr>
+	<tr>
+		<td class="opcode" colspan="3"></td>
+		<td class="opcode" colspan="3">
+			Address<br>
+			Mode Bit
+		</td>
+	</tr>
+</table>
+</center>
+
+<p></p>
+
+<table>
+<tr>
+	<th>Mnemonic</th>
+	<th>Octal</th>
+	<th>Opcode</th>
+	<th class="left">Description</th>
+</tr>
+<tr>
+	<td>AND</td>
+	<td>0xxx</td>
+	<td>000</td>
+	<td class="left">Logical AND</td>
+</tr>
+<tr>
+	<td>TAD</td>
+	<td>1xxx</td>
+	<td>001</td>
+	<td class="left">Two&rsquo;s complemend add</td>
+</tr>
+<tr>
+	<td>ISZ</td>
+	<td>2xxx</td>
+	<td>010</td>
+	<td class="left">Increment and skip if zero</td>
+</tr>
+<tr>
+	<td>DCA</td>
+	<td>3xxx</td>
+	<td>011</td>
+	<td class="left">Deposit and clear AC</td>
+</tr>
+<tr>
+	<td>JMS</td>
+	<td>4xxx</td>
+	<td>100</td>
+	<td class="left">Jump to subroutine</td>
+</tr>
+<tr>
+	<td>JMP</td>
+	<td>5xxx</td>
+	<td>101</td>
+	<td class="left">Jump</td>
+</tr>
+</table>
+
+<h2>Input Output Transfer Instructions (IOTs)</h2>
+
+<center>
+<table>
+	<tr>
+		<td class="opcode"></td>
+		<td class="opcode" colspan="3">Opcode 110</td>
+		<td class="opcode" colspan="6">I/O Device Address</td>
+		<td class="opcode" colspan="3">I/O Operation</td>
+	</tr>
+	<tr>
+		<td class="opcode">Bits</td>
+		<td class="opcode_tlb">0</td>
+		<td class="opcode_tb">1</td>
+		<td class="opcode_tb">2</td>
+		<td class="opcode_tlb">3</td>
+		<td class="opcode_tb">4</td>
+		<td class="opcode_tb">5</td>
+		<td class="opcode_tb">6</td>
+		<td class="opcode_tb">7</td>
+		<td class="opcode_tb">8</td>
+		<td class="opcode_tlb">9</td>
+		<td class="opcode_tb">10</td>
+		<td class="opcode_tbr">11</td>
+	</tr>
+</table>
+</center>
+
+<h2>Operate Instructions (OPRs)</h2>
+
+<center>
+<table>
+	<tr>
+		<td class="opcode"></td>
+		<td class="opcode" colspan="3">Opcode 111</td>
+		<td class="opcode"></td>
+		<td class="opcode" colspan="8">Microoperation</td>
+	</tr>
+	<tr>
+		<td class="opcode">Bits</td>
+		<td class="opcode_tlb">0</td>
+		<td class="opcode_tb">1</td>
+		<td class="opcode_tb">2</td>
+		<td class="opcode_tlb">3</td>
+		<td class="opcode_tlb">4</td>
+		<td class="opcode_tb">5</td>
+		<td class="opcode_tb">6</td>
+		<td class="opcode_tb">7</td>
+		<td class="opcode_tb">8</td>
+		<td class="opcode_tb">9</td>
+		<td class="opcode_tb">10</td>
+		<td class="opcode_tbr">11</td>
+	</tr>
+	<tr>
+		<td class="opcode" colspan="3"></td>
+		<td class="opcode" colspan="3">
+			Group
+		</td>
+	</tr>
+</table>
+</center>
+
+<p>
+Note that EAE instructions are special OPRs. Some of them require
+a direct operand in an extension word of the instruction.
+</p>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+am43xx_evm
+
+echo Booting from network ...; setenv autoload no; setenv hostname tisk;setenv ipaddr 192.168.2.234;setenv serverip 192.168.1.130;tftp ${loadaddr} ${bootfile}; tftp ${fdtaddr} ${fdtfile}; run netargs; bootz ${loadaddr} - ${fdtaddr}
+
+setenv bootcmd 'run findfdt; setenv autoload no;dhcp ;tftp ${loadaddr} 192.168.2.130:zImage-am437x-evm.bin; tftp ${fdtaddr} 192.168.2.130:${fdtfile}; run netargs; bootz ${loadaddr} - ${fdtaddr}' 
+
+setenv bootcmd 'run findfdt; setenv autoload no;dhcp ;tftp ${loadaddr} zImage-am437x-evm.bin; tftp ${fdtaddr} ${fdtfile}; run netargs; bootz ${loadaddr} - ${fdtaddr}'

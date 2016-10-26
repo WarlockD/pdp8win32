@@ -1,0 +1,35 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {"" = id; }; 
+            CLASS = FirstResponder; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {
+            ACTIONS = {driftChange = id; goSpeedClick = id; traceSpeedChange = id; }; 
+            CLASS = GeneralPreferences; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                driftSlider = NSSlider; 
+                driftSliderLeftLabel = NSTextField; 
+                driftSliderRightLabel = NSTextField; 
+                goSpeedRadiobuttons = NSMatrix; 
+                traceSpeedSlider = NSSlider; 
+            }; 
+            SUPERCLASS = NSPreferencePane; 
+        }, 
+        {
+            CLASS = NSPreferencePane; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                "_firstKeyView" = NSView; 
+                "_initialKeyView" = NSView; 
+                "_lastKeyView" = NSView; 
+                "_window" = NSWindow; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }
+    ); 
+    IBVersion = 1; 
+}

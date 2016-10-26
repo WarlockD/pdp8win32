@@ -1,0 +1,264 @@
+Hierarchical Logic Simulation
+by Donald C. Craig
+
+
+Figure 2:
+
+Signals values on wire: Main w4
+     {_ X} {2 1} {3 0} {5 1} {6 0} 
+
+
+
+Listing One
+class Component
+{
+public:
+    virtual     ~Component();
+
+    list<Port *>     I_List;
+    list<Port *>     O_List;
+    virtual void     process(ckt_time);
+    void         simulate();
+protected:
+    Component(ckt_time delay = 1L, const char *name = "Component"); 
+    ckt_time     delay;
+private:
+    boolean      inputs_are_ready() const;
+    char        *name;
+    ckt_time     local_time;
+};
+
+
+Listing Two
+class Connector
+{
+public:
+    virtual     ~Connector();
+    virtual Signal   get_signal(ckt_time) const = 0;
+    virtual void     send_signal(Signal) = 0;
+
+    void         connect(Component &);
+    void         propagate() const;
+protected:
+    Connector(const char* = "Connector");
+private:
+    list<Component *> fan_out;
+    char         *name;
+};
+
+
+Listing Three
+class Wire : public Connector
+{
+public:
+    Wire(const char *name = "Wire");
+    Wire(Signal s[], int num, char *name);
+
+    Signal  get_signal(ckt_time) const;
+    void    add_signal(Signal);
+
+private:
+    list<Signal>    signals;
+};
+
+
+Listing Four
+class Port : public Connector
+{
+public:
+    Signal       get_signal(ckt_time) const;
+    void         send_signal(Signal);
+protected:
+    Port(Connector &, const char* = "Port");
+    Connector   *external;
+};
+
+Listing Five
+class Input : public Port
+{
+public:
+    Input(Component &, Connector &, const char *name = "Input");
+    void    send_signal(Signal);
+};
+class Output : public Port
+{
+public:
+    Output(Component &, Connector &, const char *name = "Output");
+};
+
+
+Listing Six
+class And2 : public Component
+{
+public:
+    And2(Connector &, Connector &, Connector &,
+         ckt_time = 1L, char* = "And2");
+    void process(ckt_time);
+private:
+    Input   I1, I2;
+    Output  O1;
+};
+
+
+Listing Seven
+And2::And2(Connector &ci1, Connector &ci2, Connector &co1,
+       ckt_time dly, char *n) :
+    Component(dly, n),
+    I1 (*this, ci1, "And2 I1"),
+    I2 (*this, ci2, "And2 I2"),
+    O1 (*this, co1, "And2 O1")
+{ }
+
+Listing Eight
+class And3 : public Component
+{
+public:
+    And3(Connector &, Connector &, 
+         Connector &, Connector &, 
+         char* = "And3");
+private:
+    Input   I1, I2, I3;
+    Output  O1;
+    Wire    w;
+    And2    and2a, and2b;
+};
+
+Listing Ten
+void Component::simulate()
+{
+    // Continue to simulate the component as long as inputs signals
+    // exist at the current local time of the component.
+    while (inputs_are_ready())
+    {
+        // If so, then increment local time here.
+        // Otherwise, circuits with feedback go on forever.
+        local_time++;
+        // Send the process message to component. This may trigger further 
+        // simulate() messages depending upon connectivity of component.
+        process(local_time - 1);
+    }
+}
+
+Listing Eleven
+void Component::process(ckt_time)
+{
+    list<Port *>::const_iterator      p;
+
+    // Scan all the input port pointers in the input port list
+    // and activate any subcomponent immediately connected to an input port.
+    for (p = I_List.begin(); p != I_List.end(); p++)
+        (*p)->propagate();
+}
+
+Listing Twelve
+void
+And2::process(ckt_time t)
+{
+    Sig_Val     sigval1 = I1.get_signal(t).get_value();
+    Sig_Val     sigval2 = I2.get_signal(t).get_value();
+
+    if (sigval1 == SIG_HIGH && sigval2 == SIG_HIGH)
+        O1.send_signal(Signal(t + delay, SIG_HIGH));
+    else if (sigval1 == SIG_LOW || sigval2 == SIG_LOW)
+        O1.send_signal(Signal(t + delay, SIG_LOW));
+    else
+        O1.send_signal(Signal(t + delay, SIG_X));
+}
+
+Listing Thirteen
+void Connector::propagate() const
+{
+    list<Component *>::const_iterator   c;
+
+    // Scan all the elements in the component pointer list and
+    // send simulate() messages to each of them.
+    for (c = fan_out.begin(); c != fan_out.end(); c++)
+        (*c)->simulate();
+}
+
+Listing Fourteen
+Signal Wire::get_signal(ckt_time t) const
+{
+    // If signal list is empty or if time we are looking for is greater than 
+    // the time last signal came into wire, then return an undefined signal.
+    if (signals.empty() || signals.back().get_time() < t)
+        return Signal(CKT_TIME_NULL, SIG_NULL);
+
+    list<Signal>::const_iterator     s = signals.begin();
+    Signal  found;
+
+    // Do a linear scan over the list and return the signal that occurred
+    // at the specified time (if it exists).
+    while (s != signals.end() && (*s).get_time() <= t)
+        found = *s++;
+    return found;
+}
+
+Listing Fifteen
+void Wire::send_signal(Signal sig)
+{
+    add_signal(sig);
+    propagate();
+}
+
+Listing Sixteen
+Signal
+Port::get_signal(ckt_time t) const
+{
+    // Send message to the external feeder to get its signal.
+    return external->get_signal(t);
+}
+void
+Port::send_signal(Signal s)
+{
+    // Send the signal to the external Connector.
+    external->send_signal(s);
+    // Propagate the signal at the current level of the hierarchy.
+    propagate();
+}
+
+Listing Seventeen
+int
+main()
+{
+    // Create signal arrays for the inputs.
+    Signal  Signal1[] =
+    {
+        // {0 1} {2 0} {3 1} {4 0} {31 0}
+        Signal(0, SIG_HIGH),
+        Signal(2, SIG_LOW),
+        Signal(3, SIG_HIGH),
+        Signal(4, SIG_LOW),
+    };
+    Signal  Signal2[] =
+    {
+        // {0 1} {1 0} {2 1} {4 0} {31 0}
+        Signal(0, SIG_HIGH),
+        Signal(1, SIG_LOW),
+        Signal(2, SIG_HIGH),
+        Signal(4, SIG_LOW)
+    };
+    Signal  Signal3[] =
+    {
+        // {0 1} {2 0} {4 1} {5 0} {31 0}
+        Signal(0, SIG_HIGH),
+        Signal(2, SIG_LOW),
+        Signal(4, SIG_HIGH),
+        Signal(5, SIG_LOW)
+    };
+    // Build input & output wires and populate input wires with input signals.
+    Wire    w1(Signal1, sizeof(Signal1) / sizeof(Signal), "Main in_w1");
+    Wire    w2(Signal2, sizeof(Signal2) / sizeof(Signal), "Main in_w2");
+    Wire    w3(Signal3, sizeof(Signal3) / sizeof(Signal), "Main in_w3");
+    Wire    w4("Main out_w4");
+
+    // Build the 3-input AND gate, simulate it and show its output.
+    And3    and3(w1, w2, w3, w4, CKT_TIME_NULL, "and3");
+    and3.simulate();
+    and3.show_outputs();
+
+    return 0;
+}
+
+
+1

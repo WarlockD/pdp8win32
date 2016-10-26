@@ -1,0 +1,4961 @@
+#!/bin/sh
+# the next line restarts using wish \
+exec wish "$0" "$@"
+#
+# --------------------------------------------------------------------
+# DigiTcl 0.3.0 - An Elementary Digital Simulator 
+# (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+# 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# --------------------------------------------------------------------
+#
+
+proc about_dialog {} {
+	utils_dialog .about "About" \
+		"The DigiTcl Layout Tool and Digital Simulator\nVersion 0.3.0" \
+		0 "OK"
+}
+
+proc attrib_component {canvas status tagorid} {
+	set tagname [cmp_identify $canvas $tagorid]
+
+	regsub "^." $status [string toupper [string index $status 0]] stat
+	set colour [option get $canvas cmpColour$stat CmpColour$stat]
+	set width [option get $canvas cmpWidth$stat CmpWidth$stat]
+
+	foreach i [$canvas find withtag $tagname] {
+		if {[llength [$canvas gettags $i]] > 2} {
+			continue
+		}
+		switch -exact [$canvas type $i] {
+		    rectangle -
+		    oval {
+			$canvas itemconfigure $i -outline $colour -width $width
+		    }
+		    line -
+		    arc {
+			$canvas itemconfigure $i -fill $colour -width $width
+		    }
+		}
+	}
+}
+
+proc attrib_port {canvas status tagorid} {
+	if {$status == "selected"} {
+		set colour [option get $canvas portSelected PortSelected]
+	} elseif {[net_port_point [$canvas find withtag $tagorid]] != ""} {
+		set tags [$canvas gettags $tagorid]
+		regexp {(input|output|bidirect)} $tags type
+		regsub "^." $type [string toupper [string index $type 0]] type
+		set colour [option get $canvas port$type Port$type]
+	} else {
+		set colour [option get $canvas portNormal PortNormal]
+	}
+
+	$canvas itemconfigure $tagorid -fill $colour
+}
+
+proc attrib_multi {canvas status tagorid} {
+	global multibox
+	set id [$canvas find withtag $tagorid]
+	if {[info exists multibox($id)]} {
+		set tagorid $multibox($id)
+	}
+
+	regsub "^." $status [string toupper [string index $status 0]] stat
+	set colour [option get $canvas multiColour$stat MultiColour$stat]
+	set width [option get $canvas multiWidth$stat MultiWidth$stat]
+	$canvas itemconfigure $tagorid -outline $colour -width $width
+}
+
+proc attrib_wire {canvas status tagorid} {
+	regsub "^." $status [string toupper [string index $status 0]] stat
+	set width [option get $canvas wireWidth$stat WireWidth$stat]
+	set colour [option get $canvas wireColour$stat WireColour$stat]
+	$canvas itemconfigure $tagorid -fill $colour -width $width
+}
+
+proc attrib_point {canvas status tagorid} {
+	regsub "^." $status [string toupper [string index $status 0]] stat
+	set colour [option get $canvas point$stat Point$stat]
+	$canvas itemconfigure $tagorid -fill $colour
+}
+
+proc attrib_label {canvas status tagorid} {
+	regsub "^." $status [string toupper [string index $status 0]] stat
+	set colour [option get $canvas label$stat Label$stat]
+	$canvas itemconfigure $tagorid -fill $colour
+}
+
+proc attrib_netlist {canvas status tagorid} {
+	set tags [$canvas gettags $tagorid]
+	if {[set idx [lsearch $tags "netlist_*"]] == -1} {
+		puts "No netlist tag associated with item $tagorid?"
+	}
+	foreach i [$canvas find withtag [lindex $tags $idx]] {
+		set tags [$canvas gettags $i]
+		if {[regexp "label|point|wire" $tags item] == 0} {
+			puts "A net list tag has been incorrectly assigned?"
+		} else {
+			attrib_$item $canvas $status $i
+		}
+	}
+}
+
+proc attrib_siglabel {canvas status tagorid} {
+	regsub "^." $status [string toupper [string index $status 0]] stat
+	set colour [option get $canvas label$stat Label$stat]
+	$canvas itemconfigure $tagorid -fill $colour
+}
+
+
+proc component_create {canvas status cmp} {
+	if {$status == "on"} {
+		bind $canvas <Enter> "cmp_do_create $canvas $cmp %x %y"
+	} else {
+		bind $canvas <Enter> {}
+	}
+}
+
+proc cmp_do_create {canvas button x y}  {
+
+	set focus [focus -lastfor .]
+	focus $canvas
+	pullmenu_set_state disabled
+	toolbar_set_state disabled
+
+	workarea_convert x y
+	regsub "^cmpcreate_" $button "" type
+	set cmp_tag [draw_component $canvas $type $x $y]
+
+	bind $canvas <Enter> {}
+	bind $canvas <Motion> "cmp_create_do_move $canvas $cmp_tag %x %y"
+	bind $canvas <1> \
+		"cmp_stop_create $canvas $cmp_tag create $focus $button %x %y"
+	bind $canvas <2> "cmp_do_rotate $canvas $cmp_tag 90"
+	bind $canvas <3> \
+		"cmp_stop_create $canvas $cmp_tag abort $focus $button %x %y"
+	bind $canvas <Escape> [bind $canvas <3>]
+}
+
+proc cmp_create_do_move {canvas tagname x y} {
+	global cmp_coord
+
+	workarea_convert x y
+	set xd [expr $x - [lindex $cmp_coord($tagname) 0]]
+	set yd [expr $y - [lindex $cmp_coord($tagname) 1]]
+	$canvas move $tagname $xd $yd
+
+	set cmp_coord($tagname) "$x $y"
+}
+
+proc cmp_stop_create {canvas tagname status focus button x y} {
+	switch $status {
+	    "abort" {
+		$canvas delete $tagname
+		global cmp_coord
+		unset cmp_coord($tagname)
+	    }
+	    "create" {
+		if {! [utils_in_canvas $canvas $x $y]} {
+			puts "\aPlease click inside the canvas."
+			return
+		}
+		if {[component_overlaps $canvas $tagname]} {
+			puts "\aOverlapping objects."
+			return
+		}
+	    }
+	}
+
+	focus $focus
+	pullmenu_set_state normal
+	toolbar_set_state normal
+	.$button invoke
+
+	foreach i [bind $canvas] {
+		bind $canvas $i {}
+	}
+}
+
+proc component_dispatch_item_delete {canvas x y} {
+	cmp_do_delete $canvas [cmp_identify $canvas current]
+}
+
+proc cmp_do_delete {canvas tagname} {
+	global pnt_port
+	foreach pnt [cmp_get_point_ids $canvas $tagname] {
+		unset pnt_port($pnt)
+		set nid [net_list_identify $canvas $pnt]
+		if {[net_list_remove_port $pnt $nid] == ""} {
+			puts "\aComponent's port was incorrectly setup."
+		}
+	}
+	$canvas delete $tagname
+	global cmp_coord
+	unset cmp_coord($tagname)
+}
+
+proc component_dispatch_item_modify {canvas x y} {
+}
+
+proc component_dispatch_item_move {canvas x y} {
+	workarea_convert x y
+	cmp_prepare_move $canvas [cmp_identify $canvas current] $x $y
+}
+
+proc cmp_prepare_move {canvas tagname x y} {
+	global cmp_last_x cmp_last_y cmp_orig_x cmp_orig_y
+
+	set cmp_orig_x [set cmp_last_x $x]
+	set cmp_orig_y [set cmp_last_y $y]
+
+	set pnts [list [cmp_get_point_ids $canvas $tagname]]
+
+	bind $canvas <B1-Motion> \
+		"cmp_do_move $canvas $tagname %x %y $pnts"
+	bind $canvas <B1-ButtonRelease> \
+		"cmp_stop_move $canvas $tagname %x %y $pnts"
+}
+
+proc cmp_do_move {canvas itemtag x y pnts} {
+	global cmp_last_x cmp_last_y
+
+	workarea_convert x y
+	set xd [expr $x - $cmp_last_x]
+	set yd [expr $y - $cmp_last_y]
+	$canvas move $itemtag $xd $yd
+
+	foreach pid $pnts {
+		net_do_move_point $canvas $pid $xd $yd
+	}
+
+	set cmp_last_x $x
+	set cmp_last_y $y
+}
+
+proc cmp_stop_move {canvas itemtag x y pnts} {
+	global cmp_last_x cmp_last_y cmp_orig_x cmp_orig_y
+	set inside [utils_in_canvas $canvas $x $y] 
+	if {! $inside || [component_overlaps $canvas $itemtag]} {
+		set xd [expr $cmp_orig_x - $cmp_last_x]
+		set yd [expr $cmp_orig_y - $cmp_last_y]
+		$canvas move $itemtag $xd $yd
+		foreach pid $pnts {
+			net_do_move_point $canvas $pid $xd $yd
+		}
+		if {! $inside} {
+			puts "\aCannot place component outside canvas."
+		} else {
+			puts "\aComponent overlaps with other item(s)"
+		}
+	} else {
+		global cmp_coord
+		if {[scan $cmp_coord($itemtag) "%d %d" x y] != 2} {
+			puts "\aCannot get component's coordinates?!"
+		} else {
+			incr x [expr $cmp_last_x - $cmp_orig_x]
+			incr y [expr $cmp_last_y - $cmp_orig_y]
+			set cmp_coord($itemtag) "$x $y"
+		}
+	}
+
+	bind $canvas <B1-Motion> {}
+	bind $canvas <B1-ButtonRelease> {}
+}
+
+proc component_dispatch_item_rotate {canvas x y deg} {
+	cmp_do_rotate $canvas [cmp_identify $canvas current] $deg "overlaps"
+}
+
+proc cmp_do_rotate {canvas itemtag degrees {chk_overlaps ""}} {
+	set to_detag {}
+	foreach pnt [cmp_get_point_ids $canvas $itemtag] {
+		$canvas addtag $itemtag withtag $pnt
+		lappend to_detag $pnt
+	}
+
+	draw_rotate $itemtag $degrees
+
+	if {$chk_overlaps != "" && [component_overlaps $canvas $itemtag]} {
+		puts "\aOverlapping components!"
+		draw_rotate $itemtag -$degrees
+	}
+
+	foreach point $to_detag {
+		$canvas dtag $point $itemtag
+	}
+}
+
+proc component_overlaps {canvas itemtag} {
+	set bbox [cmp_get_bbox $canvas $itemtag bbox_body]
+	set overlaps_body [eval $canvas find overlapping $bbox]
+
+	set bbox [cmp_get_bbox $canvas $itemtag bbox_full]
+	set overlaps_full [eval $canvas find overlapping $bbox]
+
+	set permit "grid|$itemtag|point|connect|multi|label"
+	foreach i $overlaps_body {
+		if {   [set tags [$canvas gettags $i]] != ""
+		    && [regexp $permit $tags] == 0} {
+				puts "\"$tags\" overlaps with component body"
+				return 1
+		}
+	}
+
+	set permit "grid|$itemtag|wire|point|connect|multi|label"
+	foreach i $overlaps_full {
+		if {   [set tags [$canvas gettags $i]] != ""
+		    && [regexp $permit $tags] == 0} {
+				puts "\"$tags\" overlaps with rest of component"
+				return 1
+		}
+	}
+
+	return 0
+}
+
+proc cmp_get_port_ids {canvas tagname {type all}} {
+	set ports ""
+	foreach id [$canvas find withtag $tagname] {
+		set tags [$canvas gettags $id]
+		if {   [lsearch $tags "port"] != -1
+		    && ($type == "all" || [regexp $type $tags] != -1)} {
+			lappend ports $id
+		}
+	}
+
+	return $ports
+}
+
+proc cmp_get_point_ids {canvas tagname {type all}} {
+	set pnts {}
+	foreach port [$canvas find withtag $tagname] {
+		set tags [$canvas gettags $port]
+		if {   [lsearch $tags "port"] != -1
+		    && ($type == "all" || [regexp $type $tags] != -1)
+		    && [set pid [net_port_point $port]] != ""} {
+			lappend pnts $pid
+		}
+	}
+
+	return $pnts
+}
+
+proc cmp_port_point_list {canvas tagname} {
+	set port_list {}
+	foreach port [$canvas find withtag $tagname] {
+		set found_port [regexp {(input|output|bidirect)_([0-9]+)} \
+				[$canvas gettags $port] _ type seqno]
+		if {   $found_port
+		    && [set pid [net_port_point $port]] != ""} {
+			set type [string index $type 0]
+			lappend port_list "$type$seqno $pid"
+		}
+	}
+	return $port_list
+}
+
+proc cmp_identify {canvas tag_or_id} {
+	set tags [$canvas gettags $tag_or_id]
+	if {[set idx [lsearch $tags comp_*]] == -1} {
+		return ""
+	} else {
+		return [lindex $tags $idx]
+	}
+}
+
+proc cmp_get_bbox {canvas tagname type} {
+	foreach id [$canvas find withtag $tagname] {
+		if {[regexp "$type" [$canvas gettags $id]]} {
+			return [utils_round [$canvas coords $id]]
+		}
+	}
+	return ""
+}
+
+set conf_file ~/.digitclrc
+
+lappend conf_parameters toolbar_side
+set conf_values(toolbar_side) "left right"
+set conf_default(toolbar_side) "left"
+
+lappend conf_parameters auto_solder
+set conf_values(auto_solder) "on off"
+set conf_default(auto_solder) "on"
+
+lappend conf_parameters grid_weight
+set conf_values(grid_weight) "none light medium heavy"
+set conf_default(grid_weight) "medium"
+
+lappend conf_parameters manhatten
+set conf_values(manhatten) "yes no"
+set conf_default(manhatten) "no"
+
+proc config_read {} {
+	global conf_file configure
+	if {[file exists $conf_file] && [file readable $conf_file]} {
+		if {[source $conf_file] != 0} {
+			puts "\aError in \"$conf_file\"?!"
+		}
+	}
+
+	global conf_parameters conf_default conf_values
+	foreach i $conf_parameters {
+		if { ! [info exists configure($i)]
+		    || [lsearch $conf_values($i) $configure($i)] == -1} {
+			set configure($i) $conf_default($i)
+		}
+	}
+}
+
+proc config_write {} {
+	global configure conf_file conf_parameters
+	if {[file exists $conf_file] && ! [file writable $conf_file]} {
+		puts "Configuration file \"$conf_file\" could not be written."
+		return
+	}
+	set f [open $conf_file w]
+	foreach i $conf_parameters {
+		puts $f "set configure($i) $configure($i)"
+	}
+	puts $f "return 0"
+	close $f
+}
+
+proc config_buttons {option parent name {command ""}} {
+	global conf_values
+
+	frame $parent.$option -bd 2 -relief groove
+	pack $parent.$option -side top -fill x -pady 2m -padx 2m
+	label $parent.$option.label -text "$name:" -anchor w
+	pack $parent.$option.label -side top -fill x
+	frame $parent.$option.buttons
+	pack $parent.$option.buttons -side top
+
+	foreach i $conf_values($option) {
+		regsub "^." $i [string toupper [string index $i 0]] text
+		radiobutton $parent.$option.buttons.$i -text $text \
+			-value $i -variable configure($option)
+		if {$command != ""} {
+			$parent.$option.buttons.$i configure \
+				-command "$command $i" 
+		}
+		pack $parent.$option.buttons.$i -side left -fill x
+	}
+}
+
+proc config_user_interface {} {
+	toplevel .configure -class Dialog
+
+	set focus [focus -lastfor .]
+	focus .configure
+	wm title .configure "Configure" 
+	wm resizable .configure 0 0
+
+	frame .configure.top
+	pack .configure.top -side top -fill x
+	frame .configure.left
+	pack .configure.left -in .configure.top -side left -fill x
+	frame .configure.right
+	pack .configure.right -in .configure.top -side right -fill x
+
+	frame .configure.bottom
+	pack .configure.bottom -side bottom
+
+	config_buttons toolbar_side .configure.left \
+		"Tool Bar Position" tb_move
+	config_buttons auto_solder .configure.left \
+		"Automatic Solder"
+	config_buttons grid_weight .configure.right \
+		"Grid Weight" workarea_config_grid_lines
+	config_buttons manhatten .configure.right \
+		"Horizontal and Vertical Wires Only"
+
+	button .configure.bottom.ok -text "OK" -command "set conf_ok 1"
+	button .configure.bottom.cancel -text "Cancel" -command "set conf_ok 0"
+	pack .configure.bottom.ok .configure.bottom.cancel -side left \
+		-ipadx 1m -ipady 1m -padx 2m -pady 1m
+
+	utils_window_center .configure
+	grab .configure
+
+	tkwait variable conf_ok
+
+	focus $focus
+	destroy .configure
+
+	global conf_ok
+	if {$conf_ok} {
+		config_write
+	} else {
+		config_read
+		global configure
+		tb_move $configure(toolbar_side)
+		workarea_config_grid_lines $configure(grid_weight)
+	}
+}
+
+proc debug_dump_wire_point {} {
+	global pnt_coord pnt_wires pnt_port
+	set canvas [workarea_get_canvas]
+
+	puts "=== Net lists ==="
+	foreach array {pnt_coord pnt_wires pnt_port} {
+		if {! [info exists $array]} {
+			puts "No elements in $array array\n---"
+			continue
+		} 
+		foreach i [lsort [array names $array]] {
+			if {[set tag [$canvas gettags $i]] == ""} {
+				puts "$array\($i\) has no tag!"
+			} else {
+				set value [set ${array}($i)]
+				puts "$tag: $array\($i\) = $value"
+			}
+		}
+		puts "---"
+	}
+}
+
+proc debug_dump_netlists {} {
+	global pnt_port
+	set canvas [workarea_get_canvas]
+
+	foreach i [$canvas find withtag netlist] {
+		set tags [$canvas gettags $i]
+		if {! [regexp {netlist_[0-9]+} $tags netlist_id]} {
+			puts "Cannot find netlist id for item $i."
+		}
+		if {[info exists netlists($netlist_id)]} {
+			continue
+		}
+		set netlists($netlist_id) 1
+		puts "Netlist: $netlist_id"
+		puts -nonewline "\tPoints:"
+		set points {}
+		foreach n [$canvas find withtag $netlist_id] {
+			set tags [$canvas gettags $n]
+			if {[lsearch $tags "point"] == -1} {
+				continue
+			}
+			puts -nonewline " $n"
+			lappend points $n
+		}
+		puts ""
+		puts "\tPorts:"
+		foreach p $points {
+			if {[info exists pnt_port($p)]} {
+				puts "\t\t[$canvas gettags $pnt_port($p)]"
+			}
+		}
+		puts ""
+	}
+}
+
+proc debug_show_bbox item {
+	global 	bbox_port_status bbox_point_status \
+		bbox_full_status bbox_body_status \
+		tk_library
+
+	set canvas [workarea_get_canvas]
+
+	set shade yellow
+
+	switch $item {
+	    port -
+	    point {
+	    	if {$item == "port"} {
+	    		set tag prt
+	    	} else {
+	    		set tag pnt
+	    	}
+	    	if {! [set bbox_${item}_status]} {
+			$canvas delete $tag
+			return
+		}
+		foreach id [$canvas find withtag $item] {
+			eval $canvas create rectangle \
+				[draw_get_bbox $canvas $id] \
+				-fill $shade -tag $tag \
+				-outline black \
+				-stipple @$tk_library/demos/images/grey.25
+		}
+	    }
+	    bbox_full -
+	    bbox_body {
+	    	if {[set ${item}_status]} {
+			set outline black
+			set fill $shade
+	    	} else {
+	    		set fill {}
+	    		set outline {}
+	    	}
+		$canvas itemconfigure $item -fill $fill -outline $outline \
+			-stipple @$tk_library/demos/images/grey.25
+	    }
+	}
+}
+
+
+set dr_steps 15
+
+set dr_roteq(x,0)   { expr $xp }
+set dr_roteq(y,0)   { expr $yp }
+set dr_roteq(x,90)  { expr $xc + $yc - $yp }
+set dr_roteq(y,90)  { expr $xp + $yc - $xc }
+set dr_roteq(x,180) { expr 2 * $xc - $xp }
+set dr_roteq(y,180) { expr 2 * $yc - $yp }
+set dr_roteq(x,270) { expr $xc - $yc + $yp }
+set dr_roteq(y,270) { expr $yc + $xc - $xp }
+
+proc draw_component {canvas type x y} {
+	global draw_params
+
+	set colour [option get $canvas cmpColourNormal CmpColourSelected]
+	set width [option get $canvas cmpWidthNormal CmpWidthSelected]
+
+	set tagname [dr_generate_tag $type]
+	foreach i {canvas colour width} {
+		set draw_params($tagname,$i) [set $i]
+	}
+	set draw_params($tagname,orient) 0
+
+	global cmp_coord
+	set cmp_coord($tagname) "$x $y"
+
+	switch -exact $type {
+		and  -
+		nand {
+			dr_and_nand $tagname $type $x $y
+		}
+		or  -
+		nor {
+			dr_or_nor $tagname $type $x $y
+		}
+		xor  -
+		xnor {
+			dr_xor_xnor $tagname $type $x $y
+		}
+		buffer  -
+		not {
+			dr_buffer_not $tagname $type $x $y
+		}
+	}
+
+	return $tagname
+}
+
+proc draw_get_bbox {canvas tagname} {
+	foreach i [$canvas find withtag $tagname] {
+		set coords [$canvas coords $i]
+		for {set j 0} {$j < [llength $coords]} {incr j} {
+			lappend x [expr round([lindex $coords $j])]
+			lappend y [expr round([lindex $coords [incr j]])]
+		}
+	}
+	set sx [lsort -integer $x]; set sy [lsort -integer $y];
+	return "[lindex $sx 0] [lindex $sy 0] [lindex $sx end] [lindex $sy end]"
+}
+
+proc draw_rotate {tagname degrees} {
+	global draw_params cmp_coord
+
+	set canvas $draw_params($tagname,canvas)
+	set degrees [expr $degrees % 360]
+
+	foreach i [$canvas find withtag $tagname] {
+		eval dr_rotate_item $canvas $i $cmp_coord($tagname) $degrees
+	}
+
+	set draw_params($tagname,orient) \
+		[expr ($degrees + $draw_params($tagname,orient)) % 360]
+}
+
+proc dr_rotate_item {canvas item xc yc degrees} {
+	global dr_roteq pnt_coord
+
+	if {[regexp "point" [$canvas gettags $item]]} {
+		set coords $pnt_coord($item)
+		set item_is_point 1
+	} else {
+		set coords [utils_round [$canvas coords $item]]
+		set item_is_point 0
+	}
+
+	set new_coords {}
+	for {set j 0} {$j < [llength $coords]} {incr j} {
+		set xp [lindex $coords $j]
+		set yp [lindex $coords [incr j]]
+		set xr [eval $dr_roteq(x,$degrees)]
+		set yr [eval $dr_roteq(y,$degrees)]
+		eval lappend new_coords "$xr $yr"
+	}
+
+	if {$item_is_point} {
+		net_do_move_point $canvas $item \
+			[expr [lindex $new_coords 0] - [lindex $coords 0]] \
+			[expr [lindex $new_coords 1] - [lindex $coords 1]]
+	} else {
+		eval $canvas coords $item $new_coords
+		switch -exact [$canvas type $item] {
+		    arc {
+			set start [$canvas itemcget $item -start]
+			set new_start [expr (int($start) - $degrees) % 360]
+			$canvas itemconfigure $item -start $new_start
+		    }
+		}
+	}
+}
+
+proc dr_xlate {tagname x y} {
+	global draw_params
+
+	set bd [$draw_params($tagname,canvas) cget -bd]
+	set coords [draw_get_bbox $draw_params($tagname,canvas) $tagname]
+	scan $coords "%d %d %d %d" x1 y1 x2 y2
+	set mx [expr (($x2 - $x1) / 2 + $x1)]
+	set my [expr (($y2 - $y1) / 2 + $y1)]
+	workarea_truncate mx my
+	set dx [expr $x - $mx]; set dy [expr $y - $my]
+
+	$draw_params($tagname,canvas) move $tagname $dx $dy
+}
+
+proc dr_wires_not {tagname wires not} {
+	global draw_params
+
+	if {$not != ""} {
+		eval $draw_params($tagname,canvas) create oval $not \
+			-tags {"component $tagname"} \
+			-outline $draw_params($tagname,colour) \
+			-width $draw_params($tagname,width)
+	}
+
+	foreach i $wires {
+		eval $draw_params($tagname,canvas) create line $i \
+			-tags {"component $tagname"} \
+			-fill $draw_params($tagname,colour) \
+			-width $draw_params($tagname,width) 
+	}
+
+	set bbox [draw_get_bbox $draw_params($tagname,canvas) $tagname]
+	eval $draw_params($tagname,canvas) create rectangle $bbox \
+		-outline "{}" -fill "{}" \
+		-tag {"component $tagname bbox_body"}
+}
+
+proc dr_ports {tagname args} {
+	global draw_params
+
+	set canvas $draw_params($tagname,canvas)
+	foreach port_list $args {
+		set porttype [lindex $port_list 0]
+		regsub "^." $porttype \
+			[string toupper [string index $porttype 0]] type
+		set outline [option get $canvas port$type Port$type]
+		set interior [option get $canvas portNormal PortNormal]
+		set count 0 
+		foreach coords [lrange $port_list 1 end] {
+			set seq "[format "${porttype}_%03d" $count]"
+			eval $canvas create rectangle $coords \
+				-tags {"component port $tagname $seq"} \
+				-outline $outline -fill $interior \
+				-width $draw_params($tagname,width) 
+			incr count
+		}
+	}
+
+	set bbox [draw_get_bbox $canvas $tagname]
+	eval $canvas create rectangle $bbox -outline "{}" -fill "{}" \
+		-tag {"component $tagname bbox_full"}
+
+	$canvas raise port
+	$canvas raise point
+}
+
+proc dr_generate_tag component_type {
+	global dr_tagid
+
+	if {![info exists dr_tagid($component_type)]} {
+		set dr_tagid($component_type) 0
+	} else {
+		incr dr_tagid($component_type)
+	}
+
+	return comp_${component_type}_$dr_tagid($component_type)
+}
+
+proc dr_and_nand {tagname type x y} {
+	global draw_params
+
+	if {$type == "and"} {
+		set output_wire {60 20 65 20}
+		set output_port {65 15 70 25}
+		set not_ball ""
+	} else {
+		set output_wire {70 20 75 20}
+		set output_port {75 15 80 25}
+		set not_ball {60 15 70 25}
+	}
+
+	$draw_params($tagname,canvas) create line 40 0 10 0 10 40 40 40 \
+		-fill $draw_params($tagname,colour) \
+		-tags "component $tagname" \
+		-width $draw_params($tagname,width)
+
+	$draw_params($tagname,canvas) create arc 20 0 60 40 \
+		-start 270 -extent 180 \
+		-fill $draw_params($tagname,colour) -style arc \
+		-tags "component $tagname" \
+		-width $draw_params($tagname,width)
+
+	dr_wires_not $tagname \
+		[list {10 10 5 10} {10 30 5 30} $output_wire] $not_ball
+	dr_ports $tagname \
+		[list input {0 5 5 15} {0 25 5 35}] [list output $output_port]
+
+	dr_xlate $tagname $x $y
+}
+
+proc dr_or_nor {tagname type x y} {
+	global draw_params dr_steps
+
+	if {$type == "or"} {
+		set output_wire {60 20 65 20}
+		set output_port {65 15 70 25}
+		set not_ball ""
+	} else {
+		set output_wire {70 20 75 20}
+		set output_port {75 15 80 25}
+		set not_ball {60 15 70 25}
+	}
+
+	set body {{10  0 30 20 10 40} {10  0 45 0  60 20} {10 40 45 40 60 20}}
+	foreach coords $body {
+		eval $draw_params($tagname,canvas) create line $coords \
+			-capstyle round -fill $draw_params($tagname,colour) \
+			-smooth 1 -tags {"component $tagname"} \
+			-width $draw_params($tagname,width) \
+			-splinesteps $dr_steps
+	}
+	dr_wires_not $tagname \
+		[list {15 10 5 10} {15 30 5 30} $output_wire] $not_ball
+	dr_ports $tagname  \
+		[list input {0 5 5 15} {0 25 5 35}] [list output $output_port]
+
+	dr_xlate $tagname $x $y
+}
+
+proc dr_xor_xnor {tagname type x y} {
+	global draw_params dr_steps
+
+	if {$type == "xor"} {
+		set output_wire {60 20 65 20}
+		set output_port {65 15 70 25}
+		set not_ball ""
+	} else {
+		set output_wire {70 20 75 20}
+		set output_port {75 15 80 25}
+		set not_ball {60 15 70 25}
+	}
+
+	set body {{10 0  30 20 10 40} {15  0 35 20 15 40} \
+		  {15 0  45 0  60 20} {15 40 45 40 60 20}}
+	foreach coords $body {
+		eval $draw_params($tagname,canvas) create line $coords \
+			-capstyle round -fill $draw_params($tagname,colour) \
+			-smooth 1 -tags {"component $tagname"} \
+			-width $draw_params($tagname,width) \
+			-splinesteps $dr_steps
+	}
+	dr_wires_not $tagname \
+		[list {15 10 5 10} {15 30 5 30} $output_wire] $not_ball
+
+	dr_ports $tagname \
+		[list input {0 5 5 15} {0 25 5 35}] [list output $output_port]
+
+	dr_xlate $tagname $x $y
+}
+
+proc dr_buffer_not {tagname type x y} {
+	global draw_params
+
+	if {$type == "buffer"} {
+		set output_wire {50 20 55 20}
+		set output_port {55 15 60 25}
+		set not_ball ""
+	} else {
+		set output_wire {60 20 65 20}
+		set output_port {65 15 70 25}
+		set not_ball {50 15 60 25}
+	}
+
+	eval $draw_params($tagname,canvas) create line 10 0 10 40 50 20 10 0 \
+		-capstyle round -fill $draw_params($tagname,colour) \
+		-tags {"component $tagname"} -width $draw_params($tagname,width)
+
+	dr_wires_not $tagname [list {10 20 5 20} $output_wire] $not_ball
+
+	dr_ports $tagname [list input {0 15 5 25}] [list output $output_port]
+
+	dr_xlate $tagname $x $y
+}
+
+
+
+proc file_dir {} {
+	global env
+
+	if {   ! [info exists env(DIGIUSER)]
+	    || ! [file isdirectory $env(DIGIUSER)]} {
+		set dirname [pwd]
+	} else {
+		set dirname $env(DIGIUSER)
+	}
+
+	return $dirname;
+}
+
+proc file_open {} {
+	global file_name
+
+	if {! [file_new]} {
+		return
+	}
+
+	if {[set file_name [tk_getOpenFile -initialdir [file_dir]]] == ""} {
+		unset file_name
+		return
+	}
+
+	set w .fileopen
+	toplevel $w -class Dialog
+	wm title $w "Loading ... "
+	wm iconname $w "Loading"
+	wm resizable $w 0 0
+
+	set focus [focus -lastfor .]
+	focus .fileopen
+
+	label $w.msg -text "Please wait until the file is loaded..."
+	pack $w.msg -side top
+	progress_bar $w.pb 1 10c 1c -side top -padx 2m -pady 2m
+	utils_window_center $w
+	update
+	grab $w
+
+	if {[file_do_open $file_name $w.pb]} {
+		set title "[winfo name .] - [file tail $file_name]"
+		wm title . $title
+		wm iconname . $title
+	} else {
+		file_new "no_confirm"
+	}
+
+	focus $focus
+	destroy $w
+}
+
+proc file_do_open {fname pgrs} {
+	global file_cancel file_ports file_pnt_alias file_pnt_adj
+
+	set fin [open $fname r]
+
+	set file_cancel 0
+	set size [file size $fname]
+	set canvas [workarea_get_canvas]
+	set bd [$canvas cget -bd]
+	set success 1
+	while {[info exists cached] || [gets $fin line] >= 0} {
+		if {[info exists cached]} {
+			set line $cached
+			unset cached
+		}
+		set line [string trim $line]
+		if {[string index $line 0] == "#" || $line == ""} {
+			continue
+		}
+		if {! [regexp {^(component|point|label):$} $line _ item]} {
+			puts "Bad stanza header: \"$line\""
+			set success 0
+			break
+		}
+		if {[file_read_$item $fin cached $canvas $bd] != 0} {
+			puts "Cannot read item: \"$item\""
+			set success 0
+			break
+		}
+		set percent [expr double([tell $fin]) / $size]
+		progress_update $pgrs $percent
+		update
+		if {$file_cancel} {
+			puts "Cancelled"
+			set success 0
+			break
+		}
+	}
+	if {$success && [info exists file_pnt_alias]} {
+		file_do_point_connects $canvas
+		if {[info exists file_ports]} {
+			file_do_port_connects $canvas
+		}
+	}
+
+	foreach i {file_ports file_pnt_alias file_pnt_adj} {
+		if {[info exists $i]} {
+			unset $i
+		}
+	}
+
+	close $fin
+	return $success
+}
+
+proc file_read_component {fin saved_line canvas bd} {
+	upvar $saved_line cached
+	global file_ports
+
+	if {[file_attrib $fin cached type coords orient ports] != 0} {
+		return -1
+	}
+	if {[scan $coords "%d %d" x y] != 2} {
+		puts "Cannot get component's coordinates."
+		return -1
+	}
+	set coords "[expr $x + $bd] [expr $y + $bd]"
+	set tagname [eval draw_component $canvas $type $coords]
+	set file_ports($tagname) $ports
+	if {$orient != 0} {
+		draw_rotate $tagname $orient
+	}
+	return 0
+}
+
+proc file_read_point {fin saved_line canvas bd} {
+	upvar $saved_line cached
+	global netlist_id file_pnt_alias file_pnt_adj
+
+	if {[file_attrib $fin cached id coords adjcnt net] != 0} {
+		return -1
+	}
+	if {! [info exists netlist_id] || $net > $netlist_id} {
+		set netlist_id $net
+	}
+	if {[scan $coords "%d %d" x y] != 2} {
+		puts "Cannot get points's coordinates."
+		return -1
+	}
+	set coords "[expr $x + $bd] [expr $y + $bd]"
+	set pid [eval net_do_create_point $canvas $coords netlist_$net]
+	set file_pnt_alias($id) $pid
+	set file_pnt_adj($id) $adjcnt
+	return 0
+}
+
+proc file_read_label {fin saved_line canvas bd} {
+	upvar $saved_line cached
+	global file_pnt_alias
+
+	if {[file_attrib $fin cached name point anchor values] != 0} {
+		return -1
+	}
+	set pid $file_pnt_alias($point)
+	net_do_create_label $canvas $name $pid $anchor
+	global net_name
+	set nid [net_list_identify $canvas $pid]
+	set net_name($nid) $name
+	sig_draw_signal $name $values
+	return 0
+}
+
+proc file_do_point_connects canvas {
+	global pnt_wires file_pnt_alias file_pnt_adj
+
+	foreach i [array names file_pnt_alias] {
+		set pnt1 $file_pnt_alias($i)
+		set nid [net_list_identify $canvas $pnt1]
+		foreach j $file_pnt_adj($i) {
+			set pnt2 $file_pnt_alias($j)
+			set w [net_do_create_wire $canvas $pnt1 $pnt2 $nid]
+			lappend pnt_wires($pnt1) $w
+			lappend pnt_wires($pnt2) $w
+			if {[set n [lsearch $file_pnt_adj($j) $i]] == -1} {
+				puts "Inconsistent netlist?!"
+			}
+			set file_pnt_adj($j) [lreplace $file_pnt_adj($j) $n $n]
+		}
+	}
+
+	foreach pid [$canvas find withtag point] {
+		if {[llength $pnt_wires($pid)] > 2} {
+			net_do_create_connector $canvas $pid
+		}
+	}
+}
+
+proc file_do_port_connects canvas {
+	global file_pnt_alias file_ports
+
+	set type(i) input; set type(b) bidirect; set type(o) output
+	foreach cmp [array names file_ports] {
+		foreach prt_pnt $file_ports($cmp) {
+			scan $prt_pnt "%s %d" prt pnt
+			set pnt $file_pnt_alias($pnt)
+			regexp {(.)([0-9]+)} $prt _ dir seq
+			set prtid ""
+			foreach id [$canvas find withtag $cmp] {
+				set tags [$canvas gettags $id]
+				if {[regexp "$type($dir)_$seq" $tags] == 1} {
+					set prtid $id
+					break
+				}
+			}
+			if {$prtid == ""} {
+				puts "Could not find port $type($dir)_$seq"
+			} else {
+				net_connect_point_to_port $canvas $pnt $prtid
+			}
+		}
+	}
+}
+
+proc file_attrib {fid saved_line args} {
+	upvar $saved_line cached
+	foreach i $args {
+		upvar $i var_$i
+		lappend attribs $i
+	}
+	while {   [gets $fid line] >= 0
+	       && [regexp "^\t(.*): (.*)" $line _ attrib value]} {
+		if {[set idx [lsearch $attribs $attrib]] == -1} {
+			puts "Found invalid attribute ($attrib)"
+			continue
+		} else {
+			set attribs [lreplace $attribs $idx $idx]
+			set var_$attrib $value
+		}
+	}
+
+	if {[llength $attribs] != 0} {
+		puts -nonewline "Missing attributes:"
+		foreach i $attribs {
+			puts -nonewline " \"$i\""
+		}
+		puts ""
+		return -1
+	}
+	if {$line != ""} {
+		set cached $line
+	}
+	return 0
+}
+
+proc file_save {} {
+	global file_name
+
+	if { ! [info exists file_name]
+	    && [set file_name [tk_getSaveFile -initialdir [file_dir]]] == ""} {
+		unset file_name
+		return
+	}
+
+	set w .filesave
+	toplevel $w -class Dialog
+	wm title $w "Saving ... "
+	wm iconname $w "Saving"
+	wm resizable $w 0 0
+
+	set focus [focus -lastfor .]
+	focus .filesave
+
+	label $w.msg -text "Please wait until the file is saved..."
+	pack $w.msg -side top
+	progress_bar $w.pb 1 10c 1c -side top -padx 2m -pady 2m
+	utils_window_center $w
+	update
+	grab $w
+
+	file_do_save $file_name $w.pb
+
+	focus $focus
+	destroy $w
+	set title "[winfo name .] - [file tail $file_name]"
+	wm title . $title
+	wm iconname . $title
+}
+
+proc file_compare_labels {item1 item2} {
+	set signo1 [lindex $item1 0]
+	set signo2 [lindex $item2 0]
+	return [expr $signo1 - $signo2]
+}
+
+proc file_strip_nums l {
+	set ids {}
+	foreach i $l {
+		lappend ids [lindex $i 1]
+	}
+	return $ids
+}
+
+proc file_get_label_ids canvas {
+	set label_list {}
+	foreach id [$canvas find withtag label] {
+		set name [$canvas itemcget $id -text]
+		if {[set num [sig_get_number $name]] == -1} {
+			puts "\aLabel has invalid signal number?!"
+			continue
+		}
+		lappend label_list "$num $id"
+	}
+	set label_list [lsort -command file_compare_labels $label_list]
+	return [file_strip_nums $label_list]
+}
+
+proc file_do_save {fname pgrs} {
+	set fout [open $fname w]
+	set canvas [workarea_get_canvas]
+	
+	set item_list "[$canvas find withtag component] \
+			[$canvas find withtag point] \
+			[file_get_label_ids $canvas]"
+	set num_items [llength $item_list]
+	set item_counter 0
+	set bd [$canvas cget -bd]
+	foreach id $item_list {
+		incr item_counter
+		progress_update $pgrs [expr double($item_counter) / $num_items]
+		update
+		set tags [$canvas gettags $id]
+		if {! [regexp {(component|point|label)} $tags _ item]} {
+			puts "Cannot identify item: \"$tags\""
+			break
+		}
+		if {[file_save_$item $fout $canvas $bd $id] != 0} {
+			puts "Cannot save item: \"$item\""
+			break
+		}
+	}
+	close $fout
+
+	global file_cmp_list
+	if {[info exists file_cmp_list]} {
+		unset file_cmp_list
+	}
+}
+
+proc file_save_component {fout canvas bd id} {
+	global draw_params file_cmp_list cmp_coord
+
+	set cmp [cmp_identify $canvas $id]
+	if {[info exists file_cmp_list($cmp)]} {
+		return 0
+	}
+	set file_cmp_list($cmp) 1
+	if {! [regexp {comp_([^_]+)} $cmp _ type]}  {
+		puts "Unidentifiable component type."
+		return -1
+	}
+	puts $fout "component:"
+	puts $fout "\ttype: $type"
+	if {[scan $cmp_coord($cmp) "%d %d" x y] != 2} {
+		puts "Cannot get component's center."
+		return -1
+	}
+	puts $fout "\tcoords: [expr $x - $bd] [expr $y - $bd]"
+	puts $fout "\torient: $draw_params($cmp,orient)"
+	puts $fout "\tports: [cmp_port_point_list $canvas $cmp]"
+
+	return 0
+}
+
+proc file_save_point {fout canvas bd id} {
+	global pnt_coord pnt_wires
+
+	puts $fout "point:"
+	puts $fout "\tid: $id"
+	if {[scan $pnt_coord($id) "%d %d" x y] != 2} {
+		puts "Cannot get point's coordinates."
+		return -1
+	}
+	puts $fout "\tcoords: [expr $x - $bd] [expr $y - $bd]"
+	puts -nonewline $fout "\tadjcnt: "
+	foreach j $pnt_wires($id) {
+		puts -nonewline $fout \
+			"[net_get_adjacent_point $id $j] "
+	}
+	puts $fout ""
+	set tags [$canvas gettags $id]
+	if {! [regexp {netlist_([0-9]+)} $tags _ num]} {
+		puts "Cannot identify point's netlist id."
+		return -1
+	}
+	puts $fout "\tnet: $num"
+
+	return 0
+}
+
+proc file_save_label {fout canvas bd id} {
+	set anchor [$canvas itemcget $id -anchor]
+	set name [$canvas itemcget $id -text]
+	puts $fout "label:"
+	puts $fout "\tname: $name"
+	if {[set pid [net_label_point $id]] == ""} {
+		puts "Label has no point!"
+		return -1
+	}
+	puts $fout "\tpoint: $pid"
+	puts $fout "\tanchor: $anchor"
+	puts $fout "\tvalues: [sig_get_values $name]"
+
+	return 0
+}
+
+proc file_save_as {} {
+	global file_name
+
+	if {[set file_name [tk_getSaveFile -initialdir [file_dir]]] == ""} {
+		unset file_name
+	} else {
+		file_save
+	}
+}
+
+proc file_new {{confirm "yes"}} {
+
+	set canvas [workarea_get_canvas]
+	foreach i [$canvas find withtag all] {
+		if {[regexp {grid} [$canvas gettags $i]]} {
+			continue
+		}
+		lappend to_delete $i
+	}
+
+	if {! [info exists to_delete]} {
+		return 1
+	}
+
+	if {$confirm == "yes"} {
+		set ret [utils_dialog .dialog "Delete All" \
+			"Are you sure you want to start over?" 0 "Yes" "No"]
+		if {$ret != 0} {
+			return 0
+		}
+	}
+
+	eval $canvas delete $to_delete
+	foreach i {file_name dr_tagid netlist_id
+		   net_ports net_name cmp_coord
+		   pnt_label pnt_coord pnt_port pnt_wires} {
+		global $i
+		if {[info exists $i]} {
+			unset $i
+		}
+	}
+	sig_delete_all 
+
+	set title "[winfo name .] - (Untitled)"
+	wm title . $title
+	wm iconname . $title
+
+	return 1
+}
+
+proc file_exit {} {
+	if {! [utils_dialog .dialog "Quit" \
+		"Are you sure you want quit?" 0 "Yes" "No"]} {
+		exit
+	}
+}
+
+proc make_mouse_window {} {
+	toplevel .mouse_window -geometry 40x20
+	label .mouse_window.l -text "Mouse Window" -width 30
+	pack .mouse_window.l -fill both -expand 1
+}
+
+proc update_mouse_window info {
+	.mouse_window.l configure -text "$info"
+}
+
+proc multi_dispatch_item_delete {canvas x y} {
+	foreach item [multi_sort_delete_items $canvas current] {
+		set id [lindex $item 0]
+		set type [lindex $item 1]
+
+		if {[$canvas gettags $id] == ""} {
+			puts "$id already deleted"
+			continue
+		}
+
+		switch $type {
+		    component {
+			cmp_do_delete $canvas $id
+		    }
+		    point {
+			net_delete_point $canvas $id
+		    }
+		    wire {
+			net_delete_wire $canvas $id
+		    }
+		    multi {
+			$canvas delete $id
+		    }
+		}
+		puts "deleted $type"
+	}
+}
+
+proc multi_compare_delete_items {item1 item2} {
+	set order {point wire component multi}
+	set type1 [lindex $item1 1]
+	set type2 [lindex $item2 1]
+	return [expr [lsearch $order $type1] - [lsearch $order $type2]]
+}
+
+proc multi_sort_delete_items {canvas multi} {
+	set to_delete {}
+	set items [multi_find_selected $canvas $multi]
+	foreach id $items {
+		set tags [$canvas gettags $id]
+		if {[regexp "component|wire|point|multi" $tags type]} {
+			lappend to_delete "$id $type"
+		}
+	}
+	return [lsort -command multi_compare_delete_items $to_delete]
+}
+
+proc multi_glue {canvas status button} {
+	global multiglue_focus
+
+	if {$status == "on"} {
+		set multiglue_focus [focus -lastfor .]
+		focus $canvas
+		bind $canvas <1> "multi_create_new $canvas %x %y"
+		bind $canvas <3> ".$button invoke"
+		bind $canvas <Escape> [bind $canvas <3>]
+	} else {
+		focus $multiglue_focus
+		bind $canvas <1> {}
+		bind $canvas <3> {}
+		bind $canvas <Escape> {}
+	}
+}
+
+proc multi_create_new {canvas x y} {
+	if {! [utils_in_canvas $canvas $x $y]} {
+		return
+	}
+	set x1 $x; set y1 $y
+	workarea_convert x y
+	set width [option get $canvas multiWidthNormal MultiWidthNormal]
+	set colour [option get $canvas multiColourNormal MultiColourNormal]
+	set multi [$canvas create rectangle $x $y $x $y -width $width \
+		-outline $colour -tags multi]
+	bind $canvas <B1-Motion> "multi_do_set $canvas $multi $x1 $y1 %x %y"
+	bind $canvas <B1-ButtonRelease> "multi_stop $canvas $multi"
+}
+
+proc multi_do_set {canvas multi x1 y1 x2 y2} {
+	workarea_convert x1 y1
+	workarea_convert x2 y2
+	$canvas coords $multi $x1 $y1 $x2 $y2
+}
+
+proc multi_stop {canvas multi} {
+	bind $canvas <B1-Motion> {}
+	bind $canvas <B1-ButtonRelease> {}
+	set coords [utils_round [$canvas coords $multi]]
+	if {[scan $coords "%d %d %d %d" xl yl xh yh] != 4} {
+		puts "\aCannot extract multi's coordinates?!"
+		return
+	}
+	if {$xl == $xh || $yl == $yh} {
+		puts "No area selected."
+		$canvas delete $multi
+		return
+	}
+}
+
+proc multi_dispatch_item_modify {canvas x y} {
+	workarea_convert x y
+
+	set coords [utils_round [$canvas coords current]]
+	if {[scan $coords "%d %d %d %d" xc1 yc1 xc2 yc2] != 4} {
+		puts "\aCannot extract multi's coordinates?!"
+		return
+	}
+
+	set xd [expr round([.workarea.canvas canvasx 0])]
+	set yd [expr round([.workarea.canvas canvasy 0])]
+	set x1 [expr $xc1 - $xd]
+	set x2 [expr $xc2 - $xd]
+	set y1 [expr $yc1 - $yd]
+	set y2 [expr $yc2 - $yd]
+
+	set move_coords(1,1,0,0) "%x  %y  $x2 $y2"  ;# Move top left corner
+	set move_coords(1,0,0,1) "%x  $y1 $x2 %y "  ;# Move bottom left corner
+	set move_coords(1,0,0,0) "%x  $y1 $x2 $y2"  ;# Move left side
+	set move_coords(0,1,1,0) "$x1 %y  %x  $y2"  ;# Move top right corner
+	set move_coords(0,0,1,1) "$x1 $y1 %x  %y "  ;# Move bottom right corner
+	set move_coords(0,0,1,0) "$x1 $y1 %x  $y2"  ;# Move right side
+	set move_coords(0,1,0,0) "$x1 %y  $x2 $y2"  ;# Move top side
+	set move_coords(0,0,0,1) "$x1 $y1 $x2 %y "  ;# Move bottom side
+
+	set x1equal [expr $x == $xc1]
+	set y1equal [expr $y == $yc1]
+	set x2equal [expr $x == $xc2]
+	set y2equal [expr $y == $yc2]
+	set vertices $move_coords($x1equal,$y1equal,$x2equal,$y2equal)
+
+	set multi [$canvas find withtag current]
+	bind $canvas <B1-Motion> "multi_do_set $canvas $multi $vertices"
+	bind $canvas <B1-ButtonRelease> "multi_stop $canvas $multi"
+}
+
+proc multi_remove_points {canvas pnts} {
+	set cmplist {}
+	foreach id [$canvas find withtag component] {
+		if {[lsearch [$canvas gettags $id] "multi_move"] == -1} {
+			set cmpid [cmp_identify $canvas $id]
+			if {[lsearch $cmplist $cmpid] != -1} {
+				continue
+			}
+			lappend cmplist $cmpid
+			set del [cmp_get_point_ids $canvas $cmpid]
+			puts "Must delete \{$del\} from pnts = \{$pnts\}"
+			foreach pnt $del {
+				if {[set idx [lsearch $pnts $pnt]] != -1} {
+					set pnts [lreplace $pnts $idx $idx]
+				}
+			}
+			puts "\tDone pnts = \{$pnts\}"
+		}
+	}
+
+	return $pnts
+}
+
+proc multi_dispatch_item_move {canvas x y} {
+	workarea_convert x y
+
+	global multi_last_x multi_last_y multi_orig_x multi_orig_y
+
+	set multi_orig_x [set multi_last_x $x]
+	set multi_orig_y [set multi_last_y $y]
+
+	set pnts {}
+	foreach id [multi_find_selected $canvas current] {
+		set tags [$canvas gettags $id]
+		if {[regexp {component|multi} $tags]} {
+			$canvas addtag multi_move withtag $id
+		} elseif {[lsearch $tags "point"] != -1} {
+			lappend pnts $id
+		}
+	}
+
+	set pnts [multi_remove_points $canvas $pnts]
+	bind $canvas <B1-Motion> "multi_do_move $canvas %x %y $pnts"
+	bind $canvas <B1-ButtonRelease> "multi_stop_move $canvas $pnts"
+}
+
+proc multi_do_move {canvas x y args} {
+	if {! [utils_in_canvas $canvas $x $y]} {
+		return
+	}
+
+	global multi_last_x multi_last_y
+
+	workarea_convert x y
+	set xd [expr $x - $multi_last_x]
+	set yd [expr $y - $multi_last_y]
+	$canvas move multi_move $xd $yd
+
+	foreach pid $args {
+		net_do_move_point $canvas $pid $xd $yd
+	}
+
+	set multi_last_x $x
+	set multi_last_y $y
+}
+
+proc multi_stop_move {canvas args} {
+	global multi_last_x multi_last_y multi_orig_x multi_orig_y
+
+	set xd [expr $multi_orig_x - $multi_last_x]
+	set yd [expr $multi_orig_y - $multi_last_y]
+	foreach id [$canvas find withtag component] {
+		if {[lsearch [$canvas gettags $id] multi_move] == -1} {
+			continue
+		}
+		set cmpid [cmp_identify $canvas $id]
+		if {[info exists visited($cmpid)]} {
+			continue
+		}
+		puts "$cmpid"
+		set visited($cmpid) 1
+		if {[component_overlaps $canvas $cmpid]} {
+			$canvas move multi_move $xd $yd
+			foreach pid $args {
+				net_do_move_point $canvas $pid $xd $yd
+			}
+			puts "Overlapping objects.\a"
+			set overlaps 1
+			break
+		}
+	}
+
+	if {! [info exists overlaps]} {
+		global cmp_coord
+		foreach cmp [array names visited] {
+			scan $cmp_coord($cmp) "%d %d" x y
+			set cmp_coord($cmp) "[expr $x - $xd] [expr $y - $yd]"
+		}
+	}
+	$canvas dtag multi_move 
+	bind $canvas <B1-Motion> {}
+	bind $canvas <B1-ButtonRelease> {}
+}
+
+proc multi_dispatch_multi_unglue {canvas x y} {
+	global multibox
+
+	set id_1 [$canvas find withtag current]
+	if {! [info exists multibox($id_1)]} {
+		foreach id_2 [array names multibox] {
+			if {$multibox($id_2) == $id_1} {
+				$canvas delete $id_1 $id_2
+				return
+			}
+		}
+		puts "Could not find transparent box!"
+	} else {
+		$canvas delete $id_1 $multibox($id_1)
+	}
+
+}
+
+proc multi_cmp_inside {canvas enclosed id} {
+	foreach i [$canvas find withtag $id] {
+		if {[lsearch $enclosed $i] == -1} {
+			puts "$id is not in rectangle"
+			return 0
+		}
+	}
+
+	puts "$id is in rectangle"
+	return 1
+}
+
+proc multi_find_selected {canvas multi} {
+	global multibox
+
+	set multi [$canvas find withtag $multi]
+	if {[info exists multibox($multi)]} {
+		set multi $multibox($multi)
+	}
+
+	scan [draw_get_bbox $canvas $multi] "%d %d %d %d" x1 y1 x2 y2
+	incr x1 -1; incr y1 -1; incr x2 1; incr y2 1
+
+	set enclosed [eval $canvas find enclosed $x1 $y1 $x2 $y2]
+	set overlaps [eval $canvas find overlapping $x1 $y1 $x2 $y2]
+
+	set multi_items {}
+	set cmp_list {}
+	foreach id $overlaps {
+		set tags [$canvas gettags $id]
+		if {[regexp "component|point|multi" $tags type] == 0} {
+			continue
+		}
+
+		if {$type == "component"} {
+			set id [cmp_identify $canvas $id]
+			if {[lsearch $cmp_list $id] != -1}  {
+				continue
+			}
+			lappend cmp_list $id
+			if {   [lsearch $multi_items $id] != -1
+			    || ![multi_cmp_inside $canvas $enclosed $id]} {
+				continue
+			}
+		} elseif {   $type == "multi"
+		          && $multi != $id
+		          && [lsearch $enclosed $id] == -1} {
+			scan [draw_get_bbox $canvas $id] "%d %d %d %d" \
+				x1a y1a x2a y2a
+			if {   ![utils_in_box $x1a $y1a "$x1 $y1 $x2 $y2"]
+			    || ![utils_in_box $x2a $y2a "$x1 $y1 $x2 $y2"]} {
+				continue
+			}
+		}
+		lappend multi_items $id
+	}
+	return $multi_items
+}
+
+proc multi_compare_size {val1 val2} {
+	return [expr [lindex $val1 1] - [lindex $val2 1]]
+}
+
+proc multi_fill_rectangles {canvas status} {
+	global multibox
+
+	if {$status != "on"} {
+		if {[info exists multibox]} {
+			foreach i [array names multibox] {
+				$canvas delete $i
+			}
+			unset multibox
+		}
+		return
+	}
+	set multis {}
+	foreach id [$canvas find withtag multi] {
+		scan [draw_get_bbox $canvas $id] "%d %d %d %d" x1 y1 x2 y2
+		set area [expr abs($x2 - $x1) * abs($y2 - $y1)]
+		lappend multis "$id $area"
+	}
+	foreach item [lsort -command multi_compare_size $multis] {
+		set id [lindex $item 0]
+		puts "filled rectangle $id"
+		set coords [utils_round [$canvas coords $id]]
+		set trans [eval $canvas create rectangle $coords \
+				-outline "{}" -fill "{}" -tags multi]
+		set multibox($trans) $id
+	}
+}
+
+
+proc wire_create {canvas status button} {
+	global wc_focus cursor have
+
+	if {$status == "on"}  {
+		set wc_focus [focus -lastfor .]
+		focus $canvas
+		if {$have(custom_cursors)} {
+			set cursor [$canvas cget -cursor]
+			$canvas config -cursor [utils_get_cursor $button]
+		}
+		pullmenu_set_state disabled
+		net_activate_spool $canvas $button
+	} else {
+		focus $wc_focus
+		if {$have(custom_cursors)} {
+			$canvas config -cursor $cursor
+		}
+		pullmenu_set_state normal
+		net_deactivate_spool $canvas
+	}
+}
+
+proc net_activate_spool {canvas button} {
+	bind $canvas <1> "net_set_point $canvas %x %y"
+	bind $canvas <3> ".$button invoke"
+	bind $canvas <Escape> [bind $canvas <3>]
+}
+
+proc net_deactivate_spool canvas {
+	while {[net_delete_current_point $canvas]} {
+	}
+
+	bind $canvas <1> {}
+	bind $canvas <3> {}
+	bind $canvas <Escape> {}
+}
+
+proc net_check_overlaps {canvas x y} {
+	global	net_wire_list
+
+	set wid [lindex $net_wire_list end]
+	set overlaps [workarea_itemtags_at $x $y]
+
+	if {[lsearch $overlaps "bbox_body"] != -1} {
+		puts "In a bounding box!"
+		return 1
+	}
+
+	if {[info exists wid]} {
+		foreach i [$canvas find withtag bbox_body] {
+			set bbox [utils_round [$canvas coords $i]]
+			set overlaps [eval $canvas find overlapping $bbox]
+			if {[lsearch $overlaps $wid] != -1} {
+				puts "Wire overlaps with component!"
+				return 1
+			}
+		}
+	}
+	return 0
+}
+
+proc net_set_point {canvas x y {last_point 0}} {
+	global net_point_list net_wire_list pnt_wires
+
+	global net_nid
+	if {! [info exists net_nid]} {
+		set net_nid [net_list_generate_id]
+		set net_point_list {}
+		set net_wire_list {}
+	}
+
+	if {! [workarea_convert x y]} {
+		return 0
+	}
+
+	if {[set wid [lindex $net_wire_list end]] != ""} {
+		set old_x $x; set old_y $y
+		set coords [utils_round [lrange [$canvas coords $wid] 2 3]]
+		scan $coords "%d %d" x y
+	}
+
+	if {[net_check_overlaps $canvas $x $y]} {
+		return 0
+	}
+
+	set pid [net_do_create_point $canvas $x $y $net_nid]
+	lappend net_point_list $pid
+
+	if {[llength $net_point_list] > 1} {
+		lappend pnt_wires($pid) [lindex $net_wire_list end]
+	}
+
+	if {! $last_point} {
+		set wid [net_do_create_wire $canvas $pid $pid $net_nid]
+		lappend pnt_wires($pid) $wid
+		lappend net_wire_list $wid
+		if {[info exists old_x] && [info exists old_y]} {
+			net_rubber_wire $canvas $old_x $old_y
+		}
+	}
+
+	global configure
+	if {$configure(auto_solder)} {
+		net_do_auto_solder $canvas $x $y
+	}
+
+	bind $canvas <Motion> "net_rubber_wire $canvas %x %y"
+	bind $canvas <2> "net_finish_wire $canvas %x %y"
+	bind $canvas <BackSpace> "net_backspace $canvas %x %y"
+
+	return 1
+}
+
+proc net_do_auto_solder {canvas x y} {
+	global net_point_list net_nid
+
+	foreach id [$canvas find overlapping $x $y $x $y] {
+		set tags [$canvas gettags $id]
+		if {[lsearch -regexp $tags "port|wire"] != -1} {
+			set spid [net_start_solder $canvas $x $y $id]
+			if {$spid != -1} {
+				set net_point_list \
+					[lreplace $net_point_list end end $spid]
+				set net_nid [net_list_identify $canvas $spid]
+				break
+			}
+		}
+	}
+}
+
+proc net_rubber_wire {canvas x y} {
+	if {[workarea_convert x y]} {
+		global net_wire_list net_point_list pnt_coord configure
+
+		set wid [lindex $net_wire_list end]
+		set anchor $pnt_coord([lindex $net_point_list end])
+		if {$configure(manhatten)} {
+			set ax [lindex $anchor 0]
+			set ay [lindex $anchor 1]
+			if {[expr abs($ax - $x)] < [expr abs($ay - $y)]} {
+				set x $ax
+			} else {
+				set y $ay
+			}
+		}
+		eval $canvas coords $wid $anchor $x $y
+	}
+}
+
+proc net_finish_wire {canvas x y} {
+	if {! [net_set_point $canvas $x $y 1]} {
+		return
+	}
+	net_create_clear $canvas
+}
+
+proc net_create_clear canvas {
+	global net_point_list net_wire_list net_nid
+
+	unset net_point_list
+	unset net_wire_list
+	unset net_nid
+
+	bind $canvas <2> {}
+	bind $canvas <Motion> {}
+	bind $canvas <BackSpace> {}
+}
+
+proc net_backspace {canvas x y} {
+	if {[net_delete_current_point $canvas] == 1} {
+		net_rubber_wire $canvas $x $y
+	}
+}
+
+proc net_delete_current_point {canvas} {
+	global net_point_list net_wire_list pnt_wires net_nid
+
+	if {! [info exists net_point_list]} {
+		return 0
+	}
+
+	set pid [lindex $net_point_list end]
+	set wid [lindex $net_wire_list end]
+	set net_point_list [lreplace $net_point_list end end]
+	set net_wire_list [lreplace $net_wire_list end end]
+
+	set last_two [lsort -integer "[lindex $net_wire_list end] $wid"]
+	set all_adj [lsort -integer $pnt_wires($pid)]
+	if {$all_adj == $last_two} {
+		net_do_delete_point $canvas $pid
+	} else {
+		foreach w $last_two {
+			if {[set i [lsearch $pnt_wires($pid) $w]] == -1} {
+				puts "Cannot find $w in $pnt_wires($pid)!"
+				continue
+			}
+			set pnt_wires($pid) [lreplace $pnt_wires($pid) $i $i]
+		}
+		if {[llength $pnt_wires($pid)] < 3} {
+			net_modify_connector $canvas delete $pid
+		}
+		set last_pnt [lindex $net_point_list end]
+		set old_nid [net_list_identify $canvas $last_pnt]
+		set net_nid [net_list_generate_id]
+		net_list_split $canvas $old_nid $net_nid $last_pnt
+	}
+
+	net_do_delete_wire $canvas $wid
+
+	if {[llength "$net_point_list $net_wire_list"] == 0} {
+		net_create_clear $canvas
+		return 0
+	}
+
+	return 1
+}
+
+proc point_dispatch_item_delete {canvas x y} {
+	net_delete_point $canvas [$canvas find withtag current]
+}
+
+proc wire_dispatch_item_delete {canvas x y} {
+	net_delete_wire $canvas [$canvas find withtag current]
+}
+
+proc net_delete_point_degree_two {canvas pid} {
+	global pnt_wires
+
+	foreach wid $pnt_wires($pid) {
+		lappend adj_points [net_get_adjacent_point $pid $wid]
+	}
+
+	scan $adj_points "%d %d" pnt1 pnt2
+	set wire_exists 0
+	foreach wid $pnt_wires($pnt1) {
+		if {[lsearch -exact $pnt_wires($pnt2) $wid] != -1} {
+			puts "Points ($pnt1,$pnt2) already connected."
+			set wire_exists 1
+			break
+		}
+	}
+
+	if {! $wire_exists} {
+		set nid [net_list_identify $canvas $pnt1]
+		set nwid [net_do_create_wire $canvas $pnt1 $pnt2 $nid]
+	}
+
+	regsub " " $pnt_wires($pid) "|" adj_wires
+	foreach pnt $adj_points {
+		set idx [lsearch -regexp $pnt_wires($pnt) $adj_wires]
+		if {$wire_exists} {
+			set new [lreplace $pnt_wires($pnt) $idx $idx]
+			if {[llength $new] < 3} {
+				net_modify_connector $canvas delete $pnt
+			}
+		} else {
+			set new [lreplace $pnt_wires($pnt) $idx $idx $nwid]
+		}
+		set pnt_wires($pnt) $new
+	}
+}
+
+proc net_delete_point_other {canvas pid} {
+	global pnt_wires
+
+	set retag 0
+	foreach wid $pnt_wires($pid) {
+		set adj_pid [net_get_adjacent_point $pid $wid]
+		net_delete_wire_from_points_list $canvas $adj_pid $wid $retag
+		set retag 1
+	}
+}
+
+proc net_delete_point {canvas pid} {
+	global pnt_wires
+
+	if {[llength $pnt_wires($pid)] == 2}  {
+		net_delete_point_degree_two $canvas $pid
+	} else {
+		net_delete_point_other $canvas $pid
+	}
+
+	foreach wid $pnt_wires($pid) {
+		net_do_delete_wire $canvas $wid
+	}
+
+	net_do_delete_point $canvas $pid
+}
+
+proc net_delete_wire {canvas wid} {
+	set retag 0
+	foreach pid [net_wire_points $wid] {
+		net_delete_wire_from_points_list $canvas $pid $wid $retag
+		set retag 1
+	}
+	net_do_delete_wire $canvas $wid
+}
+
+proc net_delete_wire_from_points_list {canvas pid wid retag} {
+	global pnt_wires
+
+	set idx [lsearch -exact $pnt_wires($pid) $wid]
+	set pnt_wires($pid) [lreplace $pnt_wires($pid) $idx $idx]
+	set len [llength $pnt_wires($pid)] 
+	if {$len == 0} {
+		net_do_delete_point $canvas $pid
+	} else {
+		if {$len < 3} {
+			net_modify_connector $canvas delete $pid
+		}
+		if {$retag} {
+			set old_nid [net_list_identify $canvas $pid]
+			set new_nid [net_list_generate_id]
+			net_list_split $canvas $old_nid $new_nid $pid
+		}
+	}
+}
+
+trace variable net_label_name w net_label_change
+
+proc net_label_change {name _ _} {
+	global $name net_label_id
+	set text [string trim [set $name]]
+	if {[info exists net_label_id]} {
+		[workarea_get_canvas] itemconfigure $net_label_id -text $text
+	}
+	set net_label_name $text
+}
+
+proc point_dispatch_wire_label {canvas x y} {
+	global pnt_label net_name
+
+	set pid [$canvas find withtag current]
+	utils_cache_bindings $canvas $pid point enter leave
+	if {[set nid [net_list_identify $canvas $pid]] == ""} {
+		puts "Point has no netlist id!"
+		return
+	}
+	if {[info exists net_name($nid)]} {
+		if {! [info exists pnt_label($pid)]} {
+			puts "Point belongs to a netlist that is already named."
+		} else {
+			net_label_dialog $canvas $pid $pnt_label($pid)
+		}
+	} else {
+		net_label_dialog $canvas $pid
+	}
+	utils_restore_bindings $canvas $pid point $enter $leave
+}
+
+proc label_dispatch_item_modify {canvas x y} {
+	set lid [$canvas find withtag current]
+	utils_cache_bindings $canvas $lid label enter leave
+	if {[set pid [net_label_point $lid]] == ""} {
+		puts "Label has no point!"
+		return
+	}
+	net_label_dialog $canvas $pid $lid
+	utils_restore_bindings $canvas $lid label $enter $leave
+}
+
+proc label_dispatch_item_delete {canvas x y} {
+	set lid [$canvas find withtag current]
+	if {[set pid [net_label_point $lid]] == ""} {
+		puts "Label has no point!"
+		return
+	}
+	global pnt_label
+	unset pnt_label($pid)
+
+	global net_name
+	set nid [net_list_identify $canvas $lid]
+	sig_delete $net_name($nid)
+	unset net_name($nid)
+
+	$canvas delete $lid
+}
+
+proc net_label_check {ok_button old_name} {
+	upvar $ok_button ok
+	global net_label_name net_name
+
+	if {[info exists net_name]} {
+		foreach n [array names net_name] {
+			if {   $net_label_name == $net_name($n)
+			    && $net_label_name != $old_name} {
+				puts "\aNetlist name \"$net_name($n)\" in use."
+				return
+			}
+		}
+	}
+	set ok 1
+}
+
+proc net_label_dialog {canvas pid {lid ""}} {
+	global net_label_name net_label_id ok
+
+	set font [option get $canvas font Font]
+	set size [option get $canvas pointSize PointSize]
+	set pntcolour [option get $canvas pointNormal PointNormal]
+
+	toplevel .dialog -class Dialog
+	set title "Netlist Label"
+	wm title .dialog $title
+	wm iconname .dialog $title
+	wm resizable .dialog 0 0
+	frame .dialog.name
+	pack .dialog.name -in .dialog -padx 2m -pady 2m
+	label .dialog.lname -text "Label Name:" -width 13 -anchor e
+	entry .dialog.ename -textvariable net_label_name -relief sunken -bd 2 \
+		-font $font
+	pack .dialog.lname .dialog.ename -side left -in .dialog.name 
+
+	frame .dialog.top
+	pack .dialog.top
+	label .dialog.lanchor -text "Label Anchor:" -width 13 -anchor e
+	pack .dialog.lanchor -side left -in .dialog.top
+
+	global net_cur_anchor
+	set anchormap(nw) "se"; set anchormap(n) "s"; set anchormap(ne) "sw"
+	set anchormap(w) "e";   set anchormap(c) "c"; set anchormap(e) "w"
+	set anchormap(sw) "ne"; set anchormap(s) "n"; set anchormap(se) "nw"
+
+	set posmap(n,w) "nw"; set posmap(n,c) "n";  set posmap(n,e) "ne"
+	set posmap(c,w) "w";  set posmap(c,c) "c";  set posmap(c,e) "e"
+	set posmap(s,w) "sw"; set posmap(s,c) "s";  set posmap(s,e) "se"
+
+	if {$lid == ""} {
+		global net_prev_anchor
+		if {[info exists net_prev_anchor]} {
+			set net_cur_anchor $net_prev_anchor
+		} else {
+			set a \
+			[option get $canvas labelDfltAnchor LabelDfltAnchor]
+			set a [string tolower $a]
+			if {! [info exists anchormap($a)]} {
+				set net_cur_anchor s
+			} else {
+				set net_cur_anchor $anchormap($a)
+			}
+		}
+		set net_label_name \
+			[option get $canvas labelDfltName LabelDfltName]
+		set net_label_id \
+			[net_do_create_label $canvas $net_label_name \
+						$pid $net_cur_anchor]
+		set old_name ""
+	} else {
+		set net_cur_anchor [$canvas itemcget $lid -anchor]
+		set net_label_name [$canvas itemcget $lid -text]
+		set net_label_id $lid
+		set old_anchor $net_cur_anchor
+		set old_name $net_label_name
+	}
+
+	frame .dialog.anchors -bd 2 -relief sunken
+	pack .dialog.anchors -side top -in .dialog.top -pady 2m
+
+	foreach row {n c s} {
+		frame .dialog.anchors.$row
+		pack .dialog.anchors.$row -side top
+		foreach col {w c e} {
+			set text $posmap($row,$col)
+			set anchor $anchormap($text)
+			radiobutton .dialog.anchors.$row.$col \
+				-text [string toupper $text] \
+				-variable net_cur_anchor \
+				-value $anchor -anchor w -width 4 \
+				-command "net_anchor_move $canvas $pid $anchor"
+			pack .dialog.anchors.$row.$col -side left
+		}
+	}
+
+	frame .dialog.buttons -bd 2 -relief sunken
+	pack .dialog.buttons -side bottom -fill x
+	button .dialog.ok -text "OK" \
+		-command [list net_label_check ok $old_name]
+	pack .dialog.ok -side left -in .dialog.buttons \
+		-ipady 1m -ipadx 2m -pady 2m -expand 1
+	button .dialog.cancel -text "Cancel" -command { set ok 0 }
+	pack .dialog.cancel -side left -in .dialog.buttons \
+		-ipady 1m -ipadx 2m -pady 2m -expand 1
+
+	utils_window_center .dialog
+	grab .dialog
+	set old_focus [focus -lastfor .]
+	focus .dialog.ename
+
+	tkwait variable ok
+
+	focus $old_focus
+	destroy .dialog
+	update
+
+	if {! $ok || $net_label_name == ""} {
+		if {$lid == ""} {
+			global pnt_label
+			unset pnt_label($pid)
+			$canvas delete $net_label_id 
+		} else {
+			set net_label_name $old_name
+			net_label_pos $canvas $pid $old_anchor
+		}
+	} else {
+		global net_name net_ports
+		set nid [net_list_identify $canvas $pid]
+		set net_name($nid) $net_label_name
+		if {$lid == ""} {
+			sig_draw_signal $net_label_name
+		} else {
+			sig_rename $old_name $net_label_name 
+		}
+	}
+	unset net_label_id
+}
+
+proc net_do_create_label {canvas text pid anchor} {
+	global pnt_label pnt_coord
+	scan $pnt_coord($pid) "%d %d" x y
+
+	set nid [net_list_identify $canvas $pid]
+	set font [option get $canvas font Font]
+	set lid [$canvas create text $x $y -tags "label netlist $nid" \
+			-text $text -font $font]
+
+	set pnt_label($pid) $lid
+	net_label_pos $canvas $pid $anchor
+
+	return $lid
+}
+
+proc net_anchor_move {canvas pid anchor} {
+	global net_prev_anchor
+	set net_prev_anchor $anchor
+
+	net_label_pos $canvas $pid $anchor
+}
+
+proc net_label_pos {canvas pid anchor} {
+	global pnt_label pnt_coord
+
+	scan $pnt_coord($pid) "%d %d" x y
+	set delta [option get $canvas connectorSize ConnectorSize]
+	if {[string first "n" $anchor] != -1} {
+		set y [expr $y + $delta]
+	} elseif {[string first "s" $anchor] != -1} {
+		set y [expr $y - $delta]
+	}
+	if {[string first "w" $anchor] != -1} {
+		set x [expr $x + $delta]
+	} elseif {[string first "e" $anchor] != -1} {
+		set x [expr $x - $delta]
+	}
+
+	set lid $pnt_label($pid)
+	$canvas coords $lid $x $y
+	$canvas itemconfigure $lid -anchor $anchor
+}
+
+proc netlist_dispatch_wire_list {canvas x y} {
+	set tags [$canvas gettags current]
+	if {[set idx [lsearch $tags "netlist_*"]] == -1} {
+		puts "No netlist tag for netlist?"
+	} else {
+		global net_ports net_name
+		set netlist_id [lindex $tags $idx]
+		puts "Netlist ID: $netlist_id"
+		set name "<UNDEFINED>"
+		set type "<UNDEFINED>"
+		if {[info exists net_name($netlist_id)]} {
+			set name $net_name($netlist_id)
+		}
+		if {[info exists net_ports($netlist_id)]} {
+			set type $net_ports($netlist_id)
+		}
+		puts "\tName: \"$name\""
+		puts "\tType: \"$type\""
+	}
+}
+
+proc net_list_generate_id {} {
+	global netlist_id
+
+	if {! [info exists netlist_id]} {
+		set netlist_id 0
+	} else {
+		incr netlist_id
+	}
+	return netlist_$netlist_id
+}
+
+proc net_list_identify {canvas tagorid} {
+	set tags [$canvas gettags $tagorid]
+	if {[set idx [lsearch $tags netlist_*]] == -1} {
+		return ""
+	} else {
+		return [lindex $tags $idx]
+	}
+}
+
+proc net_list_type nid {
+	global net_ports
+
+	if {! [info exists net_ports($nid)]} {
+		return "unknown"
+	} else {
+		return [lindex [lindex $net_ports($nid) 0] 0]
+	}
+}
+
+proc net_list_name_id name {
+	global net_name
+	foreach nid [array names net_name] {
+		if {$net_name($nid) == $name} {
+			return $nid
+		}
+	}
+	return ""
+}
+
+proc net_compare_ports {port1 port2} {
+	set order "output input bidirect"
+	set type1 [lindex $port1 0]
+	set type2 [lindex $port2 0]
+	return [expr [lsearch $order $type1] - [lsearch $order $type2]]
+}
+
+proc net_list_sort_ports nid {
+	global net_ports net_name
+
+	if {[info exist net_ports($nid)]} {
+		set net_ports($nid) \
+			[lsort -command net_compare_ports $net_ports($nid)]
+	}
+
+	if {[info exist net_name($nid)]} {
+		sig_type $net_name($nid) [net_list_type $nid]
+	}
+}
+
+proc net_list_remove_port {pid nid} {
+	global net_ports net_name
+	set num 0
+	foreach i $net_ports($nid) {
+		if {$pid == [lindex $i 1]} {
+			set found 1
+			break
+		}
+		incr num
+	}
+	if {! [info exists found]} {
+		puts "\aCannot find point $pid in port list: $net_ports($nid)"
+		return ""
+	}
+	set ret [lindex $net_ports($nid) $num]
+	set net_ports($nid) [lreplace $net_ports($nid) $num $num]
+	if {$net_ports($nid) == ""} {
+		unset net_ports($nid)
+	}
+	if {[info exists net_name($nid)]} {
+		sig_type $net_name($nid) [net_list_type $nid]
+	}
+	return $ret
+}
+
+proc net_list_unite {canvas nid1 nid2} {
+	$canvas addtag $nid2 withtag $nid1
+	$canvas dtag $nid1
+	global net_ports net_name
+	if {[info exists net_ports($nid1)]} {
+		eval lappend net_ports($nid2) $net_ports($nid1)
+		net_list_sort_ports $nid2
+		unset net_ports($nid1)
+	}
+	if {[info exists net_name($nid1)]} {
+		puts "\aWarning netlist \"$nid1\" has a name!?  Unsetting it."
+		sig_delete $net_name($nid)
+		unset net_name($nid1)
+	}
+}
+
+proc net_list_split {canvas nid1 nid2 pid} {
+	global net_ports
+
+	net_list_traverse $canvas $pid $nid1 $nid2 visited
+	net_list_sort_ports $nid2
+}
+
+proc net_list_traverse {canvas pid nid1 nid2 done} {
+	upvar $done visited
+	global pnt_wires pnt_label pnt_port net_name net_ports
+
+	if {$pid == ""} {
+		return
+	}
+	set visited($pid) 1
+	attrib_point $canvas selected $pid
+	update idletasks
+	$canvas dtag $pid $nid1
+	$canvas addtag $nid2 withtag $pid
+	if {[info exists pnt_label($pid)]} {
+		$canvas dtag $pnt_label($pid) $nid1
+		$canvas addtag $nid2 withtag $pnt_label($pid)
+		set net_name($nid2) $net_name($nid1)
+		unset net_name($nid1)
+	}
+	if {   [info exists pnt_port($pid)]
+	    && [set prt [net_list_remove_port $pid $nid1]] != ""} {
+		lappend net_ports($nid2) $prt
+	}
+	foreach wid $pnt_wires($pid) {
+		$canvas dtag $wid $nid1
+		$canvas addtag $nid2 withtag $wid
+		set adjpnt [net_get_adjacent_point $pid $wid]
+		if {! [info exists visited($adjpnt)]} {
+			net_list_traverse $canvas $adjpnt $nid1 $nid2 visited
+		}
+	}
+	attrib_point $canvas normal $pid
+	update idletasks
+}
+
+proc point_dispatch_item_move {canvas x y} {
+	net_prepare_point_move $canvas
+}
+
+proc wire_dispatch_item_move {canvas x y} {
+	net_prepare_wire_move $canvas $x $y
+}
+
+proc net_prepare_wire_move {canvas x y} {
+	global pnt_port
+
+	set wid [$canvas find withtag current]
+	set wire_points [net_wire_points $wid]
+	foreach pid $wire_points {
+		if {[info exists pnt_port($pid)]} {
+			puts "Cannot move a wire attached to a port."
+			return
+		}
+	}
+
+	global net_last_x net_last_y
+	workarea_convert x y
+	set net_last_x $x
+	set net_last_y $y
+	$canvas bind wire <B1-Motion> \
+		"net_do_move $canvas wire $wid %x %y $wire_points"
+	$canvas bind wire <B1-ButtonRelease> "net_stop_move $canvas wire"
+}
+
+proc net_prepare_point_move canvas {
+	global pnt_port pnt_coord
+
+	set pid [$canvas find withtag current]
+	if {! [info exists pnt_port($pid)]} {
+		global net_last_x net_last_y
+
+		scan $pnt_coord($pid) "%d %d" net_last_x net_last_y
+		$canvas bind point <B1-Motion> \
+			"net_do_move $canvas point $pid %x %y"
+		$canvas bind point <B1-ButtonRelease> \
+			"net_stop_move $canvas point"
+	} else {
+		set tagname [cmp_identify $canvas $pnt_port($pid)]
+		eval cmp_prepare_move $canvas $tagname $pnt_coord($pid)
+	}
+}
+
+proc net_do_move {canvas type id x y args} {
+	if {! [utils_in_canvas $canvas $x $y]} {
+		return
+	}
+
+	global net_last_x net_last_y
+
+	workarea_convert x y
+	set xd [expr $x - $net_last_x]
+	set yd [expr $y - $net_last_y] 
+	if {$type == "wire"} {
+		foreach pid $args {
+			net_do_move_point $canvas $pid $xd $yd
+		}
+	} else {
+		net_do_move_point $canvas $id $xd $yd
+	}
+
+	set net_last_x $x
+	set net_last_y $y
+}
+
+proc net_stop_move {canvas type} {
+	$canvas raise point 
+
+	if {$type == "point"} {
+		$canvas bind point <B1-Motion> {}
+		$canvas bind point <B1-ButtonRelease> {}
+	} else {
+		$canvas bind wire <B1-Motion> {}
+		$canvas bind wire <B1-ButtonRelease> {}
+	}
+}
+
+proc port_dispatch_wire_solder {canvas x y} {
+	net_start_solder $canvas $x $y
+}
+
+proc point_dispatch_wire_solder {canvas x y} {
+	net_start_solder $canvas $x $y
+}
+
+proc wire_dispatch_wire_solder {canvas x y} {
+	net_start_solder $canvas $x $y
+}
+
+proc net_start_solder {canvas x y {item ""}} {
+	if {$item == ""} {
+		workarea_convert x y
+		set item current
+	}
+	set target_list [net_get_overlaps $canvas $x $y $item]
+
+	if {[llength $target_list] == 0} {
+		puts "\aPlease click closer to a grid intersection."
+		return -1
+	}
+
+	if {[llength $target_list] == 1} {
+		set current [lindex $target_list 0]
+		if {[lindex $current 1] == "wire"} {
+			net_add_wire_point $canvas $x $y [lindex $current 0]
+		} else {
+			puts "\aCannot solder one item."
+		}
+		return -1
+	}
+
+	set create_connector 0
+	set solder_successful 0
+	set top [lindex $target_list 0]
+	foreach target [lrange $target_list 1 end] {
+		set pid [eval net_connect $canvas $x $y $top $target]
+		if {$pid != -1} {
+			global pnt_wires
+			if {[llength $pnt_wires($pid)] > 2} {
+				set create_connector 1
+			}
+			set top "$pid point"
+			set solder_successful 1
+		}
+	}
+
+	if {$create_connector} {
+		net_do_create_connector $canvas [lindex $top 0]
+	}
+
+	if {$solder_successful} {
+		return [lindex $top 0]
+	}
+
+	return -1
+}
+
+proc net_get_overlaps {canvas x y item} {
+	regexp "wire|port|point" [$canvas gettags $item] ctype
+	if {$ctype == "wire"} {
+		set grace 2
+		set bbox "[expr $x - $grace] [expr $y - $grace] \
+			  [expr $x + $grace] [expr $y + $grace]"
+	} else {
+		set bbox [draw_get_bbox $canvas $item]
+	}
+
+	set solder_list {}
+	foreach tid [eval $canvas find overlapping $bbox] {
+		set tags [$canvas gettags $tid]
+		if {[regexp "wire|port|point" $tags ttype]} {
+			lappend solder_list "$tid $ttype"
+		}
+	}
+	return [lsort -command net_compare_targets $solder_list]
+}
+
+proc net_compare_targets {target1 target2} {
+	set order "point port wire"
+	set type1 [lindex $target1 1]
+	set type2 [lindex $target2 1]
+	return [expr [lsearch $order $type1] - [lsearch $order $type2]]
+}
+
+proc net_connect {canvas x y current_id current_type target_id target_type} {
+	set connection [lsort "$current_type $target_type"]
+	if {[string compare [lindex $connection 0] $current_type] == 0} {
+		set params "$current_id $target_id"
+	} else {
+		set params "$target_id $current_id"
+	}
+
+	if {$current_type == "wire" && $target_type == "wire"} {
+		set params "$x $y $params"
+	}
+
+	regsub " " $connection "_to_" connection_type
+	return [eval net_connect_$connection_type $canvas $params]
+}
+
+proc net_add_wire_point {canvas x y wid} {
+	set nid [net_list_identify $canvas $wid]
+	set pid [net_do_create_point $canvas $x $y $nid]
+	net_split_wire $canvas $wid $pid
+}
+
+proc net_split_wire {canvas wire pnt} {
+	global pnt_wires
+
+	set nid [net_list_identify $canvas $pnt]
+	foreach pid [net_wire_points $wire] {
+		set nwid [net_do_create_wire $canvas $pnt $pid $nid]
+		set idx [lsearch -exact $pnt_wires($pid) $wire]
+		set pnt_wires($pid) [lreplace $pnt_wires($pid) $idx $idx $nwid]
+		lappend pnt_wires($pnt) $nwid
+	}
+	net_do_delete_wire $canvas $wire
+}
+
+proc net_connection_valid {canvas nid1 nid2} {
+	global	net_name
+
+	if {$nid1 == $nid2} {
+		puts "\aNetlists cannot have cycles."
+		return 0
+	} elseif {   [info exists net_name($nid1)]
+	          && [info exists net_name($nid2)]} {
+		puts "\aNetlists cannot have more than one name."
+		return 0
+	} elseif {   [net_list_type $nid1] == "output"
+	          && [net_list_type $nid2] == "output"} {
+		puts "\aOnly one output port may feed a netlist."
+		return 0 
+	}
+	return 1
+}
+
+proc net_connect_point_to_point {canvas pnt1 pnt2} {
+	set nid1 [net_list_identify $canvas $pnt1]
+	set nid2 [net_list_identify $canvas $pnt2]
+	if {! [net_connection_valid $canvas $nid1 $nid2]} {
+		return -1
+	}
+
+	global net_name
+	if {[info exists net_name($nid2)]} {
+		set pnt_keep $pnt2;   set nid_keep $nid2
+		set pnt_delete $pnt1; set nid_delete $nid1
+	} else {
+		set pnt_keep $pnt1;   set nid_keep $nid1
+		set pnt_delete $pnt2; set nid_delete $nid2
+	}
+
+	global pnt_wires
+	eval lappend pnt_wires($pnt_keep) $pnt_wires($pnt_delete)
+	net_list_unite $canvas $nid_delete $nid_keep
+	net_do_delete_point $canvas $pnt_delete
+	net_modify_connector $canvas delete $pnt_keep 
+
+	return $pnt_keep
+}
+
+proc net_connect_point_to_port {canvas pnt prt} {
+	global pnt_port net_ports
+
+	if {[info exists pnt_port($pnt)]} {
+		return -1
+	}
+
+	set tags [$canvas gettags $prt]
+	if {! [regexp {(input|output|bidirect)} $tags prt_type]} {
+		puts "\aPort \"$prt\" has no type."
+		return -1
+	}
+
+	set pnt_nid [net_list_identify $canvas $pnt]
+	set pnt_type [net_list_type $pnt_nid]
+	if {$prt_type == "output" && $pnt_type == "output"} {
+		puts "\aCannot connect output port to output netlist."
+		return -1
+	}
+
+	set pnt_port($pnt) $prt
+	lappend net_ports($pnt_nid) "$prt_type $pnt"
+	net_list_sort_ports $pnt_nid
+
+	regexp {(input|output|bidirect)} [$canvas gettags $prt] prt_type
+	regsub "^." $prt_type [string toupper [string index $prt_type 0]] type
+	set colour [option get $canvas port$type Port$type]
+	$canvas itemconfigure $prt -fill $colour
+
+	return $pnt
+}
+
+proc net_connect_point_to_wire {canvas pnt wire} {
+	global pnt_wires
+
+	if {[lsearch $pnt_wires($pnt) $wire] != -1} {
+		return -1
+	}
+
+	set nid1 [net_list_identify $canvas $pnt]
+	set nid2 [net_list_identify $canvas $wire]
+	if {! [net_connection_valid $canvas $nid1 $nid2]} {
+		return -1
+	}
+
+	global net_name
+	if {[info exists net_name($nid2)]} {
+		set nid_delete $nid1; set nid_keep $nid2
+	} else {
+		set nid_delete $nid2; set nid_keep $nid1
+	}
+
+	net_list_unite $canvas $nid_delete $nid_keep
+	net_split_wire $canvas $wire $pnt
+
+	return $pnt
+}
+
+proc net_connect_port_to_port {canvas prt1 prt2} {
+	puts "It is impossible to connect a port to a port!"
+	return -1
+}
+
+proc net_connect_port_to_wire {canvas prt wire} {
+	scan [draw_get_bbox $canvas $prt] "%d %d %d %d" x1 y1 x2 y2
+	set x [expr ($x1 + $x2) / 2]; set y [expr ($y1 + $y2) / 2]
+	if {! [workarea_snap x y]} {
+		puts "\aSnapping out of bounds?!"
+		return -1
+	}
+	set nid [net_list_identify $canvas $wire]
+	set pnt [net_do_create_point $canvas $x $y $nid]
+	net_split_wire $canvas $wire $pnt
+
+	return [net_connect_point_to_port $canvas $pnt $prt]
+}
+
+proc net_connect_wire_to_wire {canvas x y wire1 wire2} {
+	global	net_name
+	set nid1 [net_list_identify $canvas $wire1]
+	set nid2 [net_list_identify $canvas $wire2]
+	if {! [net_connection_valid $canvas $nid1 $nid2]} {
+		return -1
+	}
+
+	if {[info exists net_name($nid2)]} {
+		set pnt [net_do_create_point $canvas $x $y $nid2]
+		set nid_keep $nid2; set nid_delete $nid1
+	} else {
+		set pnt [net_do_create_point $canvas $x $y $nid1]
+		set nid_keep $nid1; set nid_delete $nid2
+	}
+	net_list_unite $canvas $nid_delete $nid_keep
+
+	net_split_wire $canvas $wire1 $pnt
+	net_split_wire $canvas $wire2 $pnt
+	return $pnt
+}
+
+proc net_get_adjacent_point {pid wid} {
+	set wire_points [net_wire_points $wid]
+	set idx [expr 1 - [lsearch -exact $wire_points $pid]]
+	return [lindex $wire_points $idx]
+}
+
+proc net_do_create_connector {canvas pid} {
+	global pnt_coord
+
+	set colour [option get $canvas connectorColour ConnectorColour]
+	set size [option get $canvas connectorSize ConnectorSize]
+	scan $pnt_coord($pid) "%d %d" x y
+	$canvas create oval [expr $x - $size] [expr $y - $size] \
+			[expr $x + $size] [expr $y + $size] \
+			-fill $colour -outline $colour \
+			-tags "connect_$pid connector"
+	$canvas raise $pid
+}
+
+proc net_modify_connector {canvas op pid args} {
+	if {[set connector [$canvas find withtag connect_$pid]] != ""} {
+		eval $canvas $op $connector $args
+	}
+}
+
+proc net_do_delete_wire {canvas wid} {
+	$canvas delete $wid
+}
+
+proc net_do_delete_point {canvas pid} {
+	global pnt_wires pnt_coord pnt_port pnt_label net_name
+
+	unset pnt_wires($pid)
+	unset pnt_coord($pid)
+
+	set nid [net_list_identify $canvas $pid]
+	if {[info exists pnt_port($pid)]} {
+		set interior [option get $canvas portNormal PortNormal]
+		$canvas itemconfigure $pnt_port($pid) -fill $interior
+		unset pnt_port($pid)
+		net_list_remove_port $pid $nid
+	}
+
+	if {[info exists pnt_label($pid)]} {
+		$canvas delete $pnt_label($pid)
+		unset pnt_label($pid)
+		sig_delete $net_name($nid)
+		unset net_name($nid)
+	}
+	net_modify_connector $canvas delete $pid
+	$canvas delete $pid
+}
+
+proc net_do_create_point {canvas x y net_id} {
+	global pnt_coord
+
+	set colour [option get $canvas pointNormal PointNormal]
+	set size [option get $canvas pointSize PointSize]
+	set net_pid [$canvas create polygon \
+			[expr $x - $size] $y $x [expr $y - $size] \
+			[expr $x + $size] $y $x [expr $y + $size] \
+			-fill $colour -tags "point netlist $net_id"]
+	set pnt_coord($net_pid) "$x $y"
+
+	return $net_pid
+}
+
+proc net_do_create_wire {canvas pnt1 pnt2 net_id} {
+	global pnt_coord
+
+	set colour [option get $canvas wireColourNormal WireColourNormal]
+	set width [option get $canvas wireWidthNormal WireWidthNormal]
+	set net_wid [eval $canvas create line \
+			$pnt_coord($pnt1) $pnt_coord($pnt2) \
+			-fill $colour -width $width \
+			-tags {"wire netlist $net_id"}]
+	$canvas raise point
+
+	return $net_wid
+}
+
+proc net_do_move_point {canvas pid xd yd} {
+	global pnt_coord pnt_wires pnt_label
+
+	$canvas move $pid $xd $yd
+	net_modify_connector $canvas move $pid $xd $yd
+
+	set pnt $pnt_coord($pid)
+	set new_pnt "[expr [lindex $pnt 0] + $xd] [expr [lindex $pnt 1] + $yd]"
+
+	foreach wid $pnt_wires($pid) {
+		set coords [utils_round [$canvas coords $wid]]
+		if {[scan $coords "%d %d %d %d" x1 y1 x2 y2] != 4} {
+			puts "\aCannot get coordinates?!"
+			return
+		}
+		set first "$x1 $y1"
+		set second "$x2 $y2"
+		set adj_pnt $first
+		if {$pnt == $first} {
+			set adj_pnt $second
+		}
+		eval $canvas coords $wid $new_pnt $adj_pnt
+	}
+
+	if {[info exists pnt_label($pid)]} {
+		$canvas move $pnt_label($pid) $xd $yd
+	}
+
+	set pnt_coord($pid) $new_pnt
+}
+
+
+proc net_wire_points wire_id {
+	global pnt_wires
+	set points ""
+	foreach pid [array names pnt_wires] {
+		if {[lsearch $pnt_wires($pid) $wire_id] != -1} {
+			lappend points $pid
+		}
+	}
+	return $points
+}
+
+proc net_port_point port_id {
+	global pnt_port
+	if {! [info exists pnt_port]} {
+		return ""
+	}
+
+	set points ""
+	foreach pid [array names pnt_port] {
+		if {$pnt_port($pid) == $port_id} {
+			lappend points $pid
+		}
+	}
+	if {[llength $points] > 1} {
+		puts "\aPort has more than one point?!"
+	}
+	return $points
+}
+
+proc net_label_point label_id {
+	global pnt_label
+	if {! [info exists pnt_label]} {
+		return ""
+	}
+
+	set points ""
+	foreach pid [array names pnt_label] {
+		if {$pnt_label($pid) == $label_id} {
+			lappend points $pid
+		}
+	}
+	if {[llength $points] > 1} {
+		puts "\aLabel has more than one point?!"
+	}
+	return $points
+}
+proc startup_init app {
+
+	set priority startupFile
+
+	option add $app*Font \
+		"-*-helvetica-*-r-*-*-12-*-*-*-*-*-*-*"
+
+	option add $app.geometry +0+0
+
+	option add $app.progressBackground grey80 $priority
+	option add $app.progressForeground skyblue3 $priority
+	option add $app.progressBgRelief sunken $priority
+	option add $app.progressFgRelief raised $priority
+
+	option add $app.Dialog*background grey75 $priority
+	option add $app.Dialog*foreground grey0 $priority
+	option add $app.Dialog*Listbox.background grey60 $priority
+	option add $app.Dialog*Entry.background grey60 $priority
+	option add $app.Dialog*highlightBackground grey75 $priority
+	option add $app.Dialog*Radiobutton*activeForeground grey100 $priority
+	option add $app.Dialog*Radiobutton*activeBackground grey60 $priority
+	option add $app.Dialog*Button*activeForeground grey100 $priority
+	option add $app.Dialog*Button*activeBackground grey60 $priority
+	option add $app.Dialog*Scrollbar.background grey60 $priority
+	option add $app.Dialog*Scrollbar.activeBackground white $priority
+	option add $app.Dialog*Scrollbar.troughColor grey40 $priority
+	option add $app.Dialog*borderWidth 2 $priority
+	option add $app.Dialog*selectForeground white $priority
+	option add $app.Dialog*selectBackground grey50 $priority
+
+	option add $app.menu_bar*background darkslateblue $priority
+	option add $app.menu_bar*foreground grey75 $priority
+	option add $app.menu_bar*activeBackground steelblue3 $priority
+	option add $app.menu_bar*activeForeground black $priority
+	option add $app.menu_bar*disabledForeground grey20 $priority
+	option add $app.menu_bar*selectColor green $priority
+	option add $app.menu_bar*borderWidth 2 $priority
+	option add $app.menu_bar*relief flat $priority
+	option add $app.menu_bar*tearOff 0 $priority
+
+	option add $app.menu_bar.borderWidth 2 $priority
+	option add $app.menu_bar.relief raised $priority
+
+	option add $app.workarea*background grey80 $priority
+
+	option add $app.workarea.Scrollbar.background grey60 $priority
+	option add $app.workarea.Scrollbar.activeBackground white $priority
+	option add $app.workarea.Scrollbar.troughColor grey50 $priority
+	option add $app.workarea.Scrollbar.relief sunken $priority
+	option add $app.workarea.Scrollbar.width 15 $priority
+	option add $app.workarea.Scrollbar.borderWidth 2 $priority
+	option add $app.workarea.Scrollbar.highlightThickness 2 $priority
+	option add $app.workarea.Scrollbar.highlightColor black $priority
+	option add $app.workarea.Scrollbar.highlightBackground grey90 $priority
+
+	option add $app.workarea.canvas.foreground grey0 $priority
+	option add $app.workarea.canvas.background grey80 $priority
+	option add $app.workarea.canvas.relief ridge $priority
+	option add $app.workarea.canvas.borderWidth 4 $priority
+
+	option add $app.workarea.canvas.gridColour darkslateblue $priority
+
+	option add $app.workarea.canvas.cmpColourNormal black $priority
+	option add $app.workarea.canvas.cmpColourSelected black $priority
+	option add $app.workarea.canvas.cmpWidthNormal 1 $priority
+	option add $app.workarea.canvas.cmpWidthSelected 2 $priority
+
+	option add $app.workarea.canvas.wireColourNormal black $priority
+ 	option add $app.workarea.canvas.wireColourSelected red4 $priority
+ 	option add $app.workarea.canvas.wireWidthNormal 1 $priority
+ 	option add $app.workarea.canvas.wireWidthSelected 5 $priority
+
+	option add $app.workarea.canvas.pointNormal red $priority
+	option add $app.workarea.canvas.pointSelected white $priority
+	option add $app.workarea.canvas.pointSize 3 $priority
+
+	option add $app.workarea.canvas.portInput forestgreen $priority
+	option add $app.workarea.canvas.portOutput orangered3 $priority
+	option add $app.workarea.canvas.portBidirect yellow3 $priority
+	option add $app.workarea.canvas.portNormal grey75 $priority
+	option add $app.workarea.canvas.portSelected white $priority
+
+	option add $app.workarea.canvas.connectorColour black $priority
+	option add $app.workarea.canvas.connectorSize 4 $priority
+
+	option add $app.workarea.canvas.multiColourNormal black $priority
+	option add $app.workarea.canvas.multiColourSelected blue $priority
+	option add $app.workarea.canvas.multiWidthNormal 2 $priority
+	option add $app.workarea.canvas.multiWidthSelected 4 $priority
+
+	option add $app.workarea.canvas.labelDfltName "" $priority
+	option add $app.workarea.canvas.labelDfltAnchor n $priority
+	option add $app.workarea.canvas.labelNormal black $priority
+	option add $app.workarea.canvas.labelSelected white $priority
+
+	option add $app.toolbar*foreground grey20 $priority
+	option add $app.toolbar*background grey60 $priority
+	option add $app.toolbar*Label.foreground black $priority
+	option add $app.toolbar*Label.background grey75 $priority
+	option add $app.toolbar.relief ridge $priority
+	option add $app.toolbar.borderWidth 3 $priority
+	option add $app.Button.pressForeground black $priority
+	option add $app.Button.pressBackground grey85 $priority
+	option add $app.Button.foreground black $priority
+	option add $app.Button.background grey60 $priority
+	option add $app.Button.activeForeground red $priority
+	option add $app.Button.activeBackground grey75 $priority
+	option add $app.Button.disabledForeground grey40 $priority
+
+	option add $app.sig.geometry +401+459
+
+	option add $app.sig.buttons*foreground grey85 $priority
+	option add $app.sig.buttons*background grey50 $priority
+	option add $app.sig.buttons*highlightBackground grey50 $priority
+	option add $app.sig.buttons*highlightColor black $priority
+	option add $app.sig.buttons*activeForeground white $priority
+	option add $app.sig.buttons*activeBackground grey70 $priority
+
+	option add $app.sig.frameBorder 2 $priority
+	option add $app.sig.canvasBorder 2 $priority
+	option add $app.sig.labelsWidth [winfo pixels . 3c] $priority
+	option add $app.sig.timesHeight [winfo pixels . 1c] $priority
+	option add $app.sig.labelsShow 2 $priority
+	option add $app.sig.timesShow 16 $priority
+	option add $app.sig.scrollWidth 16 $priority
+	option add $app.sig.scrollBorder 2 $priority
+	option add $app.sig.scrollHighlight 2 $priority
+	option add $app.sig.sigHeight [winfo pixels . 2c] $priority
+	option add $app.sig.sigWidth [winfo pixels . 1c] $priority
+	option add $app.sig.vertPad [winfo pixels . 6m] $priority
+	option add $app.sig.sigThick 3 $priority
+
+	option add $app.sig.numValues 3 $priority
+	option add $app.sig.values "0 X 1" $priority
+	option add $app.sig.dfltValue 0 $priority
+	option add $app.sig.dfltDuration 32 $priority
+
+	option add $app.sig.times*background grey55 $priority
+	option add $app.sig.times*foreground grey95 $priority
+	option add $app.sig.times.relief raised $priority
+	option add $app.sig.times.canvas.relief sunken $priority
+
+	option add $app.sig.labels*background grey55 $priority
+	option add $app.sig.labels*foreground grey90 $priority
+	option add $app.sig.labels*labelNormal grey90 $priority
+	option add $app.sig.labels*labelSelected green $priority
+	option add $app.sig.labels.relief raised $priority
+	option add $app.sig.labels.canvas.relief sunken $priority
+
+	option add $app.sig.workarea*background grey90 $priority
+	option add $app.sig.workarea*foreground grey95 $priority
+	option add $app.sig.workarea.relief raised $priority
+	option add $app.sig.workarea.canvas.relief sunken $priority
+
+	option add $app.sig.workarea.pad.background grey50 $priority
+	option add $app.sig.workarea.pad.relief ridge $priority
+	option add $app.sig.workarea.pad.borderWidth 2 $priority
+
+	option add $app.sig.workarea.Scrollbar.background grey60 $priority
+	option add $app.sig.workarea.Scrollbar.activeBackground white $priority
+	option add $app.sig.workarea.Scrollbar.troughColor grey50 $priority
+	option add $app.sig.workarea.Scrollbar.relief sunken $priority
+	option add $app.sig.workarea.Scrollbar.highlightColor black $priority
+}
+
+proc progress_bar {win bd width height args} {
+	frame $win
+	eval pack $win $args
+	set bg [option get . progressBackground ProgressBackground]
+	set fg [option get . progressForeground ProgressForeground]
+	set bgrelief [option get . progressBgRelief ProgressBgRelief]
+	set fgrelief [option get . progressFgRelief ProgressFgRelief]
+	frame $win.total -bd $bd -relief $bgrelief -background $bg \
+		-width $width -height $height
+	pack $win.total -side right
+	pack propagate $win.total 0
+	set height [expr [$win.total cget -height] - 2 * $bd]
+	frame $win.total.filled -bd $bd -relief $fgrelief -background $fg \
+		-width 0 -height $height
+	pack $win.total.filled -anchor nw
+
+	label $win.num -textvariable progress_percent -width 5 -anchor e
+	pack $win.num -side right
+	global progress_percent
+	set progress_percent "0%"
+}
+
+proc progress_update {win percent} {
+	set bd [$win.total cget -bd]
+	set width [expr [$win.total cget -width] - 2 * $bd] 
+	global progress_percent
+	set progress_percent "[expr round($percent * 100)]%"
+	$win.total.filled configure -width [expr $width * $percent]
+}
+
+
+
+proc pullmenu_create menu_entries {
+	frame .menu_bar
+	set menus ".menu_bar"
+	foreach i $menu_entries {
+		set menu_string [lindex $i 0]
+		set underline_index [string first & $menu_string] 
+		regsub -all & $menu_string "" menu_name
+		regsub -all " "  [string tolower $menu_name] "" menu_var
+		menubutton .menu_bar.$menu_var -text $menu_name \
+			-underline $underline_index \
+			-menu .menu_bar.$menu_var.menu
+		pack .menu_bar.$menu_var -side [lindex $i 1] 
+		pm_make_submenus [lrange $i 2 end] .menu_bar.$menu_var.menu
+		lappend menus .menu_bar.$menu_var
+	}
+	eval tk_menuBar $menus
+	focus .menu_bar
+
+	return .menu_bar
+}
+
+proc pullmenu_set_state {state {buttons ""}} {
+	if {$buttons == ""} {
+		set buttons [winfo children .menu_bar]
+	}
+	foreach i $buttons {
+		$i configure -state $state
+	}
+}
+
+proc pm_make_submenus {submenu_entries menu} {
+	menu $menu
+
+	foreach j $submenu_entries {
+		set menu_type [lindex $j 0]
+		if {$menu_type != "separator"} {
+			set label_accel [lindex $j 1]
+			if {![regexp {(.*)\|(.*)} $label_accel _ label accel]} {
+				set label $label_accel
+				set accel ""
+			}
+			set underline_index [string first & $label]
+			regsub -all & $label "" label
+			$menu add $menu_type -underline $underline_index \
+				-label $label
+
+			pm_set_accel $menu $label $accel 
+		}
+		switch -exact $menu_type {
+		    separator {
+			$menu add separator
+		    }
+		    command {
+			if {[llength $j] <= 2} {
+				$menu entryconfigure last \
+					-command [list puts $label]
+			} else {
+				$menu entryconfigure last \
+					-command [lindex $j 2]
+			}
+		    }
+		    radiobutton -
+		    checkbutton {
+			$menu entryconfigure last -variable [lindex $j 2]
+			if {$menu_type == "radiobutton"} {
+				$menu entryconfigure last -value [lindex $j 3]
+			}
+			set idx [expr {$menu_type == "radiobutton"} ? 4 : 3]
+			if {[lindex $j $idx] != ""} {
+				$menu entryconfigure last \
+					-command [lindex $j $idx]
+			}
+		    }
+		    cascade {
+			regsub -all " "  [string tolower $label] "" menu_var
+			$menu entryconfigure last -menu $menu.$menu_var
+			pm_make_submenus [lrange $j 2 end] $menu.$menu_var
+		    }
+		}
+	}
+}
+
+proc pm_set_accel {menu label accel} {
+
+	set keysym_aliases("") ""
+	set keysym_aliases(Delete) Delete;   set keysym_aliases(Del) Delete
+	set keysym_aliases(Insert) Insert;   set keysym_aliases(Ins) Insert
+	set keysym_aliases(Control) Control; set keysym_aliases(Ctrl) Control
+	set keysym_aliases(Shift) Shift;     set keysym_aliases(Shft) Shift
+
+	if {$accel == ""} {
+		return
+	} 
+
+	string trim accel
+	regexp {(^.[^.]+)} $menu top_parent
+	$menu entryconfigure $label -accelerator "  $accel"
+	if {[regexp {(.*)\+(.*)} $accel _ modifier keystroke]} {
+		set modifier $keysym_aliases($modifier)
+		set keystroke [string tolower $keystroke]
+		set event $modifier-$keystroke
+	} else {
+		set event $accel
+	}
+	bind $top_parent <$event> [list $menu invoke $label]
+}
+
+proc sig_build_window {} {
+	global	sig_xbase sig_ybase \
+		sig_workarea_width sig_workarea_height \
+		sig_min_time sig_min_label
+
+	toplevel .sig
+	wm title .sig "Signal Display"
+	wm protocol .sig WM_DELETE_WINDOW { puts "\aMust exit via editor." }
+	wm geometry .sig [option get .sig geometry Geometry]
+	.sig configure -background black
+
+	if {[option get .sig numValues NumValues] <= 1} {
+		puts "Cannot have unary signals."
+		exit
+	}
+
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set frame_border [option get .sig frameBorder FrameBorder]
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set vertpad [option get .sig vertPad VertPad]
+	set showx [option get .sig timesShow TimesShow]
+	set showy [option get .sig labelsShow LabelsShow]
+
+	set sig_workarea_width [expr $sig_width * $showx]
+	set sig_workarea_height \
+		[expr ($vertpad + $sig_height) * $showy + $vertpad]
+
+	sig_build_buttons
+	sig_build_times
+	sig_build_labels
+	sig_build_workarea
+	update idletasks
+
+	set real_width [expr [winfo width .sig.workarea.canvas] - \
+			2 * $canvas_border]
+	if {$real_width > $sig_workarea_width} {
+		set sig_workarea_width $real_width
+		.sig.workarea.canvas configure -width $real_width
+	}
+
+	set real_height [expr [winfo height .sig.workarea.canvas] - \
+			2 * $canvas_border]
+	if {$real_height > $sig_workarea_height} {
+		set sig_workarea_height $real_height
+		.sig.workarea.canvas configure -height $real_height
+	}
+
+	set sig_xbase [expr [winfo width .sig] - $sig_workarea_width]
+	set sig_ybase [expr [winfo height .sig] - $sig_workarea_height]
+
+	set sig_min_time \
+		[expr int(ceil(double($sig_workarea_width) / $sig_width))]
+	set sig_min_label \
+		[expr int(ceil(double($sig_workarea_height - $vertpad) / \
+				($vertpad + $sig_height)))]
+
+	sig_delete_all
+
+	.sig.workarea.canvas bind signal <1> {
+		sig_start_modify %W %x %y
+	}
+
+	.sig.labels.canvas bind siglabel <Enter> {
+		sig_label_attrib %W selected
+	}
+	.sig.labels.canvas bind siglabel <Leave> {
+		sig_label_attrib %W normal
+	}
+	.sig.labels.canvas bind siglabel <1> {
+		sig_label_drag %W
+	}
+	.sig.labels.canvas bind siglabel <ButtonRelease-1> {
+		sig_label_drop %W %y
+	}
+	.sig.labels.canvas bind siglabel <B1-Leave> {
+	}
+
+	global have
+	if {$have(custom_cursors)} {
+		.sig.workarea.canvas configure \
+			-cursor [utils_get_cursor sig_draw]
+	}
+}
+
+proc sig_build_buttons {} {
+	frame .sig.buttons
+	pack .sig.buttons -side top -fill x 
+
+	button .sig.buttons.simulate -text "Simulate" \
+		-command simulate
+	button .sig.buttons.duration -text "Increase Duration" \
+		-command sig_increase_duration
+
+	focus .sig.buttons.simulate
+
+	pack .sig.buttons.simulate .sig.buttons.duration \
+		-in .sig.buttons -side left
+}
+
+proc sig_build_times {} {
+	set frame_border [option get .sig frameBorder FrameBorder]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set times_height [option get .sig timesHeight TimesHeight]
+	set labels_width [option get .sig labelsWidth LabelsWidth]
+	set sb_width [option get .sig scrollWidth ScrollWidth]
+	set sb_border [option get .sig scrollBorder ScrollBorder]
+	set sb_highlight [option get .sig scrollHighlight ScrollHighlight]
+
+	frame .sig.times -bd $frame_border
+	pack .sig.times -side top -fill x 
+
+	frame .sig.times.lpad -width \
+		[expr $labels_width + 2 * $canvas_border + 2 * $frame_border] 
+	pack .sig.times.lpad -side left -fill y
+
+	frame .sig.times.rpad \
+		-width [expr $sb_width + 2 * $sb_border + 2 * $sb_highlight]
+	pack .sig.times.rpad -side right -fill y
+
+	canvas .sig.times.canvas -width 0 -highlightthickness 0 \
+		-bd $canvas_border -height $times_height
+	pack .sig.times.canvas -side top -fill x
+}
+
+proc sig_build_labels {} {
+	set frame_border [option get .sig frameBorder FrameBorder]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set labels_width [option get .sig labelsWidth LabelsWidth]
+	set sb_width [option get .sig scrollWidth ScrollWidth]
+	set sb_border [option get .sig scrollBorder ScrollBorder]
+	set sb_highlight [option get .sig scrollHighlight ScrollHighlight]
+
+	frame .sig.labels -bd $frame_border
+	pack .sig.labels -side left -fill y
+
+	frame .sig.labels.bpad \
+		-height [expr $sb_width + 2 * $sb_border + 2 * $sb_highlight]
+	pack .sig.labels.bpad -side bottom -fill x
+
+	canvas .sig.labels.canvas -height 0 -highlightthickness 0 \
+		-bd $canvas_border -width $labels_width
+	pack .sig.labels.canvas -side left -fill y
+}
+
+proc sig_build_workarea {} {
+	global	sig_workarea_width sig_workarea_height
+
+	set frame_border [option get .sig frameBorder FrameBorder]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set labels_width [option get .sig labelsWidth LabelsWidth]
+	set sb_width [option get .sig scrollWidth ScrollWidth]
+	set sb_border [option get .sig scrollBorder ScrollBorder]
+	set sb_highlight [option get .sig scrollHighlight ScrollHighlight]
+	set times_height [option get .sig timesHeight TimesHeight]
+	set labels_width [option get .sig labelsWidth LabelsWidth]
+
+	frame .sig.workarea -bd $frame_border
+	pack .sig.workarea -fill both -expand 1
+
+	frame .sig.workarea.top
+	pack .sig.workarea.top -side top -expand 1 -fill both
+	canvas .sig.workarea.canvas \
+		-yscrollcommand ".sig.workarea.vscroll set" \
+		-xscrollcommand ".sig.workarea.hscroll set" \
+		-bd $canvas_border -highlightthickness 0 \
+		-height $sig_workarea_height -width $sig_workarea_width
+	pack .sig.workarea.canvas -in .sig.workarea.top -side left \
+		-fill both -expand 1
+
+	scrollbar .sig.workarea.vscroll -orient vertical \
+		-command sig_scroll_vert -bd $sb_border -width $sb_width \
+		-highlightthickness $sb_highlight
+	pack .sig.workarea.vscroll -in .sig.workarea.top -side left -fill y
+
+	frame .sig.workarea.bottom
+	pack .sig.workarea.bottom -side bottom -fill x
+
+	scrollbar .sig.workarea.hscroll -orient horizontal \
+		-command sig_scroll_horiz -bd $sb_border -width $sb_width \
+		-highlightthickness $sb_highlight
+	pack .sig.workarea.hscroll -in .sig.workarea.bottom -side left \
+		-fill x -expand 1
+
+	frame .sig.workarea.pad -bd $frame_border \
+		-width [expr $sb_width + 2 * $sb_border + 2 * $sb_highlight] \
+		-height [expr $sb_width + 2 * $sb_border + 2 * $sb_highlight]
+
+	pack .sig.workarea.pad -in .sig.workarea.bottom -side left
+}
+
+proc sig_scroll_horiz args {
+	eval .sig.workarea.canvas xview $args
+	eval .sig.times.canvas xview $args
+}
+
+proc sig_scroll_vert args {
+	eval .sig.workarea.canvas yview $args
+	eval .sig.labels.canvas yview $args
+}
+
+proc sig_label_attrib {canvas state} {
+	set tags [$canvas gettags current]
+	if {[regexp {siglabel_([0-9]+)} $tags _ signum] == 0} {
+		puts "\aCannot identify signal number \"$tags\""
+		return
+	}
+	attrib_siglabel $canvas $state sig_$signum
+	global sig_to_drag
+	if {$state == "selected"} {
+		set sig_to_drag $signum
+	} else {
+		if {! [info exists sig_to_drag]} {
+			puts "\asig_to_drag does not exist?!"
+		} else {
+			unset sig_to_drag
+		}
+	}
+}
+
+proc sig_label_drag {canvas} {
+	global sig_old_cursor have
+	if {$have(custom_cursors)} {
+		set sig_old_cursor [$canvas cget -cursor]
+		$canvas configure -cursor [utils_get_cursor sig_drag]
+	}
+}
+
+proc sig_label_drop {canvas y} {
+	set vertpad [option get .sig vertPad VertPad]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+
+	set y [expr round([$canvas canvasy $y])]
+	set new_pos [expr ($y - $vertpad - $canvas_border - $sig_height / 2) / \
+		($vertpad + $sig_height)]
+
+	global sig_to_drag sig_number have
+
+	if {   $new_pos == $sig_to_drag || [expr $new_pos + 1] == $sig_to_drag
+	    || $new_pos >= $sig_number || $new_pos < -1} {
+		if {$have(custom_cursors)} {
+			global sig_old_cursor
+			$canvas configure -cursor $sig_old_cursor
+		}
+		return
+	}
+
+	attrib_siglabel $canvas normal sig_$sig_to_drag
+
+	global sig_values
+
+	sig_swap_signals $sig_to_drag -1 0
+	set delta [expr $vertpad + $sig_height]
+	set count 0
+	if {$new_pos > $sig_to_drag} {
+		for {set i $sig_to_drag} {$i < $new_pos} {incr i} {
+			sig_swap_signals [expr $i + 1] $i -$delta
+			incr count $delta
+		}
+	} else {
+		set lower [expr $new_pos + 1]
+		for {set i $sig_to_drag} {$i > $lower} {incr i -1} {
+			sig_swap_signals [expr $i - 1] $i $delta
+			incr count -$delta
+		}
+	}
+	sig_swap_signals -1 $i $count
+	unset sig_values(-1)
+
+	global have
+	if {$have(custom_cursors)} {
+		global sig_old_cursor
+		$canvas configure -cursor $sig_old_cursor
+	}
+	$canvas raise siglabel
+}
+
+proc sig_swap_signals {old new delta} {
+	global sig_values
+
+	.sig.workarea.canvas move sig_$old 0 $delta
+	.sig.labels.canvas move sig_$old 0 $delta
+	.sig.workarea.canvas addtag sig_$new withtag sig_$old
+	.sig.labels.canvas addtag sig_$new withtag sig_$old
+	.sig.workarea.canvas dtag sig_$old
+	.sig.labels.canvas dtag sig_$old
+
+	.sig.labels.canvas addtag signame_$new withtag signame_$old
+	.sig.labels.canvas addtag sigtype_$new withtag sigtype_$old
+	.sig.labels.canvas dtag signame_$old
+	.sig.labels.canvas dtag sigtype_$old
+	set sig_values($new) $sig_values($old)
+}
+
+proc sig_start_modify {canvas x y} {
+	if {! [utils_in_canvas $canvas $x $y]} {
+		puts "Please click inside the canvas."
+		return
+	}
+
+	global	sig_hit sig_high sig_low
+
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set vertpad [option get .sig vertPad VertPad]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+
+	set tags [$canvas gettags current]
+	if {[regexp {sig_box_([0-9]+)} $tags _ sig_hit] == 0} {
+		puts "Cannot identify signal (tags were \"$tags\")."
+		return
+	}
+
+	set type [.sig.labels.canvas itemcget sigtype_$sig_hit -text]
+	if {$type == ""} {
+		puts "\aSignal \"$sig_hit\" has no type information!?"
+		return
+	}
+	if {$type != "input"} {
+		puts "\a\"$type\" signals cannot be modified."
+		return
+	}
+	set sig_high [expr $sig_hit * ($sig_height + $vertpad) + \
+		$vertpad + $canvas_border]
+	set sig_low [expr $sig_high + $sig_height]
+
+	$canvas bind signal <B1-ButtonRelease> "sig_stop_modify %W"
+	$canvas bind signal <B1-Motion> "sig_modify %W $sig_hit %x %y"
+
+	sig_modify $canvas $sig_hit $x $y
+}
+
+proc sig_stop_modify canvas {
+	$canvas bind signal <B1-ButtonRelease> {}
+	$canvas bind signal <B1-Motion> {}
+}
+
+proc sig_modify {canvas num x y} {
+	if {! [utils_in_canvas $canvas $x $y]} {
+		return
+	}
+	global sig_left sig_right sig_high sig_low sig_values
+
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set num_values [option get .sig numValues NumValues]
+
+	set x [expr round([$canvas canvasx $x])]
+	set y [expr round([$canvas canvasy $y])]
+
+	set t [expr ($x - $canvas_border) / $sig_width]
+
+	set range [expr double($sig_height) / ($num_values - 1)]
+	set block [expr int((($y + $range / 2) - $sig_high) / $range)]
+
+	if {$block < 0} {
+		set block 0
+	} elseif {$block > [expr $num_values - 1]} {
+		set block [expr $num_values - 1]
+	}
+
+	set new_y [expr round($sig_high + $block * $range)]
+	set sigval [expr $num_values - $block - 1]
+
+	if {[lindex $sig_values($num) $t] != ""} {
+		set id [lindex [lindex $sig_values($num) $t] 1]
+	} else {
+		sig_extend $canvas $num $t $new_y $sigval
+		return
+	}
+
+	set sig_values($num) [lreplace $sig_values($num) $t $t "$sigval $id"]
+	set orig_y [lindex [utils_round [$canvas coords $id]] 1]
+	set yd [expr $new_y - $orig_y]
+
+	$canvas move $id 0 $yd
+	
+	set coords [utils_round [$canvas coords $id]]
+	if {[scan $coords "%d %d %d %d" xl yl xr yr] != 4} {
+		puts "\aCannot extract coordinates of signal?!"
+		return
+	}
+
+	if {[info exists sig_left($id)]} {
+		set coords [utils_round [$canvas coords $sig_left($id)]]
+		eval $canvas coords $sig_left($id) \
+			[lreplace $coords 2 3 $xl $yl]
+	}
+
+	if {[info exists sig_right($id)]} {
+		set coords [utils_round [$canvas coords $sig_right($id)]]
+		eval $canvas coords $sig_right($id) \
+			[lreplace $coords 0 1 $xr $yr]
+	}
+
+	update idletasks
+}
+
+proc sig_extend {canvas num time y sigval} {
+	global sig_left sig_right sig_high sig_low sig_values sig_time \
+		sig_number
+
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set sig_thick [option get .sig sigThick SigThick]
+
+	if {$time < 0 || $time >= $sig_time} {
+		return
+	}
+	if {[set last_time [llength $sig_values($num)]] != 0} {
+		set last_sig [lindex $sig_values($num) end]
+		set prev_id [lindex $last_sig 1]
+	}
+	set x [expr $canvas_border + $last_time * $sig_width]
+
+	for {set t $last_time} {$t <= $time} {incr t} {
+		set hid [$canvas create line $x $y [expr $x + $sig_width] $y \
+				-tags "sig_$num" \
+				-width $sig_thick -capstyle round]
+		if {$t > 0} {
+			set vid [$canvas create line $x $y $x $y \
+					-tags "sig_$num" \
+					-width $sig_thick -capstyle round]
+			set sig_left($hid) $vid
+		}
+		lappend sig_values($num) "$sigval $hid"
+
+		if {[info exists prev_id]} {
+			set sig_right($prev_id) $vid
+			set coords [utils_round [$canvas coords $prev_id]]
+			set right [lrange $coords 2 3]
+			eval $canvas coords $vid "$right $x $y"
+		}
+		incr x $sig_width
+		set prev_id $hid
+	}
+	$canvas raise sig_box_$num
+}
+
+proc sig_get_values name {
+	global	sig_number sig_time sig_values
+
+	if {[set sig [sig_get_number $name]] == -1} {
+		puts "Cannot get values for \"$name\": No signal number."
+		return ""
+	}
+
+	set sig_map [option get .sig values Values]
+
+	set time 0
+	set signals {}
+	set num_sigs [llength $sig_values($sig)]
+	foreach value $sig_values($sig) {
+		set sigval [lindex $value 0]
+		if {$sigval < [llength $sig_map]} {
+			set sigval [lindex $sig_map $sigval]
+		}
+		if { ! [info exists prev_sigval]
+		    || $prev_sigval != $sigval
+		    || $time == [expr $num_sigs - 1]} {
+			lappend signals "$time $sigval"
+			set prev_sigval $sigval
+		}
+		incr time
+	}
+
+	return $signals
+}
+
+proc sig_delete name {
+	global sig_number sig_values
+
+	set sig_height [option get .sig sigHeight SigHeight]
+	set vertpad [option get .sig vertPad VertPad]
+
+	if {[set sig_no [sig_get_number $name]] == -1} {
+		puts "Cannot delete: \aSignal \"$name\" has no signal number."
+		return
+	}
+
+	.sig.workarea.canvas delete sig_$sig_no
+	.sig.labels.canvas delete sig_$sig_no
+	set delta [expr - $vertpad - $sig_height]
+	for {set i [expr $sig_no + 1]} {$i < $sig_number} {incr i} {
+		sig_swap_signals $i [expr $i - 1] $delta
+	}
+
+	incr sig_number -1
+	unset sig_values($sig_number)
+
+	.sig.workarea.canvas delete sig_box_$sig_number
+	.sig.workarea.canvas delete sig_hi_$sig_number
+	.sig.workarea.canvas delete sig_lo_$sig_number
+	.sig.labels.canvas delete siglabel_$sig_number
+
+	sig_adjust_scrolly
+}
+
+proc sig_draw_signal {name args} {
+	global sig_left sig_right sig_values
+
+	set canvas .sig.workarea.canvas
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set sig_thick [option get .sig sigThick SigThick]
+	set vertpad [option get .sig vertPad VertPad]
+	set num_vals [option get .sig numValues NumValues]
+	set dflt_val [option get .sig dfltValue DfltValue]
+	set dflt_duration [option get .sig dfltDuration DfltDuration]
+
+	set range [expr double($sig_height) / ($num_vals - 1)]
+
+	if {[set sig_no [sig_get_number $name]] != -1} {
+		set sig_number $sig_no 
+		$canvas delete sig_$sig_number
+		$canvas delete sig_box_$sig_number
+		$canvas delete sig_hi_$sig_number
+		$canvas delete sig_lo_$sig_number
+	} else {
+		global sig_number 
+		set sig_create_new 1
+	}
+
+	set yhi [expr ($vertpad + $sig_height) * $sig_number + \
+			$vertpad + $canvas_border]
+	set x $canvas_border
+
+	foreach i [pack slaves .sig.buttons] {
+		$i configure -state normal
+	}
+	$canvas delete NoSignalsDefined
+
+	if {[llength $args] == 0} {
+		set duration $dflt_duration
+		set value $dflt_val
+		set ordval [sig_ord_value $value]
+	} else {
+		set siglist [lindex $args 0]
+		set firstsig [lindex $siglist 0]
+		set lastsig [lindex $siglist end]
+		set duration [expr [lindex $lastsig 0] + 1]
+		if {[lindex $firstsig 0] != 0} {
+			set ordval [sig_ord_value $dflt_val]
+			set index 0
+		} else {
+			set ordval [sig_ord_value [lindex $firstsig 1]]
+			set index 1
+		}
+		set time [lindex [lindex $siglist $index] 0]
+	}
+
+	set sig_values($sig_number) {}
+	set y [sig_get_y $ordval $num_vals $yhi $range]
+	for {set t 0} {$t < $duration} {incr t} {
+		if {[info exists index] && $time == $t} {
+			set value [lindex [lindex $siglist $index] 1]
+			set ordval [sig_ord_value $value]
+			incr index
+			set time [lindex [lindex $siglist $index] 0]
+			set y [sig_get_y $ordval $num_vals $yhi $range]
+		}
+		set hid [$canvas create line $x $y \
+			[expr $x + $sig_width] $y \
+			-tags "sig_$sig_number" \
+			-width $sig_thick -capstyle round]
+		lappend sig_values($sig_number) "$ordval $hid"
+		incr x $sig_width
+
+		if {[info exists prev_id]} {
+			set sig_left($hid) $sig_right($prev_id)
+			if {[info exists index]} {
+				set c [$canvas coords $sig_left($hid)]
+				set c [utils_round $c]
+				set coords [lreplace $c 3 3 $y]
+				eval $canvas coords $sig_left($hid) $coords
+			}
+		}
+		if {$t != [expr $duration - 1]} {
+			set vid [$canvas create line $x $y $x $y \
+					-tags "sig_$sig_number" \
+					-width $sig_thick -capstyle round]
+			set sig_right($hid) $vid
+		}
+		set prev_id $hid
+	}
+
+	sig_boundaries $canvas $yhi $sig_number
+
+	if {[info exists sig_create_new]} {
+		sig_draw_label $name
+		incr sig_number
+	}
+
+	sig_adjust_scrollx $duration
+	sig_adjust_scrolly
+}
+
+proc sig_ord_value {value} {
+	set sig_map [option get .sig values Values]
+	if {[set ordval [lsearch $sig_map $value]] == -1} {
+		return -1
+	}
+	return $ordval
+}
+
+proc sig_get_y {ordval num_values y_high range} {
+	set block [expr $num_values - $ordval - 1]
+	return [expr round($y_high + $block * $range)]
+}
+
+proc sig_draw_label name {
+	global	sig_number
+
+	set canvas .sig.labels.canvas
+	set labels_width [option get .sig labelsWidth LabelsWidth]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set vertpad [option get .sig vertPad VertPad]
+	set colour [option get $canvas labelNormal LabelNormal]
+	set font [option get $canvas font Font]
+ 	set y [expr $vertpad + ($vertpad + $sig_height) * \
+ 		$sig_number + $canvas_border]
+	set x0 $canvas_border
+	set x1 [expr $labels_width + $canvas_border - 1]
+
+	set nid [net_list_name_id $name]
+	if {[set type [net_list_type $nid]] == ""} {
+		puts "Netlist has no type!\a"
+	}
+
+	$canvas create text $x1 [expr $y + $sig_height] \
+		-text "0" -anchor e -fill $colour -font $font \
+		-tags "sig_$sig_number"
+	$canvas create text $x1 $y \
+		-text "1" -anchor e -fill $colour -font $font \
+		-tags "sig_$sig_number"
+	$canvas create text \
+		[expr $labels_width / 2 + $canvas_border] \
+		[expr $y + $sig_height / 3] \
+		-text $name -anchor c -fill $colour -font $font \
+		-tags "signame signame_$sig_number sig_$sig_number"
+	$canvas create text \
+		[expr $labels_width / 2 + $canvas_border] \
+		[expr $y + 2 * $sig_height / 3] \
+		-text $type -anchor c -fill $colour -font $font \
+		-tags "sigtype_$sig_number sig_$sig_number"
+
+	$canvas create rectangle \
+		$x0 [expr $y - $vertpad / 2] \
+		$x1 [expr $y + $sig_height + $vertpad / 2] \
+		-outline $colour -tags "siglabel siglabel_$sig_number"
+
+	$canvas create rectangle \
+		$x0 [expr $y - $vertpad / 2] \
+		$x1 [expr $y + $sig_height + $vertpad / 2] \
+		-fill {} -outline {} -tags "siglabel siglabel_$sig_number"
+}
+
+proc sig_boundaries {canvas y_high sig_no} {
+	global	sig_time
+
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+
+	set time_width [expr $sig_time * $sig_width + $canvas_border]
+	$canvas raise [$canvas create rectangle $canvas_border $y_high \
+		$time_width [expr $y_high + $sig_height] -fill {} -outline {} \
+		-tags "sig_box_$sig_no signal"]
+
+	$canvas lower [$canvas create line \
+			$canvas_border $y_high $time_width $y_high -fill red \
+			-tags "sig_hi_$sig_no" \
+			-stipple [utils_get_bitmap hdotted2.stp]]
+
+	$canvas lower [$canvas create line \
+			$canvas_border [expr $y_high + $sig_height] \
+			$time_width [expr $y_high + $sig_height] \
+			-fill blue -tags "sig_lo_$sig_no" \
+			-stipple [utils_get_bitmap hdotted2.stp]]
+}
+
+proc sig_get_number name {
+	set canvas .sig.labels.canvas
+	foreach id [$canvas find withtag signame] {
+		if {$name == [$canvas itemcget $id -text]} {
+			set tags [$canvas gettags $id]
+			if {! [regexp {signame_([0-9]+)} $tags _ num]} {
+				return -1
+			} else {
+				return $num
+			}
+		}
+	}
+	return -1
+}
+
+proc sig_rename {oldname newname} {
+	if {[set sig_no [sig_get_number $oldname]] == -1} {
+		puts "Cannot rename \"$oldname\": Signal has no number."
+		return 
+	}
+	.sig.labels.canvas itemconfigure signame_$sig_no -text $newname
+}
+
+proc sig_type {name {type ""}} {
+	if {[set sig_no [sig_get_number $name]] == -1} {
+		puts "\aSignal \"$name\" has no signal number."
+		return
+	}
+
+	set canvas .sig.labels.canvas
+	set curtype [$canvas itemcget sigtype_$sig_no -text]
+
+	if {$curtype == ""} {
+		puts "\aSignal \"$name\" has no type!?"
+		return
+	}
+	if {$type == ""} {
+		return $curtype
+	}
+	$canvas itemconfigure sigtype_$sig_no -text $type
+}
+
+
+proc sig_increase_duration {{delta 10}} {
+	global sig_time
+
+	if {$sig_time != 0} {
+		sig_adjust_scrollx [expr $sig_time + $delta]
+	}
+}
+
+proc sig_draw_times {duration} {
+	global	sig_time sig_number
+	set sig_canvas .sig.workarea.canvas
+	set time_canvas .sig.times.canvas
+
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set times_height [option get .sig timesHeight TimesHeight]
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set vertpad [option get .sig vertPad VertPad]
+	set colour [option get $time_canvas foreground Foreground]
+	set font [option get $time_canvas font Font]
+
+	set start [expr $sig_time * $sig_width + $canvas_border]
+	set end [expr $duration * $sig_width + $canvas_border]
+ 	set maxy [expr ($vertpad + $sig_height) * $sig_number \
+ 			+ $vertpad + $canvas_border]
+	for {set x $start} {$x < $end} {incr x $sig_width} {
+		if {$x == $canvas_border} {
+			continue
+		}
+		set num [expr ($x - $canvas_border) / $sig_width]
+		$time_canvas create text \
+			$x [expr $times_height / 2 + $canvas_border] \
+			-text [format "%d" $num] -font $font -fill $colour
+		$sig_canvas lower [$sig_canvas create line \
+			$x $canvas_border $x $maxy -fill grey75 -tags timeline]
+	}
+}
+
+proc sig_adjust_scrollx {new_time} {
+	global sig_number sig_time sig_xbase sig_min_time
+
+	set canvas .sig.workarea.canvas
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set sig_width [option get .sig sigWidth SigWidth]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set vertpad [option get .sig vertPad VertPad]
+
+	if {$new_time < $sig_min_time} {
+		set new_time $sig_min_time
+	}
+
+	if {$sig_time >= $new_time} {
+		return
+	}
+
+	set old [$canvas cget -scrollregion]
+	set new_x [expr $new_time * $sig_width + $canvas_border]
+	$canvas configure -scrollregion [lreplace $old 2 2 $new_x]
+
+	set old [.sig.times.canvas cget -scrollregion]
+	.sig.times.canvas configure -scrollregion [lreplace $old 2 2 $new_x]
+
+	sig_draw_times $new_time
+
+	set y [expr $vertpad + $sig_height + $canvas_border]
+	for {set i 0} {$i < $sig_number} {incr i} {
+		$canvas coords sig_box_$i \
+			$canvas_border [expr $y - $sig_height] $new_x $y
+		$canvas coords sig_hi_$i \
+			$canvas_border [expr $y - $sig_height] \
+			$new_x [expr $y - $sig_height]
+		$canvas coords sig_lo_$i \
+			$canvas_border $y $new_x $y
+		incr y [expr $vertpad + $sig_height]
+	}
+
+	scan [wm maxsize .sig] "%d %d" _ max_y
+	set max_x [expr $sig_xbase + $new_x]
+	wm maxsize .sig $max_x $max_y
+
+	set sig_time $new_time
+}
+
+
+proc sig_adjust_scrolly {} {
+	global	sig_number sig_ybase sig_min_label
+
+	set canvas .sig.workarea.canvas
+
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	set sig_height [option get .sig sigHeight SigHeight]
+	set vertpad [option get .sig vertPad VertPad]
+ 	set new_y [expr ($vertpad + $sig_height) * $sig_number + $vertpad + \
+ 			$canvas_border]
+
+	set old [$canvas cget -scrollregion]
+	$canvas configure -scrollregion [lreplace $old 3 3 $new_y]
+
+	set old [.sig.labels.canvas cget -scrollregion]
+	.sig.labels.canvas configure -scrollregion [lreplace $old 3 3 $new_y]
+
+	foreach i [$canvas find withtag timeline] {
+		set coords [utils_round [$canvas coords $i]]
+		eval $canvas coords $i [lreplace $coords 3 3 $new_y]
+	}
+
+	set min_labels [expr ($sig_min_label < $sig_number) ? \
+				$sig_min_label : $sig_number]
+	if {$min_labels <= 0} {
+		sig_delete_all
+		return
+	}
+	set min_win_y [expr $sig_ybase + ($vertpad + $sig_height) * \
+			$min_labels + $vertpad]
+	scan [wm minsize .sig] "%d %d" min_win_x _
+	wm minsize .sig $min_win_x $min_win_y
+
+	set workarea_height [expr $new_y - $canvas_border]
+	set max_win_y [expr $sig_ybase + $workarea_height]
+
+	scan [wm maxsize .sig] "%d %d" max_win_x _
+	wm maxsize .sig $max_win_x $max_win_y
+
+	set sig_win_height [winfo height .sig]
+
+	global sig_xbase
+	set width [expr [winfo width .sig] - $sig_xbase]
+	if {$sig_win_height > $max_win_y} {
+		$canvas configure -width $width -height $workarea_height
+		update idletasks
+		wm geometry .sig ""
+	}
+	if {$sig_win_height < $min_win_y} {
+		$canvas configure -width $width -height $workarea_height
+		update idletasks
+		wm geometry .sig ""
+	}
+}
+
+proc sig_delete_all {} {
+	global	sig_number sig_time \
+		sig_workarea_height sig_workarea_width \
+		sig_xbase sig_ybase
+
+	foreach i [pack slaves .sig.buttons] {
+		$i configure -state disabled
+	}
+	.sig.times.canvas delete all
+	.sig.workarea.canvas delete all
+	.sig.labels.canvas delete all
+
+	set font [option get .sig.workarea.canvas font Font]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+	.sig.workarea.canvas create text \
+		[expr $sig_workarea_width / 2 + $canvas_border] \
+		[expr $sig_workarea_height / 2 + $canvas_border] \
+		-font $font -justify center \
+		-text "No signals defined.\nPlease label wire points." \
+		-tags "NoSignalsDefined"
+	wm geometry .sig ""
+
+	set sig_win_width [expr $sig_workarea_width + $sig_xbase]
+	set sig_win_height [expr $sig_workarea_height + $sig_ybase]
+	wm minsize .sig $sig_win_width $sig_win_height
+	wm maxsize .sig $sig_win_width $sig_win_height
+
+	set times_height [option get .sig timesHeight TimesHeight]
+	set labels_width [option get .sig labelsWidth LabelsWidth]
+	set canvas_border [option get .sig canvasBorder CanvasBorder]
+
+	.sig.workarea.canvas configure \
+		-width $sig_workarea_width -height $sig_workarea_height \
+		-scrollregion "$canvas_border $canvas_border \
+			[expr $sig_workarea_width + $canvas_border] \
+			[expr $sig_workarea_height + $canvas_border]"
+	.sig.labels.canvas configure \
+		-scrollregion "$canvas_border $canvas_border \
+			$labels_width \
+			[expr $sig_workarea_height + $canvas_border]"
+	.sig.times.canvas configure \
+		-scrollregion "$canvas_border $canvas_border \
+			[expr $sig_workarea_width + $canvas_border] \
+			$times_height"
+
+	set sig_time 0
+	set sig_number 0
+
+	global sig_values
+	if {[info exists sig_values]} {
+		unset sig_values
+	}
+}
+
+proc simulate {{debug 0}} {
+	set canvas [workarea_get_canvas]
+
+	if {! $debug} {
+		if {! [sim_circuit_complete $canvas]} {
+			return
+		}
+
+		global env
+		regsub -all {\\} $env(DIGISIM) {\\\\} engine
+		if {! [file executable $engine]} {
+			puts "Cannot execute simulator engine \"$engine\"."
+			return
+		}
+		set fd [open "|$engine" "r+"]
+	} else {
+		set fd stdout
+	}
+
+	sim_extract_netlists $canvas $fd
+	sim_extract_components $canvas $fd
+
+	puts $fd "end"
+	flush $fd
+
+	if {! $debug} {
+		puts stdout " The data has been sent.  Now reading ..."
+		sim_process_outputs $fd 
+		close $fd
+		puts stdout "done."
+	}
+}
+
+proc sim_circuit_complete canvas {
+	if {[$canvas find withtag component] == ""} {
+		puts "\aNo components to simulate!?"
+		return 0
+	}
+
+	foreach prt [$canvas find withtag port] {
+		if {[net_port_point $prt] == ""} {
+			attrib_component $canvas selected $prt
+			utils_dialog .dialog "Error" \
+				"Component has unconnected port(s)" 0 "OK"
+			attrib_component $canvas normal $prt
+			return 0
+		}
+	}
+
+	return 1
+}
+
+proc sim_extract_netlists {canvas fd} {
+	global net_name net_ports
+
+	foreach i [$canvas find withtag netlist] {
+		set tags [$canvas gettags $i]
+		if {! [regexp {netlist_([0-9]+)} $tags nid num]} {
+			puts "\aCannot extract netlist number!?"
+			continue
+		}
+
+		if {[info exists visited($num)]} {
+			continue
+		}
+		set visited($num) 1
+		if {[set type [net_list_type $nid]] == "unknown"} {
+			continue
+		}
+
+		if {$type == "input"} {
+			puts $fd "input:"
+		} elseif {$type == "output" && [info exists net_name($nid)]} {
+			puts $fd "output:"
+		} else {
+			puts $fd "internal:"
+		}
+		puts $fd "\tid: $num"
+
+		if {$type == "input"} { 
+			if {[info exists net_name($nid)]} {
+				set values [sig_get_values $net_name($nid)]
+			} else {
+				set values ""
+			}
+			puts $fd "\tvalues: $values"
+		}
+	}
+}
+
+proc sim_extract_components {canvas fd} {
+	foreach i [$canvas find withtag component] {
+		set tags [$canvas gettags $i]
+		if {! [regexp {comp_([^_]+)_([0-9]+)} $tags cmp type seq]} {
+			puts "Component $id has no sequence number?"
+			continue
+		}
+		if {[info exists visited($cmp)]} {
+			continue
+		}
+		set visited($cmp) 1
+		puts $fd "component:"
+		puts $fd "\ttype: $type"
+		puts $fd "\tid: $seq"
+		puts $fd "\tports: [sim_extract_port_nets $canvas $cmp]"
+	}
+}
+
+proc sim_extract_port_nets {canvas cmp} {
+	global pnt_port
+	set port_list {}
+	foreach p [$canvas find withtag $cmp] {
+		if {! [regexp {(input|output|bidirect)_([0-9]+)} \
+				[$canvas gettags $p] _ type seqno]} {
+			continue
+		}
+		if {[set pnt [net_port_point $p]] == ""} {
+			set num -1
+		} else {
+			set tags [$canvas gettags $pnt]
+			if {! [regexp {netlist_([0-9]+)} $tags _ num]} {
+				puts "\aCannot extract netlist number!?"
+				continue
+			}
+		}
+		lappend port_list "$type $seqno $num"
+	}
+	set port_list [lsort -command sim_compare_ports $port_list]
+
+	set port_nets {}
+	foreach i $port_list {
+		lappend port_nets [lindex $i 2]
+	}
+	return $port_nets
+}
+
+
+proc sim_compare_ports {var1 var2} {
+	scan $var1 "%s %s" type1 seqno1
+	scan $var2 "%s %s" type2 seqno2
+	if {$type1 == $type2} {
+		return [expr $seqno1 > $seqno2]
+	}
+	set port_order {input output bidirect}
+	set idx1 [lsearch $port_order $type1]
+	set idx2 [lsearch $port_order $type2]
+	return [expr $idx1 > $idx2]
+}
+
+proc sim_process_outputs fd {
+	while {[info exists cached] || [gets $fd line] >= 0} {
+		if {[info exists cached]} {
+			set line $cached
+			unset cached
+		}
+		if {$line != "output:"} {
+			puts "Bad stanza header: \"$line\""
+			continue
+		}
+		if {[file_attrib $fd cached id values] != 0} {
+			puts "Cannot read output $id attributes"
+			continue
+		}
+		global net_name
+		set initsig [lindex $values 0]
+		set values [lrange $values 1 end]
+		set values [linsert $values 0 "0 [lindex $initsig 1]"]
+		sig_draw_signal $net_name(netlist_$id) $values
+	}
+}
+
+set tb_button_groups {Components Edit Wire}
+set tb_buttons(Components)	{
+					{cmpcreate_and cmpcreate_nand}
+					{cmpcreate_or cmpcreate_nor}
+					{cmpcreate_xor cmpcreate_xnor}
+					{cmpcreate_buffer cmpcreate_not}
+				}
+
+set tb_buttons(Edit)		{
+					{item_move item_delete}
+					{item_rotate item_modify}
+					{multi_glue multi_unglue}
+				}
+
+set tb_buttons(Wire)		{
+					{wire_create wire_solder}
+					{wire_label wire_list}
+				}
+
+proc toolbar_create {} {
+	global tb_button_groups tb_buttons tb_button_list
+
+	frame .toolbar -bd 0
+	set tb_button_list ""
+
+	foreach i $tb_button_groups {
+		set wname [string tolower $i] 
+		frame .toolbar.$wname -bd 3 -relief ridge
+		pack .toolbar.$wname -fill x
+
+		label .toolbar.$wname.label -text " $i " -relief raised
+		pack .toolbar.$wname.label -side top -fill x
+
+		set c 0
+		foreach bgroup $tb_buttons($i) {
+			frame .toolbar.$wname.subframe_$c
+			pack .toolbar.$wname.subframe_$c -fill x
+			foreach b $bgroup {
+				button .$b -bitmap [utils_get_bitmap $b.btn] \
+					-command "tb_select_button $b" \
+					-highlightthickness 0 -takefocus 0
+				pack .$b -in .toolbar.$wname.subframe_$c \
+					-side left -expand 1 -fill x
+			}
+			incr c
+			set tb_button_list "$tb_button_list $bgroup"
+		}
+	}
+	return .toolbar
+}
+
+proc toolbar_set_state {state {buttons ""}} {
+	if {$buttons == ""} {
+		global tb_button_list
+		set buttons $tb_button_list
+	}
+	foreach i $buttons {
+		.$i configure -state $state
+	}
+}
+
+proc tb_move {side} {
+	pack forget [workarea_get_frame] .toolbar
+	pack .toolbar -side $side -fill y
+	pack [workarea_get_frame] -fill both -expand 1
+}
+
+proc tb_select_button button {
+	global tb_current
+
+	if {[info exists tb_current]} {
+		tb_button_status off
+		if {$tb_current == $button} {
+			unset tb_current
+			return
+		}
+	}
+
+	set tb_current $button
+	tb_button_status on
+}
+
+proc tb_button_status status {
+	global tb_current
+
+	if {$status == "on"} {
+		.$tb_current configure -relief sunken
+		set fg [option get .$tb_current pressForeground PressForeground]
+		set bg [option get .$tb_current pressBackground PressBackground]
+		.$tb_current configure -activeforeground $fg
+		.$tb_current configure -activebackground $bg
+		.$tb_current configure -foreground $fg
+		.$tb_current configure -background $bg
+	} else {
+		.$tb_current configure -relief raised
+		.$tb_current configure -foreground \
+			[option get .$tb_current foreground Foreground]
+		.$tb_current configure -background \
+			[option get .$tb_current background Background]
+		.$tb_current configure -activeforeground \
+			[option get .$tb_current activeForeground Background]
+		.$tb_current configure -activebackground \
+			[option get .$tb_current activeBackground Foreground]
+	}
+
+	set canvas [workarea_get_canvas]
+
+	set op_items(item_move) {component wire point multi}
+	set op_items(item_delete) {component wire point multi label}
+	set op_items(item_rotate) {component}
+	set op_items(item_modify) {component multi label}
+	set op_items(wire_solder) {point wire port}
+	set op_items(multi_unglue) {multi}
+	set op_items(wire_list) {netlist}
+	set op_items(wire_label) {point}
+
+	switch -glob $tb_current {
+	    wire_create {
+	    	wire_create $canvas $status $tb_current
+	    }
+	    multi_glue {
+	    	multi_glue $canvas $status $tb_current
+	    }
+	    cmpcreate_* {
+		component_create $canvas $status $tb_current
+	    }
+	    default {
+		tb_set_mode $canvas $status $tb_current $op_items($tb_current)
+	    }
+	}
+}
+
+proc tb_set_mode {canvas status button items} {
+	global tb_focus tb_cursor env have
+
+	if {$status == "on"} {
+		set tb_focus [focus -lastfor .]
+		focus $canvas
+		if {   $have(custom_cursors)
+		    && [file readable $env(DIGILIB)/${button}.csr]} {
+			set tb_cursor [$canvas cget -cursor]
+			$canvas configure -cursor [utils_get_cursor $button]
+		}
+
+		bind $canvas <3> ".$button invoke"
+		bind $canvas <Escape> [bind $canvas <3>]
+	} else {
+		focus $tb_focus
+		if {   $have(custom_cursors)
+		    && [file readable $env(DIGILIB)/${button}.csr]} {
+			$canvas configure -cursor $tb_cursor
+		}
+
+		bind $canvas <3> {}
+		bind $canvas <Escape> {}
+	}
+
+	set cur_tags [$canvas gettags current]
+	foreach i $items {
+		if {$status == "off" && [lsearch $cur_tags $i] != -1} {
+			eval [$canvas bind $i <Leave>]
+		}
+		tb_set_bindings $i $canvas $status $button
+	}
+}
+
+proc tb_set_bindings {item canvas status button} {
+	if {$status == "on"} {
+		$canvas bind $item <Enter> \
+			"attrib_$item $canvas selected current"
+		$canvas bind $item <Leave> \
+			"attrib_$item $canvas normal current"
+		$canvas bind $item <B1-Leave> { }
+		if {$button == "item_rotate"} {
+			$canvas bind $item <1> \
+				"${item}_dispatch_${button} $canvas %x %y -90"
+			$canvas bind $item <2> \
+				"${item}_dispatch_${button} $canvas %x %y 90"
+		} else {
+			$canvas bind $item <1> \
+				"${item}_dispatch_${button} $canvas %x %y"
+		}
+	} else {
+		$canvas bind $item <Enter> {}
+		$canvas bind $item <Leave> {}
+		$canvas bind $item <B1-Leave> {}
+		if {$button == "item_rotate"} {
+			$canvas bind $item <1> {}
+			$canvas bind $item <2> {}
+		} else {
+			$canvas bind $item <1> {}
+		}
+	}
+
+	if {   $item == "multi" 
+	    && [regexp {item_delete|item_move|multi_unglue} $button]} {
+		multi_fill_rectangles $canvas $status
+	}
+}
+
+proc utils_lremove {list todelete} {
+	upvar $list l
+
+	foreach del $todelete {
+		set newlist {}
+		foreach i $l {
+			if {[lsearch $i $del] == -1} {
+				lappend newlist $i
+			}
+		}
+		set l $newlist
+	}
+}
+
+proc utils_lunique list {
+	upvar $list l
+
+	set newlist {}
+	foreach i $l {
+		if {[llength $i] < 2 && [lsearch $newlist $i] == -1} {
+			lappend newlist $i
+		}
+	}
+	set l $newlist
+}
+
+proc utils_in_box {x y box} {
+	if {  $x > [lindex $box 0] && $x < [lindex $box 2]
+	   && $y > [lindex $box 1] && $y < [lindex $box 3]} {
+   		return 1
+	}
+	return 0
+}
+
+proc utils_window_center w {
+	wm withdraw $w
+	update idletasks
+	set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2 \
+		- [winfo vrootx [winfo parent $w]]]
+	set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2 \
+		- [winfo vrooty [winfo parent $w]]]
+	wm geom $w +$x+$y
+	wm deiconify $w
+}
+
+proc utils_cache_bindings {canvas id item enter leave} {
+	upvar $enter e $leave l
+
+	attrib_$item $canvas selected $id
+
+	set e [$canvas bind $item <Enter>]
+	set l [$canvas bind $item <Leave>]
+	$canvas bind $item <Enter> {}
+	$canvas bind $item <Leave> {}
+}
+
+proc utils_restore_bindings {canvas id item enter leave} {
+	attrib_$item $canvas normal $id
+
+	$canvas bind $item <Enter> $enter
+	$canvas bind $item <Leave> $leave
+}
+
+proc utils_busy {win state} {
+	global file_cursors
+	set winlist $win
+	while {$winlist != {}} {
+		set w [lindex $winlist 0]
+		if {$state} {
+			set file_cursors($w) [$w cget -cursor]
+			$w configure -cursor watch
+		} else {
+			$w configure -cursor $file_cursors($w)
+		}
+		set winlist [lrange $winlist 1 end]
+		if {[set children [winfo children $w]] != ""} {
+			eval lappend winlist $children
+		}
+	}
+	if {!$state} {
+		unset file_cursors
+	}
+	update idletasks
+}
+
+proc utils_round nums {
+	set new_nums {}
+	foreach i $nums {
+		lappend new_nums [expr round($i)]
+	}
+	return $new_nums
+}
+
+proc utils_in_canvas {canvas x y} {
+	scan [$canvas cget -scrollregion] "%f %f %f %f" x1 y1 x2 y2
+	set x [expr [$canvas canvasx $x] - $x1]
+	set y [expr [$canvas canvasy $y] - $y1]
+
+	scan "[$canvas xview] [$canvas yview]" "%f %f %f %f" xs1 xs2 ys1 ys2
+	set xl [expr $xs1 * ($x2 - $x1)]; set xu [expr $xs2 * ($x2 - $x1)]
+	set yl [expr $ys1 * ($y2 - $y1)]; set yu [expr $ys2 * ($y2 - $y1)]
+
+	return [expr $x >= $xl && $x <= $xu && $y >= $yl && $y <= $yu]
+}
+
+proc utils_get_cursor {name} {
+	global env
+	set libdir $env(DIGILIB)
+	if {! [file readable ${libdir}/${name}.csr]} {
+		puts "Cannot find cursor source file for \"$name\""
+		return ""
+	}
+	if {! [file readable ${libdir}/${name}.msk]} {
+		puts "Cannot find cursor mask file for \"$name\""
+		return ""
+	} 
+	return "@${libdir}/${name}.csr ${libdir}/${name}.msk black white"
+}	
+
+proc utils_get_bitmap {name} {
+	global env
+	set libdir $env(DIGILIB)
+	if {! [file readable ${libdir}/$name]} {
+		puts "Cannot find bitmap source file for \"$name\""
+		return ""
+	}
+	return "@${libdir}/$name"
+}
+
+proc utils_env_ok {} {
+	global env
+	set envvars {
+		{DIGISIM file      "full pathname of the simulator engine"}
+		{DIGILIB directory "location of the bitmap files"}
+	}
+	set eg(DIGISIM,windows) "set DIGISIM=c:\\digitcl\\digisim\\digisim.exe"
+	set eg(DIGISIM,unix) "export DIGISIM=/usr/local/bin/digisim"
+	set eg(DIGILIB,windows) "set DIGILIB=c:\\digitcl\\bitmaps"
+	set eg(DIGILIB,unix) "export DIGILIB=/usr/local/lib/digitcl/bitmaps"
+	global tcl_platform
+	set platform $tcl_platform(platform)
+
+	wm withdraw .
+	foreach i $envvars {
+		set v [lindex $i 0]
+		set t [lindex $i 1]
+		set l [lindex $i 2]
+		if {! [info exists env($v)]} {
+			utils_dialog .error "Error" \
+			     "Please set the environment variable \
+			      $v to the $l\n(e.g. $eg($v,$platform))" 0 "End" 
+			return 0
+		}
+		if {   ($t == "directory" && ! [file isdirectory $env($v)])
+		    || ($t == "file"      && ! [file isfile $env($v)])
+		    || ! [file readable $env($v)]} {
+			utils_dialog .error "Error" \
+			     "Cannot access the $t given by \
+			      environment variable $v ($env($v))" 0 "End" 
+			return 0
+		}
+	}
+	wm deiconify .
+	return 1
+}
+
+proc utils_dialog {w title text default args} {
+	global utils_dlg_button
+
+
+	catch {destroy $w}
+	toplevel $w -class Dialog
+	wm title $w $title
+	wm iconname $w $title
+	wm protocol $w WM_DELETE_WINDOW { }
+	wm transient $w [winfo toplevel [winfo parent $w]]
+	frame $w.top -relief raised -bd 1
+	pack $w.top -side top -fill both
+	frame $w.bot -relief raised -bd 1
+	pack $w.bot -side bottom -fill both
+
+
+	label $w.msg -justify center -text $text
+	pack $w.msg -in $w.top -side right -expand 1 -fill both \
+		-padx 3m -pady 3m
+
+
+	set i 0
+	foreach but $args {
+		button $w.button$i -text $but \
+			-command "set utils_dlg_button $i"
+		if {$i == $default} {
+			frame $w.default -relief sunken -bd 1
+			raise $w.button$i $w.default
+			pack $w.default -in $w.bot -side left -expand 1 \
+				-padx 3m -pady 2m
+			pack $w.button$i -in $w.default -padx 2m -pady 2m
+			bind $w <Return> \
+				"$w.button$i flash; set utils_dlg_button $i"
+		} else {
+			pack $w.button$i -in $w.bot -side left -expand 1 \
+			-padx 3m -pady 2m
+		}
+		incr i
+	}
+
+
+	utils_window_center $w
+
+
+	set oldFocus [focus]
+	grab $w
+	if {$default >= 0} {
+		focus $w.button$default
+	} else {
+		focus $w
+	}
+
+
+	tkwait variable utils_dlg_button
+	catch {focus $oldFocus}
+	destroy $w
+	return $utils_dlg_button
+}
+
+set wa_snap 10
+
+proc workarea_create {weight} {
+	frame .workarea
+
+	pack [frame .workarea.top] -expand 1 -fill both
+	pack [frame .workarea.bottom] -fill x
+
+	canvas .workarea.canvas -width 640 -height 480 \
+		-xscrollcommand ".workarea.hscroll set" \
+		-yscrollcommand ".workarea.vscroll set" \
+		-highlightthickness 0
+	set bd [.workarea.canvas cget -bd]
+	.workarea.canvas configure -scrollregion \
+			"$bd $bd \
+			 [expr [winfo screenwidth .] + $bd] \
+			 [expr [winfo screenheight .] + $bd]"
+	pack .workarea.canvas -in .workarea.top -expand 1 -fill both -side left
+	scrollbar .workarea.vscroll -command ".workarea.canvas yview"
+	pack .workarea.vscroll -fill y -side left -in .workarea.top
+
+	scrollbar .workarea.hscroll \
+		-command ".workarea.canvas xview" -orient horizontal
+	pack .workarea.hscroll -side left -expand 1 -fill x \
+		-in .workarea.bottom
+
+	set hw [expr [.workarea.vscroll cget -width] + \
+		2 * [.workarea.vscroll cget -bd] + \
+		2 * [.workarea.vscroll cget -highlightthickness]]
+	frame .workarea.pad  \
+		-height $hw -width $hw -relief sunken \
+		-background [.workarea.vscroll cget -background] \
+		-borderwidth [.workarea.vscroll cget -borderwidth]
+
+	pack .workarea.pad -side left -in .workarea.bottom
+
+	. configure -background [.workarea.canvas cget -background]
+
+	workarea_display_grid_lines $weight
+
+	return .workarea
+}
+
+proc workarea_display_grid_lines {weight} {
+	global wa_snap
+
+	set region [utils_round [.workarea.canvas cget -scrollregion]]
+	if {[scan $region "%d %d %d %d" x1 y1 x2 y2] != 4} {
+		puts "\aCannot get scroll region of canvas?!"
+		return
+	}
+
+	for {set i $x1} {$i < $x2} {incr i $wa_snap} {
+		.workarea.canvas create line $i $y1 $i $y2 -tags {grid vgrid}
+	}
+	for {set i $y1} {$i < $y2} {incr i $wa_snap} {
+		.workarea.canvas create line $x1 $i $x2 $i -tags {grid hgrid}
+	}
+	workarea_config_grid_lines $weight
+}
+
+proc workarea_config_grid_lines {weight} {
+	if {$weight == "none"} {
+		set colour [.workarea.canvas cget -background]
+		.workarea.canvas itemconfigure grid -fill $colour
+		return
+	}
+
+	set colour [option get .workarea.canvas gridColour GridColour]
+	set map(light) 4
+	set map(medium) 3
+	set map(heavy) 2
+	.workarea.canvas itemconfigure vgrid -fill $colour \
+		-stipple [utils_get_bitmap vdotted$map($weight).stp]
+	.workarea.canvas itemconfigure hgrid -fill $colour \
+		-stipple [utils_get_bitmap hdotted$map($weight).stp]
+}
+
+
+proc workarea_convert {x_old y_old} {
+	global wa_snap
+	upvar $x_old x $y_old y
+
+	set offset [expr [.workarea.canvas cget -bd] % $wa_snap]
+
+	set x [expr $offset + \
+		round([.workarea.canvas canvasx [expr $x - $offset] $wa_snap])]
+	set y [expr $offset + \
+		round([.workarea.canvas canvasy [expr $y - $offset] $wa_snap])]
+
+	set region [utils_round [.workarea.canvas cget -scrollregion]]
+	if {[scan $region "%d %d %d %d" x1 y1 x2 y2] != 4} {
+		puts "\aCannot get canvas scroll region?!"
+		return 0
+	}
+	return [expr $x1 <= $x && $x <= $x2 && $y1 <= $y && $y <= $y2]
+}
+
+proc workarea_truncate {x_old y_old} {
+	upvar $x_old x $y_old y
+	global wa_snap
+	set x [expr int($x / $wa_snap) * $wa_snap]
+	set y [expr int($y / $wa_snap) * $wa_snap]
+}
+
+proc workarea_snap {x_old y_old} {
+	upvar $x_old x $y_old y
+	global wa_snap
+
+	incr x -[expr round([.workarea.canvas canvasx 0])]
+	incr y -[expr round([.workarea.canvas canvasy 0])]
+
+	return [workarea_convert x y]
+}
+
+proc workarea_get_canvas {} {
+	return .workarea.canvas
+}
+
+proc workarea_get_frame {} {
+	return .workarea
+}
+
+proc workarea_itemtags_at {x y} {
+	set itemtags {}
+	foreach i [.workarea.canvas find overlapping $x $y $x $y] {
+		eval lappend itemtags [.workarea.canvas gettags $i]
+	}
+
+	return $itemtags
+}
+
+startup_init [winfo name .]
+
+set have(custom_cursors) 1
+if {$tcl_platform(platform) == "windows"} {
+	set have(custom_cursors) 0
+}
+
+if {! [utils_env_ok]} {
+	exit
+}
+
+config_read
+
+set toolbar [toolbar_create]
+set workarea [workarea_create $configure(grid_weight)]
+set menubar [pullmenu_create {
+	{" &File " left
+		{command "&New|Ctrl+N" file_new}
+		{command "&Open...|Ctrl+O" file_open}
+		{command "&Save...|Ctrl+S" file_save}
+		{command "S&ave As...|Ctrl+A" file_save_as}
+		{command "&Configure...|Ctrl+C" config_user_interface}
+		{command "E&xit|Ctrl+X" file_exit}
+	}
+	{" &Help " right
+		{command "&About..." about_dialog}
+	}
+}]
+
+
+pack $menubar -side top -fill x
+pack $toolbar -side $configure(toolbar_side) -fill y
+pack $workarea -side $configure(toolbar_side) -fill both -expand 1
+
+wm geometry . [option get . geometry Geometry]
+wm title . "[winfo name .] - (Untitled)"
+
+update idletasks
+wm minsize . [winfo reqwidth .] [winfo reqheight .]
+
+sig_build_window
+
+focus $menubar

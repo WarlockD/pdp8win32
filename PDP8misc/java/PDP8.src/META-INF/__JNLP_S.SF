@@ -1,0 +1,552 @@
+Signature-Version: 1.0
+SHA-256-Digest-Manifest-Main-Attributes: ohMlYilskWRYzUgPcpDnTEx+eBB/N
+ hbeYWSNa1np+G8=
+SHA-256-Digest-Manifest: 0/3/6st87lDcSTJ7WO6fSXdjiEXCnSHvY25XKjP/nCI=
+Created-By: 1.7.0_45 (Oracle Corporation)
+
+Name: Panel/Panel8$6.class
+SHA-256-Digest: YN3ZkreH1XZ8kZGsEAPipd3MG8G9iNBW+Jt0PC9cnL8=
+
+Name: Panel/SwitchReg$3.class
+SHA-256-Digest: /+MOX7By+Y0Dzx2IlJSq8VQ4DkaXzglttrF3AKXS/0Y=
+
+Name: Panel/XLamp.class
+SHA-256-Digest: SG5iYzB15WRGVi5+kI2hp1lLKcyQ3yzXwv4YOgidqEs=
+
+Name: Devices/LE8$22.class
+SHA-256-Digest: qkbuU13r8ir83UT9qpQLfcIumcu0t+alAnoJ136fV7c=
+
+Name: Panel/SwitchReg$8.class
+SHA-256-Digest: CF4tt1Ykz/CD9db2pVwTCahsUhE6OAfE/ZJ/NImgsJI=
+
+Name: Devices/LE8$FilePrintHelper$Entry.class
+SHA-256-Digest: Hbp5BRDNrJmshUxNwMKSkUWwUmdWCx1PizOnaO4wMwY=
+
+Name: Devices/VT100.class
+SHA-256-Digest: SEdRxijGrx6F/FgQeSLNsWSOaBsjAYqbO8iHhv/WXBk=
+
+Name: Devices/LE8$15.class
+SHA-256-Digest: lZSMDnsDXo6oTViiaGdVLjq1LibWSYUUEFUbxzK7c2g=
+
+Name: Devices/LE8$24.class
+SHA-256-Digest: OoLwCX+ZLpAvGD6z1d5N5nxgsxn1yhFo79KwVxXUbg8=
+
+Name: Panel/AcLamps.class
+SHA-256-Digest: 74rwSAJ9d+tF/dEVetcoBrbRbowrB0WCFV10XbiScY0=
+
+Name: Devices/Lamp$1.class
+SHA-256-Digest: eiKvpISiJ1/rrl2T9921k+BD+i0kQNCSDBI+DE1aJOc=
+
+Name: Logic/TD8E$1.class
+SHA-256-Digest: 0Z/oM1PnAQ7H49WerXKwRx1E0i1neKKU6gxLQ1RMEN4=
+
+Name: Logic/DK8EP$1.class
+SHA-256-Digest: 7024ohlFiC/dJsVcg+s/+J2+hdX+tZFPw6tYXU0X+MY=
+
+Name: Logic/TTY.class
+SHA-256-Digest: qGDo5pbqwkkjmchO75GwaAZ+3fE6uFVDs0Xv6ccZ0Dw=
+
+Name: Devices/LE8$23.class
+SHA-256-Digest: SAkqqhQHmCdtlPibG0MCRy3AvQwQOAMwshosC4AckN8=
+
+Name: Devices/Terminal$SendFileInput.class
+SHA-256-Digest: 2e7y5OSpDFEBeND6isPaLIg5py9uWMzTaYzPxZ/d/Q4=
+
+Name: Logic/FPP.class
+SHA-256-Digest: SPD6lgFojFRRzjHfm/WWhcyRtjQo8Bvb9l0h6FCMxg0=
+
+Name: Logic/FPPOld$FAC.class
+SHA-256-Digest: uDqeAxtantr3SniYjw9bjXaF+gcrKJVj55zpjdWsy40=
+
+Name: Panel/AcLamps$1.class
+SHA-256-Digest: 06Y499mHNy5CtxLQGPu9S91mI6uBE8i0LrKADdnuYBs=
+
+Name: Devices/LE8Search.class
+SHA-256-Digest: hYXoFTSMqHOmwRvFjJYbN57zu8OJP+WQV8meb/I/WZo=
+
+Name: Logic/FPP$Mode.class
+SHA-256-Digest: rzkVhMcERB1B9z3HrGc5hxkg8pzub9UpDU5eZHF0GL0=
+
+Name: Devices/DiskUnit$Heads.class
+SHA-256-Digest: Y2EIZnZA26PP3z9mnmfJv842za3krytK5DQw/ZT8C+k=
+
+Name: Devices/LE8$11.class
+SHA-256-Digest: l9/WrPGe2El2871hp1ltatnzJUy0Ue0bZcM8ltSdleo=
+
+Name: Panel/MdLamps.class
+SHA-256-Digest: KBfBchJ4e5nUDD4ZoX8Kh5CTQDIf9MnHjuLVQH2SdMs=
+
+Name: Main8.class
+SHA-256-Digest: 9SPDyTf1yd24lgsV9ysnJu4IYQM6czRg6aEYbmsd82w=
+
+Name: Panel/JPanel.class
+SHA-256-Digest: +LWYfml7huIN5EAYn8YRgJ/DZbQ/OIXOzUxCD3hoGuU=
+
+Name: Logic/FPPOld.class
+SHA-256-Digest: r8bAHuALfoQuR6FLFzGX/pVJCSdNq8u19inmqX5w1HM=
+
+Name: Logic/PC8E.class
+SHA-256-Digest: O8EaWFvs/VmHmFMEmZNHdpS0h3MIplwjzpip7x6tg3g=
+
+Name: Devices/PtrPtp$5.class
+SHA-256-Digest: 7a/tAJSvlDIi5CEXtaiLA+LQ8AUrXvnZooWQelxPZeU=
+
+Name: Panel/SwitchReg.class
+SHA-256-Digest: wc6962PtEyH0Eu+YgmrKhCxkkLRCLf/q2UCN+blLEtU=
+
+Name: Panel/SwitchReg$6.class
+SHA-256-Digest: UiACP60pyKIg2oWmcNca79hFdjhQ8t7APfzRZMfZ/XY=
+
+Name: Devices/PTape.class
+SHA-256-Digest: a+E2BnS+ZbSdgm0aKBPSy2Ah9jMFHKtR//+P8iAWg7c=
+
+Name: Devices/LE8$12.class
+SHA-256-Digest: 2VlX47xJmw/E0g+U1zcSxVUUU0RK8K+24GVfvyF/iLw=
+
+Name: Devices/LE8Search$1.class
+SHA-256-Digest: Zy1FpeBUBQbEtKP6qYYhR0W0o5s5qTNJxY3AARJjY6E=
+
+Name: Devices/LE8$13.class
+SHA-256-Digest: UNcUIyk0cLWhXGsKinzAQLWudhyzyOg9lzGxqEsc9GE=
+
+Name: Panel/SwitchReg$1.class
+SHA-256-Digest: SJe+FN6W+w4Q5GVPhWhwdMLobL84TEUagKCDNHxTzks=
+
+Name: Logic/FPP$FAC.class
+SHA-256-Digest: WHn1M/M+PXCkIMEz/WS/JhUrczE3W1suw2+ME6jlu7w=
+
+Name: Logic/EAE.class
+SHA-256-Digest: UPeuBiNvVxlKZoYTy5bfF0n4Qao63ysjOP5u9v5fwqI=
+
+Name: Devices/LE8$TextPrinter.class
+SHA-256-Digest: 3+XMLB/c4v1Baknr5unyO+oJi6XBaOo17uQFQfiufSI=
+
+Name: Panel/Panel8$2.class
+SHA-256-Digest: hQsTp57kh7xN5Iu16OnLsU8Gj94fRgkchTFEUQ9/DSE=
+
+Name: Devices/LE8$RedoAction.class
+SHA-256-Digest: Xtb/DDV6d/oh+rwGhWIJuDgvIIAVtqCTlMiZbuRulPI=
+
+Name: Devices/Dectape$ImageFileFilter.class
+SHA-256-Digest: PZ/7RgeQsM83c9xat+20qqNEMvwo05kqxFc6Sd+P5l8=
+
+Name: Panel/Panel8$1.class
+SHA-256-Digest: eZAfXo0nAdYtJ+1eQP9qJ0TkGpb6COxzrGwxfiaow4g=
+
+Name: Logic/PC8E$1.class
+SHA-256-Digest: zgqeAuyox8CrwaPsU4kAziQY8H96tYQqbDdiXvROWuk=
+
+Name: Panel/SwitchReg$4.class
+SHA-256-Digest: Kjw/NT7Nyus2O8aZ86T2W2DC4zx5msHJdQL9/ZL+AdU=
+
+Name: Logic/PanelLogic_backup.class
+SHA-256-Digest: r/BlWkNBdqY/a0pYFVd4msx5dX0hs5GQiH+hrmR5YNU=
+
+Name: Devices/Disk4043$1.class
+SHA-256-Digest: 5yugid6pqQyploL1jtQNCscHtGYAio56OChlWstCRw4=
+
+Name: Panel/Panel8$11.class
+SHA-256-Digest: YeU+JoCKjcQWZH8facyPa03YlOdoKQr+NuGIpRYUDrY=
+
+Name: Devices/LE8$7.class
+SHA-256-Digest: KXxtDosS5Dcfdrw01S5mviEACKhkJIbw+8RVN0h0pPs=
+
+Name: Devices/Disk4043$ImageFileFilter.class
+SHA-256-Digest: A/0JM8fB8bb36sfi/m3IRETJBwTm3zoVwCcLsdhWyAY=
+
+Name: Devices/Terminal.class
+SHA-256-Digest: wMB/DL2MxWBKv68pyueDMADu6it2pDI3g4D3J86GZkA=
+
+Name: Panel/Switch$2.class
+SHA-256-Digest: jJNHTeFnslsVavHMS3HPvLMAwmCiSMGScLgBh42avME=
+
+Name: Panel/.nbattrs
+SHA-256-Digest: 7X+0vZtUMlavjiTznINwTcSs8FXB3GdmbfY4MM9ih8w=
+
+Name: Logic/SI3040$2.class
+SHA-256-Digest: KVw9iO4RnkSX0XY/HfoD6OSqXqm1HEsCf2MLXG9NfF0=
+
+Name: Panel/SwitchReg$5.class
+SHA-256-Digest: t7PS9cn3PnE0GZyqW4OCHeiFWgt0CADikhsiQTKfkWQ=
+
+Name: Panel/SwitchReg$10.class
+SHA-256-Digest: CnQ2Wyt5I+oSfMqx35fO/m7RO1hianMQ5Z9q8RS87dk=
+
+Name: Devices/DTSwitch$1.class
+SHA-256-Digest: UaJ4biZu48ucSgtrg2hUl6lzFRnEPJ11ILNLxOe+6sw=
+
+Name: Logic/Example$1.class
+SHA-256-Digest: TfdNFQFBjcF2MH/ti5PVw8rqKFTjyT2JfMNSTc6O+R4=
+
+Name: Panel/Panel8.class
+SHA-256-Digest: +zgSty1/i0n5WONro+MJXNNLsuggIzD+UUmc+7BYLtA=
+
+Name: Devices/Emulator.class
+SHA-256-Digest: zY1fF/0XXqdyIP+BPQxzVwWew950RseCj5r2RhxuuBk=
+
+Name: Panel/MqLamps.class
+SHA-256-Digest: RQcpVaZYL2rpqgTWp5O6/gkOZzLDUnWQ/+yt7q5tT78=
+
+Name: Panel/Lamp.class
+SHA-256-Digest: r4HfhNiI6b763f3cY8E/6SHGsKKR1oQKRCwCwvllQgI=
+
+Name: Panel/Lamp$1.class
+SHA-256-Digest: Sp3CyxjRh65VoRE3XfbFYagkhbwtzTVKqODd2d+2Ljo=
+
+Name: Devices/LE8$2.class
+SHA-256-Digest: W9l4tYtZiJs9MTXu+CEyeyMISQH0U6Lhf6Irc5bVsD4=
+
+Name: Panel/Panel8$3.class
+SHA-256-Digest: dw841JI6IGEd6R4kPubUWgtOp+s6S3HOe3ikppEREME=
+
+Name: Devices/LE8Search$MyHighlightPainter.class
+SHA-256-Digest: E5soBc5LKDefrFOUpEIjPP8eKVC+3x2QNPMeniIxmTQ=
+
+Name: Panel/SwitchReg$9.class
+SHA-256-Digest: kVnuWLxSmjNXrSmPtnou2kKS5b6nOCAdd/q7znY7cJY=
+
+Name: Panel/Knob$1.class
+SHA-256-Digest: 2acnsisji87JwFpzkFHQldWtjRlOXRgyJJ/dVwGvXkY=
+
+Name: Devices/Dectape$7.class
+SHA-256-Digest: RfOUyXQc1XncAzGncXjzMbKqGJqkdlI8KSfnMP9xW9Y=
+
+Name: Logic/FPPOld$APT.class
+SHA-256-Digest: p0QfrfGto0yMj6oa8SCk//+yTTWVUPEOFqeXGy2isx8=
+
+Name: Panel/Panel8$13.class
+SHA-256-Digest: LJcLD1tJNWz1gWVENTPK423qO2s1nt8+RNxMDkL/Y1Y=
+
+Name: Logic/VirListener.class
+SHA-256-Digest: Mwa9+DLmUIHDZRgbuJA81D4cLfIC8g5E9JXYyLceJi8=
+
+Name: Logic/PC8E$2.class
+SHA-256-Digest: 5HqAZ+CS378/i77uB0RmQmWaf1LPgJih8n5/FodhTz4=
+
+Name: Panel/Switch$1.class
+SHA-256-Digest: 36TPKy6w3kSaLJ//1nFTetSUjticzJOvbHggK9QAQ/w=
+
+Name: Logic/PanelLogic_backup$1.class
+SHA-256-Digest: 8IOV7v+XcVQsMs4B9V+A3g1fvE/OPcxG6vep2MEYcxk=
+
+Name: Devices/Disk4043.class
+SHA-256-Digest: 596akElZ6PZM1DDMBOyhr07SHlJ8/XgxY9EJTZdinFs=
+
+Name: Logic/FPPOld$FPProc.class
+SHA-256-Digest: 9DYSObvhOMgldRcYzcdZi3BojsBfIj66W1JkH0aNqTM=
+
+Name: Devices/DiskUnit.class
+SHA-256-Digest: OAhqfcV6Tj2kXPeE/NiuN0FsIwkQiojvgqczys6n1VI=
+
+Name: Logic/SI3040$3.class
+SHA-256-Digest: UQg9JqFclAhL0s+LJSle+a6pFsYSvgwPFuCW8nYsYcE=
+
+Name: Devices/Terminal$SendOutput.class
+SHA-256-Digest: rKjdZlQC41o7dAUNRYUiREy5pYhxSCX15bU83d9I1KU=
+
+Name: Logic/VirTimer.class
+SHA-256-Digest: kkR04ehCBCZcQC+voV5RRfDSIVyuamWa/SE0pCOfnwU=
+
+Name: Panel/Panel8$9.class
+SHA-256-Digest: K2TSlQrGhhrAnNPclW+P3rpwGSA+YOTkikRogEqVSzk=
+
+Name: Logic/LPT.class
+SHA-256-Digest: kDqsjm68geED4RIxpQRoiE4blOuohvlO7+DG8CVYPQE=
+
+Name: Panel/SwitchReg$11.class
+SHA-256-Digest: zknyvsKr083qmJAi7PIcu+d/8Nx0fqp2g91w6Tm2EU0=
+
+Name: Devices/PtrPtp.class
+SHA-256-Digest: MundtYDvOaLgv4p1Azce9fDRXW9Q/yVjkXXsiXyBffM=
+
+Name: Logic/SI3040$1.class
+SHA-256-Digest: wDvQTpjfFbNAdqFpMP6KBE5M6vowTL401lLwq8jstQw=
+
+Name: Logic/FPP$APT.class
+SHA-256-Digest: bV8eQUcagaZ9lElXQYS/GyVamBpol6rhm9gJARQ1M+c=
+
+Name: Logic/TTY$1.class
+SHA-256-Digest: GuSFcXHlttreTd8NaZZRP8m/G/Vf2vr84ylpMgag4+4=
+
+Name: Devices/DTSwitch.class
+SHA-256-Digest: 2AjWcmcJ+/ZuBaOBXYZCHYo0VbyFR51FryqASoVbD/k=
+
+Name: Devices/LE8$10.class
+SHA-256-Digest: hfAKwTPRGoYMdn8eKVCzsYZ7i9OP/hYj7qjBaC8ATAg=
+
+Name: Logic/LPT$2.class
+SHA-256-Digest: bQlMiCGsw/r6HziUOsKGwPAJLbo260rRACoDYucuHGQ=
+
+Name: Logic/FPP$FPProc.class
+SHA-256-Digest: iJO63xBrBHvQHqdey0+XNrd3R+QhTJ4/zrO7QCeXL+M=
+
+Name: Logic/Constants.class
+SHA-256-Digest: t/0SwWcpAU0fnNaVp+WWKt7sidvO8DFrrNkhGbLeQ+E=
+
+Name: Devices/DTReel$Turn.class
+SHA-256-Digest: vl5RDxuoYYJrI689fb8TbDw701rX8ffXQG0qA2xYWmM=
+
+Name: Devices/DTSwitch$2.class
+SHA-256-Digest: hEIhsyGESZizNHoh1Q9eHnxLiPdJFhGI9YyZTMrCJBQ=
+
+Name: Devices/Dectape$1.class
+SHA-256-Digest: 8e6cpbAgl8LBMcD+zaH6FszqYXiQA43rngxmkQ83vbc=
+
+Name: Devices/DTReel.class
+SHA-256-Digest: pUACsxPB24vA+bbd6/22C0yVhIeam63UEk6sRYt77ok=
+
+Name: Devices/PtrPtp$2.class
+SHA-256-Digest: HziPDirdGS3BBybcGUBTNNt4zRrS+ukGiNdAPS64ebc=
+
+Name: Panel/BusLamps.class
+SHA-256-Digest: Lr06uDjB8ojZn+lBzhHTleB4BEk/Pi/P6by4rhyO8zE=
+
+Name: Logic/PowerBoot.class
+SHA-256-Digest: fkiVIHcfA5BRc1ihS/b8fSVntkn2z9/rMfbjcfBwIWY=
+
+Name: Devices/LE8$8.class
+SHA-256-Digest: /wQkTxVl4Ddpb4jlUyjvGvkSlBllHtJeP48o9yQFd+o=
+
+Name: Devices/LE8$3.class
+SHA-256-Digest: CUw6ry0cANfrlXyENaDcbkoy62+ZSQdzOaRBre5MyWw=
+
+Name: Devices/VT100Lamps.class
+SHA-256-Digest: 4mIoaRoPIHvIe+wbk5kGAO5lL5Reqz2sb0g4GMjnT7I=
+
+Name: Devices/LE8$16.class
+SHA-256-Digest: ZXGQp69sqsN2h/P5D1k8HF49cOblKCbrOespcIbRNrw=
+
+Name: Devices/Dectape$6.class
+SHA-256-Digest: +/tdWiryFwaEJ4oM9QC79F+NGvR6Al3VvNZtl/yoPZQ=
+
+Name: Devices/Terminal$ImageFileFilter.class
+SHA-256-Digest: 3yYoOObQH5m2xgRWkmOnNZ2SjDMQNIaJZyy/yhpIh80=
+
+Name: Panel/SwitchReg$7.class
+SHA-256-Digest: YBMCaqKKU6Gcs4G4AH1ivsRxUtVgxroJZQwsZtHnzq0=
+
+Name: Panel/Panel8$5.class
+SHA-256-Digest: u2Ra5A5R3afhogMkyQJeE6cJSAjV+j2+aaFjD/Fp0VA=
+
+Name: Logic/LPT$1.class
+SHA-256-Digest: GpsPeEX5B4RIqwaPlTAQDIMH8BlGtNjhUoL/8atjH5s=
+
+Name: Panel/StateLamps$1.class
+SHA-256-Digest: V3j1zadMd4VSIHAGuoeum4bsqeeXtSTcyMHtKbFg7IQ=
+
+Name: Logic/Example.class
+SHA-256-Digest: KAtWflcTFPlQbZwIyzyMsVH0NQBMEXeG+ClGOXPz42A=
+
+Name: Devices/.nbattrs
+SHA-256-Digest: dY6grKXVw+KcNlf4P5KRH3jXSUufDG/6wRf5O5GPAn8=
+
+Name: Devices/LE8$19.class
+SHA-256-Digest: o3lkM8vNfb5Y7asHBZl64EiIhAjQVz9Cl7xR6NpRPy0=
+
+Name: Panel/Panel8$7.class
+SHA-256-Digest: qJE6mQLB1mHQqgFE0lHPM/oDdyAbVWdmHVQnPHJSmF0=
+
+Name: Panel/XLamp$1.class
+SHA-256-Digest: gXK96G3tsZQYjuwnK/Boy529lqnv5Qy8+t6FSQ8IKl4=
+
+Name: Devices/PtrPtp$4.class
+SHA-256-Digest: G7nzQ6A9DojUyG1LQDKirH+kl19NQ72WyzSctcZhPds=
+
+Name: Devices/LE8$5.class
+SHA-256-Digest: mFMP6uofIR9YnJeFz4hqydekrKnjrTOz3yxGXImfAvo=
+
+Name: Logic/FPPOld$Mode.class
+SHA-256-Digest: kx2EcQxPDTlLeF2U6d/PcDhziY/ut+6wV4UET4frXxI=
+
+Name: Devices/Terminal$ReceiveInput.class
+SHA-256-Digest: 210tHBD3R5YrmsYT6luY32JiZZgyS6n2Zx0Q58UpEig=
+
+Name: Logic/Proc.class
+SHA-256-Digest: 6fGS3aCN5Ufb7HdlBEzY0yA9x8P2ElK1wOeSHfm491E=
+
+Name: Devices/LE8$6.class
+SHA-256-Digest: BwO/2rMxHHuz41e/gO3RMIxecif71fMBAiz2VhLRgeg=
+
+Name: Devices/LE8$4.class
+SHA-256-Digest: dF4uC5BJ8U3LveLF0AzuONWvQC6NmGOAZjuutMLMDyw=
+
+Name: Devices/Term.class
+SHA-256-Digest: DcXUBniDqRp/9oasGCihUwYxIVthRBZyF+aU6Kj8bJ4=
+
+Name: Main8$1.class
+SHA-256-Digest: v+nptDXYZX2VrBI+Va+H4159HeYOy1caRgKZQad9ASI=
+
+Name: Panel/StateLamps.class
+SHA-256-Digest: z6fHs2ZtIrowZWS9+bfclHQLc3ta9jUflBcy5XosmJ0=
+
+Name: Devices/Dectape$3.class
+SHA-256-Digest: zE4zW/ezrxDqCadHLWb1PEHhf3GO3l33RpRClu9pFgs=
+
+Name: Panel/Panel8$10.class
+SHA-256-Digest: gYwh/WkR5VpZBMjMHFB4q6w/p+G6Kfcn4vn3AdN55rg=
+
+Name: Panel/SwitchReg$12.class
+SHA-256-Digest: 5acanoxSB5qFnOK+9GecATs4GdVe3lo5fJQkxnMHBYY=
+
+Name: Devices/LE8$1.class
+SHA-256-Digest: BDIk/R/U+O63y5GcRPWANnQkhJj4v6cj5h4dVZw3RvA=
+
+Name: Devices/LE8$RandomText.class
+SHA-256-Digest: 58Cmj0DGiNFBs+F3ox0tcWwadFGRtqJ4mTDgbua7pd8=
+
+Name: Devices/LE8$18.class
+SHA-256-Digest: 3nBDMszg6iJDQoC6cJvjyXlv6+X/xqWTMcmS8aHTrGA=
+
+Name: META-INF/INDEX.LIST
+SHA-256-Digest: UYoGb4dGT03ruYGHkQaY3Yta9iIRPAchtNDkyo6XKOg=
+
+Name: Devices/LE8$9.class
+SHA-256-Digest: OHDSlkuQBvpoY0Tm4rN/Rwj1d0Uy1gIHJYZGSWCrvkU=
+
+Name: Devices/PTape$Turn.class
+SHA-256-Digest: AuFVy1xtqRoR5DWLrW+jx/fcqDRPN2f0U6n86m7Zh4Q=
+
+Name: Devices/Lamp.class
+SHA-256-Digest: EIz/5bf0p1ukBkh+j79S/gBHSDyETglKYcEnr9ZOZgY=
+
+Name: Logic/TTY$WriteOutput.class
+SHA-256-Digest: LYU7TyGPvaWNoqyz3rlc2whYJ9mNsmO18Qcicrt4254=
+
+Name: Logic/TTY$ReadInput.class
+SHA-256-Digest: vmNwYDs8aIEx/zjQam5gMyHK1tv9W4KHVaVjkwepgvg=
+
+Name: Panel/StatusLamps.class
+SHA-256-Digest: /0t8jGSenGfW9yOQVG4SCLs6BV5SVyq69CB6AWIJ97I=
+
+Name: Panel/Panel8$4.class
+SHA-256-Digest: 83hr31Ib30RTb97HGP9Zf4mdIfl4ap48PEUks6+1bq8=
+
+Name: Devices/Terminal$ReceiveFileOutput.class
+SHA-256-Digest: If0dUT2wpCLR+sy5ZUompEjyBDB9Wr6KEPbfM293Je0=
+
+Name: Devices/Terminal$1.class
+SHA-256-Digest: WkbrInwPSkyg+Jq6wsj3YQNMc/QGHhH3SdklNCsfdTc=
+
+Name: Logic/VirQueue.class
+SHA-256-Digest: rx2ak2P4DccWwO9BnvC+r7TMjpP5hNuf4zpyzKCVz18=
+
+Name: Devices/Dectape$4.class
+SHA-256-Digest: 8vV2JF5tZhOtkgpbBzqTvlZeQY21kqj6eFrnoECRu9g=
+
+Name: Panel/Panel8$8.class
+SHA-256-Digest: ieKoR80g0/aEeMEcs/9sxYnYnkqIDN2tG9p9XcK39X8=
+
+Name: Devices/LE8$UndoHandler.class
+SHA-256-Digest: vGqiJmpKGIaa04JZeX5LSV/bOcx5Aqh5+23B+CT2bPc=
+
+Name: Logic/DK8EP.class
+SHA-256-Digest: Rmh/rO95DLNaJG1ZHOZFO+uhZg6NSvnbx5HiSEfu67k=
+
+Name: Logic/PowerBoot$1.class
+SHA-256-Digest: llb3Kd886srmdpqtBBZTJYLXjvfLwTxHwafO1i5lGOg=
+
+Name: Devices/PtrPtp$ImageFileFilter.class
+SHA-256-Digest: rlyohIO/pbFyBHAQQ4PjMqJtqLfl4oK8qRMd0i0PFlA=
+
+Name: Devices/LE8$FilePrintHelper.class
+SHA-256-Digest: T8mhvSGVUqZy9sdlHOv9aQ5MJMet3VrGFhi5fR7kM68=
+
+Name: Devices/LE8$UndoAction.class
+SHA-256-Digest: d9iq3m1eFXsfa8+TJ8bwqeJrSg9punmTdwhmrJyDXl0=
+
+Name: Panel/Switch.class
+SHA-256-Digest: DzVERB/qxHNshgcQdM7JfmY8HwDpVL/EbOPMT4J7hoM=
+
+Name: Logic/FPP$1.class
+SHA-256-Digest: ROe15bKzNqjMTOVopaJqHmNa6wOUUTIGQQcwuVnEFFI=
+
+Name: Devices/LE8$14.class
+SHA-256-Digest: cj6wLGAk3lTFTEiTrjhNcPtOwmSlODmndvmiXNsxckw=
+
+Name: Devices/Dectape.class
+SHA-256-Digest: zcQIqV/2UWyDpPi+YsHkOWdghQz2cF+iHiIuQBcu0do=
+
+Name: Logic/ProcMemIOTs.class
+SHA-256-Digest: TQkLF2P90xsTTgomFIKhB5ZbNYSWWrhjI0JmatrNuPc=
+
+Name: Devices/PtrPtp$3.class
+SHA-256-Digest: Kxo9hd56n5Ij1oW6diqJABHOZisUVtsvKleCkJ8CHWg=
+
+Name: Logic/PanelLogic_backup$BootType.class
+SHA-256-Digest: a1DGqJfehPIfgy2U6ruIEzlud/aPamVv4PPw8C/uImA=
+
+Name: Panel/MaLamps.class
+SHA-256-Digest: OLbzj07jQKKtaP6tfhRM+3Yi+nI/SmF9cGO2gzRt6e8=
+
+Name: Logic/BusRegMem.class
+SHA-256-Digest: 9OfYYMZ0B60fOkq5D2q8ydRs6Es3AthAiVKrhUwBCe0=
+
+Name: Devices/Dectape$2.class
+SHA-256-Digest: OyXOXJgIIFhw7D+SLzkShk9MwrpZFiDjsZPucqzhLcw=
+
+Name: Panel/Panel8$12.class
+SHA-256-Digest: QTphYtXoqCGesfEl0wAZGWK/TQw+I5ErMBDk2TPssh4=
+
+Name: Logic/SI3040.class
+SHA-256-Digest: PglWG2GYrwq6VBlRfIr0Zkmg5+gYFAvU6ZE96DRmMDA=
+
+Name: Panel/DataLamps.class
+SHA-256-Digest: Bk0oovmBiTzyTB9mIT8XoOWqp6mnwyge/HVygsZMIS4=
+
+Name: Panel/StatusLamps$1.class
+SHA-256-Digest: wi9ksP8YJ34gZXf13MC83oAM8r+b6vg5adVDgJCW4mE=
+
+Name: Logic/PC8E$3.class
+SHA-256-Digest: 6tkAsJaQkd82y0oDgcVCSwJ28rGq5rg4Y0u2cxFFLOY=
+
+Name: Devices/LE8$21.class
+SHA-256-Digest: TJmNn3l6EJfKX9PI7gZG1UcPOnyIihi9/6jPnUJ0u6k=
+
+Name: Logic/FPP$Stat.class
+SHA-256-Digest: TohJXO2QQ/qJwVEyyvxskmn+efNxiswb3/Di/B+lsTY=
+
+Name: Devices/Dectape$5.class
+SHA-256-Digest: h2U68Z1KO1E9KFcawbs/Bv5upq1lL0P0K8hf/S3lHYA=
+
+Name: Logic/PanelLogic.class
+SHA-256-Digest: S7b+NlcIhlKhIQNncxqctPj1MNIcC9/63DdJb3Ja/5s=
+
+Name: Devices/LE8$17.class
+SHA-256-Digest: xXKjtvLRm9dcWcCiK6RX4Ti2Z4bNirpo+sgSACAScwE=
+
+Name: Logic/.nbattrs
+SHA-256-Digest: bjf1Plwo2EAJ5gX1qDLGnOyvLr8xPkOEbtQFcZxMd6I=
+
+Name: Devices/LE8$20.class
+SHA-256-Digest: OcGNFpxE3TKnVCInD4mrZ21pwY1bZ17OjsJwU4/G61E=
+
+Name: Devices/LE8.class
+SHA-256-Digest: DMCrnOifHPMxmjxMjwKBS1fJnuaBCKC8rKP8hb0t3UE=
+
+Name: Panel/SwitchReg$14.class
+SHA-256-Digest: l0SQFnpdMVX0tsOz/z1TFNODFq4cbG5v77R0gSYouyc=
+
+Name: Logic/TD8E$2.class
+SHA-256-Digest: cMCcXtSVt5JbzCg5nwzukbyKG8CNQWHS4Q/Mz2cz/84=
+
+Name: Panel/Knob.class
+SHA-256-Digest: SHzwNcyyxagCGu11V9fD4JwQ7KnEjdkmeu8bOrMZD5Y=
+
+Name: Logic/Device.class
+SHA-256-Digest: l9Zy7Dp/0sFQYj+CCmIeEjrVet4efbT5TctRb4PMmRY=
+
+Name: Panel/SwitchReg$2.class
+SHA-256-Digest: Dboto4JvYb8ADikMtySPLAbG9XGLVXMemuaNQW+Ui9o=
+
+Name: Panel/SwitchReg$13.class
+SHA-256-Digest: tmhFna8/MRWeOboNn3M7FHL+beh1Ph0y9gH9BrdHa1Y=
+
+Name: Panel/EmaLamps.class
+SHA-256-Digest: TaQs1eSJ93JUdfz9S2QcJWbhwA0GJR+q0S10EHHIENk=
+
+Name: Devices/PtrPtp$1.class
+SHA-256-Digest: f7tVBPpHhGdMI4d/tGBafEN59U2Hgy15gBUi04aYsfw=
+
+Name: Logic/TD8E.class
+SHA-256-Digest: MD/hcfFVfn7W6kXQ6FYRrRZnvQ7QQpOD1SXb8fJa/BU=
+

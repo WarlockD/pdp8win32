@@ -1,0 +1,299 @@
+		DigiTcl 0.3.0 - An Elementary Digital Simulator 
+		(C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+
+Introduction:
+~~~~~~~~~~~~~
+DigiTcl is a digital circuit layout and simulation tool which is
+(hopefully) easy to use.  The software is partitioned into two major
+modules:  a Tcl/Tk script which serves as the GUI layout tool front-end
+and a C++ simulator engine which is invoked at the user's request during
+simulation.  The two modules exist as separate, independent entities
+which communicate with each other over a bidirectional command pipeline
+which is created when the user simulates a given circuit.
+
+This document describes the installation and usage of the DigiTcl
+package.  For more information about DigiTcl, please consult the
+DigiTcl Home page, which can be found at:
+
+	http://www.cs.mun.ca/~donald/digitcl/
+
+Please note that I haven't been working on DigiTcl very much recently and
+that I don't always have the time to answer questions regarding the
+software.
+
+Requirements:
+~~~~~~~~~~~~~
+The installation and execution of DigiTcl makes the following
+assumptions about the user's platform and available software:
+
+- The preferred target machine is running the X Window System, Version
+11 on a UNIX or UNIX-like operating system.  The software may also work
+under Microsoft Windows 95/98/NT, but has not been recently tested on
+these platforms.  The distribution assumes that the underlying
+file system is capable of storing long file names (up to 20 characters).
+
+- The circuit editor requires Tcl/Tk 8.0, which is available
+at ftp://ftp.scriptics.com/.  This document assumes that Tcl/Tk have
+been downloaded and installed successfully on your machine.
+
+- A C++ compiler (e.g. g++2.7.2) and the Standard Template Library
+(STL) is required for compiling the simulator engine under Unix (NOTE:
+g++ 2.6.3 will not successfully link the application).  The supplied
+Makefile can be adapted for use under Microsoft Windows.
+
+- The software requires a three-button mouse.  A two button mouse,
+unfortunately, is not sufficient.
+
+Extracting the Archive File:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The compressed archive file is distributed in two formats, both of which
+can be found on the aforementioned web page.
+
+- For UNIX platforms, use 'digitcl-0.3.0.tar.gz' which has been tarred
+and gzipped.  It can be extracted using the command:
+
+	$ gzip -dc digitcl-0.3.0.tar.gz | tar oxvf -
+
+- For Microsoft Windows 95/98/NT platforms, use 'digitcl-0.3.0.zip' which
+has been zipped using InfoZip's 'zip' archiver.  Because the archive
+contains long file names, it MUST be extracted with a compatible
+dearchiver.  Note that PKZIP 2.04g will NOT work.  Instead, get
+an appropriate binary from the ftp site:
+
+	ftp://ftp.uu.net/pub/archiving/zip/WIN32/
+
+Once the unzip.exe program has been extracted, digitcl-0.3.0.zip itself
+can be extracted using the command:
+
+	c:\> unzip digitcl-0.3.0.zip
+
+Note that if you downloaded DigiTcl using a web browser on Microsoft
+Windows, the archive file may be renamed to 'digitcl-0_3_0.zip'.
+
+Upon extraction of the archive, a directory called 'digitcl-0.3.0' will
+be created and all the relevant files and subdirectories will be placed
+in that directory.  These files and subdirectories are described below:
+
+File: 		Description:
+README		This file.
+
+COPYING		Describes the terms under which this software may be
+		redistributed (GPL).
+
+digitcl		The Tcl/Tk script for the DigiTcl circuit editor GUI.
+
+bitmaps/*	Bitmaps and mouse cursors required by DigiTcl.
+
+digisim/*       This directory contains the C++ source and Makefile
+		for building the simulator engine on most Unix platforms
+		with g++.  For Microsoft Windows users, the Makefile
+		will have to be modified depending upon which compiler
+		you are using.  No binaries of the simulator engine
+		are provided for Microsoft Windows.
+
+Recompiling the Simulator Engine:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In order to simulate circuits, the simulator engine must be compiled.
+The GNU C++ compiler, version 2.7.2, should be able to successfully
+compile the engine.  egcs-1.0.2 can also be used to compile the engine.
+The
+
+To compile the simulator engine under Unix, change to the 'digisim'
+directory and type 'make'.  Note that you may have to do some
+customizations of the supplied 'Makefile'.  If there were no errors
+during the compiling and linking, a 'digisim' executable should be
+created in the directory.  This binary will be executed as a subprocess
+by DigiTcl --- there is no need to run the binary directly.
+
+If you are using Microsoft Windows 95/98/NT, you will have to customize
+the Makefile to work for a Microsoft Windows-based compiler.  There
+are no special flags required for compiling -- just make sure that a
+recent version of the STL is installed on your machine.  Note that Tk
+(or is it NT?) seems to require that the simulator engine be compiled as
+a 32-bit application, not 16-bit.
+
+Environment Variables:
+~~~~~~~~~~~~~~~~~~~~~~
+Before DigiTcl can be used, the appropriate shell variables must be set
+and exported to the environment.  Some of these environment variables
+may be required by the underlying graphics toolkit, Tcl/Tk,  while
+others are required by DigiTcl itself.  The standard PATH environment
+variable may also be modified for user convenience.  Consult your
+system documentation for information on how to set environment variables
+on your platform.
+
+Environment Variables Used by Tcl/Tk:
+
+Environment	Description:
+Variable:    
+TCL_LIBRARY	Set to the location of the Tcl library files.  It is
+		not necessary to set this environment variable if tclsh
+		was compiled with the library path pre-configured in
+		its binary.
+
+TK_LIBRARY	Set to the location of the Tk library files.  Again,
+		it is not necessary to set this environment variable if
+		wish was compiled with the library path pre-configured
+		in its binary.
+
+PATH		This standard environment variable should include the location 
+		of the wish binary.
+
+Environment Variables Used by DigiTcl:
+
+Environment	Description:
+Variable:
+
+DIGISIM		Set to the location of the simulator engine compiled earlier.
+		An absolute pathname should be used.
+
+DIGILIB		Set to the location of auxiliary bitmap and cursor files
+		required by the circuit editor.  Again, an absolute pathname
+		should be used.
+
+DIGIUSER	Set to the location of the working directory to be used
+		by DigiTcl.  When loading or saving circuits, the
+		contents of the directory indicated by this environment
+		variable will be presented in the file selection dialog box.
+
+Running the DigiTcl Circuit Editor:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Once Tcl/Tk have been installed, the simulator engine has been compiled
+and the environment variables have been set, the DigiTcl circuit editor
+may be started.
+
+On UNIX platforms:
+	Type './digitcl' while in the 'digitcl-0.3.0' directory.  For
+	convenience, the full path of the 'digitcl-0.3.0' directory may
+	be added to the PATH environment variable, thereby letting the
+	user execute the script while in any directory.
+
+For Microsoft Windows 95/98/NT platforms:
+	DigiTcl can be started by typing 'wish80 digitcl', while in the
+	'digitcl-0.3.0' directory.  
+
+If the location of the wish executable was not included in the user's
+PATH, then the circuit editor must be invoked by specifying the full
+path of the wish binary and providing the pathname of the digitcl
+script as an argument.  For example:
+
+	$ /usr/local/bin/wish ~/digitcl-0.3.0/digitcl	(Unix)
+	c:\> c:\tcl\bin\wish80 d:\apps\ckt\digitcl	(MS Windows 95/98/NT)
+
+If the DIGIUSER environment variable was not set, then the contents of
+the directory that was current when DigiTcl was invoked will be
+presented in the file selection dialog box.  The file selection dialog
+box is displayed whenever the user activates the 'Open...', 'Save...' or
+'Save As...' options of the File pull-down menu.
+
+Unfortunately, a Makefile or Setup program that installs the
+distribution files in standard directories does not exist.  Any
+changes to the locations of the files will have to be done in accordance
+with the installation information provided above.  In particular, the
+environment variables have to be modified appropriately when moving the
+location of the DigiTcl script, the simulator engine executable or the
+auxiliary bitmap files required by DigiTcl.
+
+User's Manual:
+~~~~~~~~~~~~~~
+Unfortunately, a comprehensive User's Manual and online help describing
+how to use DigiTcl does not yet exist.  Sorry.
+
+One feature which might cause some initial confusion is the creation of
+wires (netlists).  To create a wire:
+
+	(1) Click the "CREATE" button in the "Wire" subsection of the
+	    toolbar.
+	(2) Move the mouse pointer location on the canvas where you want to
+	    set the first wire point.
+	(3) Click the leftmost mouse button.  A wire point will appear.
+	(4) Move the mouse to the location of the next wire point.  The
+	    wire will follow the mouse pointer.
+	(5) Press the leftmost mouse button.
+	(6) Continue repeating steps 4 and 5 until you are ready to set
+	    the final wire point.
+	(7) To complete the operation, move the mouse to the final
+	    location where you want to set a wire point and press the
+	    middle mouse button.
+
+In order to create input signals and observe output signals, you must
+use the "LABEL" button to label the wire points of the appropriate
+netlists.  You cannot give a netlist two names, nor can you give two
+netlists the same name.  Once the netlist points have been labeled, you
+can modify the input signal waveforms by 'drawing' them with the
+mouse.  Note that you cannot modify waveforms which are designated as
+'output' in the signal display window.
+
+Known Problems:
+~~~~~~~~~~~~~~~
+For a relatively complete list of the currently known problems and
+restrictions of DigiTcl, please check the DigiTcl Home page, mentioned
+above.  With respect to Microsoft Windows NT, the following problems are
+known to occur (Note: these problems were noted with version 0.2.0
+of DigiTcl running under an older version of Tcl/Tk.  Newer releases
+of Tcl/Tk have fixed some of the problems.)
+
+- Tcl/Tk under Microsoft Windows 95/98/NT does not permit cursor
+customization.  As a result, the cursor does not change when you are
+create wires or soldering circuit wire points.
+
+- The performance is kind of sluggish (especially screen refreshes)
+Hopefully, speed will improve as the Tcl/Tk release matures on this
+platform.
+
+- The GUI has a Motif look and feel instead of a Microsoft
+Windows 95/98/NT look and feel.  A native look and feel for Microsoft
+Windows 95/98/NT should be available sometime in the future.
+
+- Tcl/Tk seems to have problems creating lines with a stipple pattern.
+As a result, grid lines cannot be created on the workarea canvas and the
+signal display window does not show the upper and lower horizontal
+boundaries of each signal.
+
+- No diagnostic messages are displayed on the console from which
+DigiTcl was invoked.  This limits the amount of textual feedback
+provided by the application.  In the future, most diagnostic output
+will be displayed in a message subwindow which may be incorporated
+into the main circuit editor window.
+
+Change Log:
+~~~~~~~~~~~
+0.3.0: 	Modifications for inclusion in DDJ.
+
+	* Removed win32 simulator engine binary and Microsoft/Borland
+	  makefiles as I no longer have access to the Microsoft Windows
+	  compilers (with STL support).
+
+	* Circuit simulator engine now requires STL.  This eliminates
+	  the need for the silly List class that was present before.
+	  Many minor touch ups to the simulator soure code, but no
+	  major functional changes.
+ 
+	* Fixed a syntax error in the cktgui/file.tcl.
+
+	* Did some quick testing to ensure that the GUI works under
+	  Tcl/Tk 8.0.
+
+	* cktgui/file.tcl now uses the tk_getFileOpen/tk_getFileSave
+	  dialog boxes which are standard in Tcl/Tk 8.0.
+
+0.2.0:	First public release.
+
+Legal Stuff:
+~~~~~~~~~~~~
+DigiTcl 0.3.0 - An Elementary Digital Simulator 
+Copyright (C) 1995-1998  Donald C. Craig
+
+This program is free software; you can redistribute it and/or modify
+it under  the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.

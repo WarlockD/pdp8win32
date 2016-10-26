@@ -1,0 +1,235 @@
+/*
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	styles.css - Online help - Style sheet
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+p {
+	font-size: 9pt;
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	text-decoration: none
+}
+
+p.small {
+	font-size: 8pt;
+}
+
+a {
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	text-decoration: none
+}
+
+a:hover {
+	text-decoration: underline
+}
+
+ul {
+	margin-left: 1.25em; padding-left: 0em;
+}
+
+li {
+	font-size: 9pt;
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	text-decoration: none
+}
+
+#mainbox {
+	background-color: #fff;
+	margin-top: 30px;
+	margin-right: 26px;
+	margin-left: 18px;
+	position: absolute;
+	top: 10px
+}
+	
+#taskbox {
+	background-color: #eee;
+	list-style-type: decimal;
+	list-style-position: outside;
+	margin-top: 12px;
+	margin-bottom: 12px;
+	border: solid 1px #444
+}
+
+h1 {
+	font-size: 12pt;
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	padding-top: 6pt;
+}
+
+h2 {
+	font-size: 12pt;
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	padding-top: 8pt;
+}
+
+h3 {
+	font-size: 10pt;
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	padding-top: 5pt;
+}
+
+h4 {
+	font-size: 9pt;
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	padding-top: 4pt;
+}
+
+/* index.html */
+
+table.index {
+	padding-top: 20px;
+	width: 100%;
+}
+
+td.banner {
+	padding: 20px;
+}
+
+td.toc {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 20px;
+	padding-right:20px;
+	border-left: 1px solid darkgray;
+}
+
+/* other pages */
+
+table {
+	border-collapse: separate;
+	border-spacing: 0px;
+}
+
+th {
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	font-size: 9pt;
+	font-style: bold;
+	border-bottom: 1px solid gray;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+th.left {
+	text-align: left;
+}
+
+td {
+	text-align: center;
+	vertical-align: top;
+	font-family: "Lucida Grande", Arial, "Sans Serif";
+	font-size: 9pt;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+td.left {
+	text-align: left;
+}
+
+td.right {
+	text-align: right;
+}
+
+td.br {
+	border-right: 1px solid gray;
+}
+
+td.bb {
+	border-bottom: 1px solid lightgray;
+}
+
+td.bb_left {
+	text-align: left;
+	border-bottom: 1px solid lightgray;
+}
+
+td.bbr {
+	border-bottom: 1px solid lightgray;
+	border-right: 1px solid gray;
+}
+
+td.opcode {
+	vertical-align: middle;
+	width: 40px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+td.opcode_right {
+	text-align: right;
+	vertical-align: middle;
+	width: 40px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+td.opcode_left {
+	text-align: left;
+	vertical-align: middle;
+	width: 40px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+td.opcode_tb {
+	vertical-align: middle;
+	background: lightgray;
+	width: 40px;
+	height: 40px;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+td.opcode_tlb {
+	vertical-align: middle;
+	background: lightgray;
+	width: 40px;
+	height: 40px;
+	border-top: 1px solid black;
+	border-left: 1px solid black;
+	border-bottom: 1px solid black;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+td.opcode_tbr {
+	vertical-align: middle;
+	background: lightgray;
+	width: 40px;
+	height: 40px;
+	border-top: 1px solid black;
+	border-bottom: 1px solid black;
+	border-right: 1px solid black;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+td.opcode_tlbr {
+	vertical-align: middle;
+	background: lightgray;
+	width: 40px;
+	height: 40px;
+	border: 1px solid black;
+	padding-left: 0px;
+	padding-right: 0px;
+}

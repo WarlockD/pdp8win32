@@ -1,0 +1,4 @@
+#define hdotted_width 5
+#define hdotted_height 1
+static char hdotted_bits[] = {
+   0x01};

@@ -1,0 +1,317 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2132E5F0181FF7950024FD25 /* MemoryContentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 2132E5EF181FF7950024FD25 /* MemoryContentView.m */; };
+		216AF641197B3430000D9193 /* MemoryContentOnlineHelp in Resources */ = {isa = PBXBuildFile; fileRef = 216AF63B197B3430000D9193 /* MemoryContentOnlineHelp */; };
+		21B2523C181FA775008CC322 /* PluginFramework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 21B251FF181FA316008CC322 /* PluginFramework.framework */; };
+		21B25243181FA87D008CC322 /* MemoryContent.m in Sources */ = {isa = PBXBuildFile; fileRef = 21B25216181FA3BD008CC322 /* MemoryContent.m */; };
+		21B252A9181FB1DC008CC322 /* MemoryContent.nib in Resources */ = {isa = PBXBuildFile; fileRef = 21B252A8181FB1DC008CC322 /* MemoryContent.nib */; };
+		21B252BB181FB25B008CC322 /* io-info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 21B252B9181FB25B008CC322 /* io-info.plist */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		2132E5EE181FF7950024FD25 /* MemoryContentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryContentView.h; sourceTree = "<group>"; };
+		2132E5EF181FF7950024FD25 /* MemoryContentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MemoryContentView.m; sourceTree = "<group>"; };
+		2132E81018215BF00024FD25 /* colorfun.pa */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = colorfun.pa; sourceTree = "<group>"; };
+		216AF63C197B3430000D9193 /* English */ = {isa = PBXFileReference; lastKnownFileType = folder; name = English; path = English.lproj/MemoryContentOnlineHelp; sourceTree = "<group>"; };
+		21B251FF181FA316008CC322 /* PluginFramework.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PluginFramework.framework; path = "../build/Release/PDP-8:E Simulator.app/Contents/Frameworks/PluginFramework.framework"; sourceTree = SOURCE_ROOT; };
+		21B25213181FA367008CC322 /* MemoryContent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MemoryContent.h; sourceTree = "<group>"; };
+		21B25216181FA3BD008CC322 /* MemoryContent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MemoryContent.m; sourceTree = "<group>"; };
+		21B2521B181FA44E008CC322 /* MemoryContent.pdp8Plugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MemoryContent.pdp8Plugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		21B2521D181FA44E008CC322 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		21B2523F181FA7E4008CC322 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/MemoryContent.nib; sourceTree = "<group>"; };
+		21B252BA181FB25B008CC322 /* English */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = English; path = "English.lproj/io-info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		21B25219181FA44E008CC322 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21B2523C181FA775008CC322 /* PluginFramework.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		2132E81518215C0A0024FD25 /* Memory Content Plugin */ = {
+			isa = PBXGroup;
+			children = (
+				21B2521D181FA44E008CC322 /* Info.plist */,
+				21B252B9181FB25B008CC322 /* io-info.plist */,
+				21B25213181FA367008CC322 /* MemoryContent.h */,
+				21B25216181FA3BD008CC322 /* MemoryContent.m */,
+				2132E5EE181FF7950024FD25 /* MemoryContentView.h */,
+				2132E5EF181FF7950024FD25 /* MemoryContentView.m */,
+				21B252A8181FB1DC008CC322 /* MemoryContent.nib */,
+				216AF63B197B3430000D9193 /* MemoryContentOnlineHelp */,
+			);
+			name = "Memory Content Plugin";
+			sourceTree = "<group>";
+		};
+		2132E81618215C200024FD25 /* PDP-8 Demo Program */ = {
+			isa = PBXGroup;
+			children = (
+				2132E81018215BF00024FD25 /* colorfun.pa */,
+			);
+			name = "PDP-8 Demo Program";
+			sourceTree = "<group>";
+		};
+		21B251EE181FA298008CC322 = {
+			isa = PBXGroup;
+			children = (
+				2132E81618215C200024FD25 /* PDP-8 Demo Program */,
+				2132E81518215C0A0024FD25 /* Memory Content Plugin */,
+				21B251F8181FA2EE008CC322 /* Frameworks */,
+				21B2521C181FA44E008CC322 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		21B251F8181FA2EE008CC322 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				21B251FF181FA316008CC322 /* PluginFramework.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		21B2521C181FA44E008CC322 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				21B2521B181FA44E008CC322 /* MemoryContent.pdp8Plugin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		21B2521A181FA44E008CC322 /* MemoryContent */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 21B25220181FA44E008CC322 /* Build configuration list for PBXNativeTarget "MemoryContent" */;
+			buildPhases = (
+				21B25217181FA44E008CC322 /* Resources */,
+				21B25218181FA44E008CC322 /* Sources */,
+				21B25219181FA44E008CC322 /* Frameworks */,
+				2132E7B6182128360024FD25 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MemoryContent;
+			productName = MemoryContent;
+			productReference = 21B2521B181FA44E008CC322 /* MemoryContent.pdp8Plugin */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		21B251F0181FA298008CC322 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 21B251F3181FA298008CC322 /* Build configuration list for PBXProject "MemoryContent" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 21B251EE181FA298008CC322;
+			productRefGroup = 21B2521C181FA44E008CC322 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				21B2521A181FA44E008CC322 /* MemoryContent */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		21B25217181FA44E008CC322 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21B252A9181FB1DC008CC322 /* MemoryContent.nib in Resources */,
+				21B252BB181FB25B008CC322 /* io-info.plist in Resources */,
+				216AF641197B3430000D9193 /* MemoryContentOnlineHelp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		2132E7B6182128360024FD25 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# index the online help (there is no online help for the Memory Content plugin)\n#/usr/bin/hiutil -C -m 3 -a -f \"${CONFIGURATION_BUILD_DIR}/${FULL_PRODUCT_NAME}/Contents/Resources/English.lproj/MemoryContentOnlineHelp/MemoryContentOnlineHelp.helpindex\" \"${CONFIGURATION_BUILD_DIR}/${FULL_PRODUCT_NAME}/Contents/Resources/English.lproj/MemoryContentOnlineHelp\"\n\n# make the plugin to appear as bundles in the Finder\n/usr/bin/SetFile -a B \"${CONFIGURATION_BUILD_DIR}/${FULL_PRODUCT_NAME}\"";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		21B25218181FA44E008CC322 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				21B25243181FA87D008CC322 /* MemoryContent.m in Sources */,
+				2132E5F0181FF7950024FD25 /* MemoryContentView.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		216AF63B197B3430000D9193 /* MemoryContentOnlineHelp */ = {
+			isa = PBXVariantGroup;
+			children = (
+				216AF63C197B3430000D9193 /* English */,
+			);
+			name = MemoryContentOnlineHelp;
+			sourceTree = "<group>";
+		};
+		21B252A8181FB1DC008CC322 /* MemoryContent.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21B2523F181FA7E4008CC322 /* English */,
+			);
+			name = MemoryContent.nib;
+			sourceTree = "<group>";
+		};
+		21B252B9181FB25B008CC322 /* io-info.plist */ = {
+			isa = PBXVariantGroup;
+			children = (
+				21B252BA181FB25B008CC322 /* English */,
+			);
+			name = "io-info.plist";
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		21B251F1181FA298008CC322 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_VERSION = 4.0;
+				INFOPLIST_FILE = Info.plist;
+				SDKROOT = macosx10.4;
+				WRAPPER_EXTENSION = pdp8Plugin;
+			};
+			name = Debug;
+		};
+		21B251F2181FA298008CC322 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_VERSION = 4.0;
+				INFOPLIST_FILE = Info.plist;
+				SDKROOT = macosx10.4;
+				WRAPPER_EXTENSION = pdp8Plugin;
+			};
+			name = Release;
+		};
+		21B2521E181FA44E008CC322 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../PDP-8:E Simulator.app/Contents/Frameworks\"",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = MemoryContent;
+				SDKROOT = macosx10.4;
+				WRAPPER_EXTENSION = pdp8Plugin;
+			};
+			name = Debug;
+		};
+		21B2521F181FA44E008CC322 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/../PDP-8:E Simulator.app/Contents/Frameworks\"",
+				);
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Library/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = MemoryContent;
+				WRAPPER_EXTENSION = pdp8Plugin;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		21B251F3181FA298008CC322 /* Build configuration list for PBXProject "MemoryContent" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21B251F1181FA298008CC322 /* Debug */,
+				21B251F2181FA298008CC322 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		21B25220181FA44E008CC322 /* Build configuration list for PBXNativeTarget "MemoryContent" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				21B2521E181FA44E008CC322 /* Debug */,
+				21B2521F181FA44E008CC322 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 21B251F0181FA298008CC322 /* Project object */;
+}

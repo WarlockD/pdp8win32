@@ -1,0 +1,68 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265\cocoasubrtf210
+\cocoascreenfonts1{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fnil\fcharset0 LucidaGrande;}
+{\colortbl;\red255\green255\blue255;}
+{\*\listtable{\list\listtemplateid1\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid1\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid1}
+{\list\listtemplateid2\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid101\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid2}
+{\list\listtemplateid3\listhybrid{\listlevel\levelnfc23\levelnfcn23\leveljc0\leveljcn0\levelfollow0\levelstartat1\levelspace360\levelindent0{\*\levelmarker \{disc\}}{\leveltext\leveltemplateid201\'01\uc0\u8226 ;}{\levelnumbers;}\fi-360\li720\lin720 }{\listname ;}\listid3}}
+{\*\listoverridetable{\listoverride\listid1\listoverridecount0\ls1}{\listoverride\listid2\listoverridecount0\ls2}{\listoverride\listid3\listoverridecount0\ls3}}
+\paperw11900\paperh16840\margl1440\margr1440\vieww14280\viewh12580\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\b\fs28 \cf0 PDP-8/E Simulator 2.0.d3 ReadMe\
+
+\b0\fs24 \
+This is a developer preview of PDP-8/E Simulator 2.0, a Cocoa based reimplementation of the classic Mac OS and Carbon based version 1.x, retaining the proven PDP-8/E emulation engine.\
+\
+Some highlights of the new version compared to the old implementation:\
+\
+\pard\tx220\tx720\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\li720\fi-720\pardirnatural
+\ls1\ilvl0\cf0 {\listtext	\'95	}Photo realistic KC8-EA console (thanks to high quality photos of the front panel from Gerhard Kreuzer ({\field{\*\fldinst{HYPERLINK "http://www.compuseum.at/"}}{\fldrslt http://www.compuseum.at/}})\
+{\listtext	\'95	}ASR-33 Teletype with sound\
+{\listtext	\'95	}Improved real time behaviour of the emulated PDP-8/E and the I/O devices\
+{\listtext	\'95	}Improved and updated GUI, matching the current Apple Human Interface Guidelines\
+{\listtext	\'95	}Future-proof code base using modern tools like Objective-C, Cocoa, XML, Xcode, OS X\
+{\listtext	\'95	}Very simple plugin architecture for I/O devices thanks to Cocoa: writing an I/O device for the simulator is as easy as subclassing an Objective-C class\
+{\listtext	\'95	}Running natively on Intel Macs (the old version used Rosetta emulation of PowerPC code): the emulated PDP-8/E now runs at least 100 times faster than a hardware PDP-8/E (on an 2.53 GHz MacBook Pro)\
+{\listtext	\'95	}The application runs on any Mac with Mac OS X 10.4 or better, including \'84OS X Yosemite Beta 1\'93\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 \
+What is missing in this version:\
+\
+\pard\tx220\tx720\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\li720\fi-720\pardirnatural
+\ls2\ilvl0\cf0 {\listtext	\'95	}More testing and fine tuning, although the new version already passes all relevant MAINDEC hardware diagnostics and runs all PDP-8/E software that works with the previous version of the simulator\
+{\listtext	\'95	}High quality icons files (plugins, disk images, paper tapes etc.)\
+{\listtext	\'95	}Plugins for more PDP-8/E I/O devices\
+{\listtext	\'95	}AppleScript support (will probably never be implemented)\
+{\listtext	\'95	}A set of useful PDP-8 software: currently, please use the PDP-8/E Simulator 1.5 distribution to get things like OS/8\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 \
+When you want to contribute to one of these points, send me a short mail notice, as any kind of feedback is welcome. Due to Mac OS X 10.4 and PowerPC support, Xcode 3.2.6 and the Mac OS X 10.4 SDK is required to build the simulator or plugins. MemoryContent is a sample plugin Xcode project that you can use to investigate the plugin API and to build your own plugins for the PDP-8/E Simulator.\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640
+\cf0 \
+How to install:\
+\pard\tx220\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\li720\fi-720
+\ls3\ilvl0\cf0 {\listtext	\'95	}Leave \'84PDP-8/E Simulator.app\'93 where it is or drag it to your Applications folder (or anywhere else) (when you want to compile the Memory Content Plugin, it uses the plugin framework inside the application, so you might have to adjust the framework search path)\
+{\listtext	\'95	}Under Library 
+\f1 \uc0\u8594  Application Support, create a folder 
+\f0 \'84PDP-8/E Simulator\'93 and drag \'84MemoryContent.pdp8Plugin\'93 to this folder\
+{\listtext	\'95	}When you want to use an additional ASR 33 Teletype (with I/O addresses 40/41), drag \'84ASR 33 Auxiliary Teletype.pdp8Plugin\'93 to the same folder\
+\pard\tx566\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640
+\cf0 \
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+{\field{\*\fldinst{HYPERLINK "mailto:bernhard.baehr@gmx.de"}}{\fldrslt \cf0 mailto:bernhard.baehr@gmx.de}}\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+{\field{\*\fldinst{HYPERLINK "http://www.bernhard-baehr.de/pdp8e/pdp8e.html"}}{\fldrslt \cf0 http://www.bernhard-baehr.de/pdp8e/pdp8e.html}}\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640
+\cf0 \
+Copyright \'a9 1994-2014 Bernhard Baehr\
+\
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation; either version 3 of the License, or (at your option) any later version.\
+\
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.\
+\
+You should have received a copy of the GNU General Public License along with this program. If not, see <{\field{\*\fldinst{HYPERLINK "http://www.gnu.org/licenses/"}}{\fldrslt http://www.gnu.org/licenses/}}>.\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+\cf0 \
+}

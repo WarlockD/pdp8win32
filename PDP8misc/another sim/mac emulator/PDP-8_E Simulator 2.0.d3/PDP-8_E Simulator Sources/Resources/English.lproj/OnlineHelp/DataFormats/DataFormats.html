@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	DataFormats.html - Online help - memory inspector PDP-8 data formats
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta name="AppleTitle" content="Data Formats">
+	<title>Data Formats</title>
+	<meta name="description"
+		content="A list of various PDP-8 data formats available in the Memory Inspector">
+	<link href="../resources/styles.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+
+<h1>Data Formats in the Memory Inspector Drawer</h1>
+
+<ul>
+<li>
+<b>6-Bit ASCII.</b>
+Two 6-bit ASCII characters are packed into one memory word,
+the first character in the most significant half of the word.
+This format is often used for packed storage of character strings in
+the PDP-8 memory.
+</li>
+<li>
+<b>8-Bit ASCII.</b>
+Any memory word contains one 8-bit ASCII character, stored in the least
+significant bits fo the word. The memory inspector ignores the most
+significant bit because it is normally set to one or used as a parity bit.
+</li>
+<li>
+<b>OS/8 Packed 8-Bit ASCII.</b>
+The OS/8 Disk Monitor System uses this format for storing text files.
+Three 8-bit characters aaaaAAAA bbbbBBBB ccccCCCC are stored in two
+consecutive 12-bit words as ccccaaaaAAAA CCCCbbbbBBBB. The memory inspector
+ignores the most significant bits of the 8-bit characters.
+</li>
+<li>
+<b>Sigend Integer.</b>
+The 12-bit memory words are interpreted as 12-bit two&rsquo;s complement
+numbers. The valid range is &minus;2048 to 2047.
+</li>
+<li>
+<b>Unsigned Integer.</b>
+The 12-bit memory words are interpreted as 12-bit binary numbers.
+The valid range is 0 to 4095.
+</li>
+<li>
+<b>Double Word Signed Integer.</b>
+Two consecutive 12-bit memory words are interpreted as a 24-bit two&rsquo;s
+complement number. The first 12-bit word contains the least significant half
+of the number, the second word the most significant half. This is the order
+used by the EAE instructions DAD and DST. The valid range is &minus;8388608 to
+8388607.
+</li>
+<li>
+<b>Double Word Unsigned Integer.</b>
+Two consecutive 12-bit memory words are interpreted as a 24-bit binary number.
+The first 12-bit word contains the least significant half of the number, the
+second word the most significant half. The valid range is 0 to 16777215.
+</li>
+<li>
+<b>FPP8-A Floating Point.</b>
+This is the single precision floating point format used by the FPP8-A floating
+pointn processor, the DEC floating point software package and a lot of PDP-8
+software, e.&nbsp;g. FORTRAN IV and FOCAL-8. FP numbers are stored in three
+memory words:
+<img src="">
+The expontent <em>e</em> is a 12-bit signed two&rsquo;s complement integer,
+the mantissa is interpreted as a signed two&rsquo;s complement normalized
+fration, i.&nbsp;e. 0.5 &le; |<em>m</em>| &lt; 1, and the represented number
+is <em>m</em> &middot; 2<sup><em>e</em></sup>. The range of FP numbers is
+about &minus;0.99E+619 to 0.99E+619; they have about six significant decimal
+digits.
+<p>
+<center>
+<img src="fpp8a_fp.png">
+</center>
+</p>
+</li>
+<li>
+<b>FPP8-A EP Floating Point.</b>
+This is the extended precision floating point format of the FPP8-A floating
+point processor. The EP format is the same as the FP format, but the mantissa
+occupies five 12-bit words, extending the precision of EP numbers to
+approximately 15 significant decimal digits.
+</li>
+<li>
+<b>FORTRAN II Floating Point.</b>
+This floating point format is used by the PDP-8 8K FORTRAN system.
+A number of this format is stored in three words:
+<p>
+<center>
+<img src="fortran2fp.png">
+</center>
+</p>
+The exponent <em>e</em> of the number is stored (after adding 200 (octal)) as
+an 8-bit unsigned binary number. The mantissa <em>m</em> is stored as a 27-bit
+usigned normalized fraction, i.&nbsp;e. 0.5 &le; <em>m</em> &lt; 1.
+The range of FORTRAN II floating point numbers is about &minus;1.7E+38 to
+1.7E+38, the smallest nonzero number is &plusmn;0.14E&minus;38; they have
+approximately eight significant decimal digits.
+</li>
+<li>
+<b>Pascal-S Floating Point.</b>
+This is the floating point format used by the PDP-8 Pascal-S compiler of
+Heinz Stegbauer. It is the same as the FPP8-A FP format, but uses three words
+for the mantissa (about ten significant decimal digits) and stores it as an
+unsigned (not two&rsquo;s complement) normalized fraction.
+</li>
+</ul>
+
+<h3>Remarks</h3>
+
+<ul>
+<li>
+For input and output of PDP-8 floating point formats in the memory inspector,
+the simulator uses IEEE double precision floating point numbers as an intermediate
+format. Because the biggest IEEE double is 1.79E+308, there are very big PDP-8
+floating point numbers which cannot be represented as an IEEE double. These
+numbers are displayed as &ldquo;(IEEE overflow)&rdquo;. Likewise very small
+PDP-8 floating point numbers can cause an IEEE double underflow, signaled by
+&ldquo;(IEEE underflow)&rdquo;. Because IEEE doubles have fewer mantissa bits
+than the FPP8-A EP floating point numbers, the rightmost bits of the EP
+format mantissa are ignored. Bit patterns which do not represent normalized,
+valid PDP-8 floating point numbers are indicated by &ldquo;(not normalized)&rdquo;.
+</li>
+<li>
+Plug-ins for the PDP-8/E Simulator can add additional formats to the memory inspector drawer.
+They simply have to provide an Objective-C subclass of &ldquo;NSFormatter&rdquo; that conforms
+to the &ldquo;MemoryInspectorProtocol&rdquo; protocol from the plug-in API. These classes are
+automatically detected and registered.
+</li>
+</p>
+
+</body>
+</html>

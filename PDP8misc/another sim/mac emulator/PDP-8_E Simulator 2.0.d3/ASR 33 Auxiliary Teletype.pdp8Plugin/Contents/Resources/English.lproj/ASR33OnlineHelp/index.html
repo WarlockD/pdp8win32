@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	index.html - Online help for the ASR 33 Teletype
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+	<title>ASR 33 Teletype Help</title>
+	<meta name="description"
+		content="Describes the functioning and PDP-8 IOTs of the ASR 33 Teletype">
+	<meta name="AppleTitle" content="ASR 33 Teletype Help">
+	<meta name="AppleIcon" content="pdp8e.png">
+	<link href="styles.css" rel="stylesheet" media="all">
+</head>
+<body>
+
+<h1>ASR 33 Teletype Help</h1>
+
+<p>
+The ASR 33 Teletype can operate under program control or independent of the PDP-8 unter manual
+control. When operated in manual mode, characters typed at the keyboard are printed by the type
+writer of the teletype. When additionally the paper tape punch is turned on, the typed
+characters are punched on the papter tape, too. When a paper tape is loaded into the reader and
+the reader is turned on, the teletype ignores the keyboard input and reads characters to print
+or punch from the reader paper tape.
+</p>
+
+<p>
+When the teletype is used in online mode, characters typed at the keyboard or read from the reader paper
+tape are not printed or punched, but their ASCII value is transferred into the keyboard buffer register
+KBB, from where the PDP-8 can read it into the accumulator AC. The PDP-8 then can use teletype output
+IOTs to write the character to the teletype output buffer register TTO to initiate the printing or
+punching of the character.
+</p>
+
+<p>
+The teletypes of the PDP-8/E Simulator have the following improvements compared to hardware ASR 33
+Teletypes:
+<p>
+
+<ul>
+<li>
+Backspace handling: When the teletype is operated in local mode, typing the backspace key causes the
+last character to be removed from the output display and &mdash; when the punch is turned on &mdash;
+from the punch paper tape. The Macintosh clear key (at the top left of the numeric key pad or fn-6 on
+notebook keyboards) has the function of the ASR 33 rubout key.
+</li>
+<li>
+Tabulator handling: The teletype handles the output of tabulator characters with tabulator stops at every
+8th column. (Tab characters are punched to paper tapes unaltered.)
+</li>
+<li>
+Speed: The simulated teletype can run with the speed of a hardware ASR 33 teletype (about ten characters
+per second) or as fast as possible. Use the ASR 33 preference pane to change the speed of the teletype.
+</li>
+<li>
+High bit masking for the punch: When this feature is enabled (in the ASR 33 preference pane), the paper
+tape punch masks the most significant bit of the punched characters. This is useful when you run PDP-8
+software that use the 8th bit as a checksum and save the output to a paper tape. When the MSB is
+masked out, you can open and read the paper tape file with any Mac text editor. (When punching BIN or
+RIM format paper tapes, you normally won't have to disable the MSB masking because these formats use
+the 8th bit only for punching leaders or trailers, which are not needed with paper tapes stored in
+files. One exception: BIN format with field settings uses values 3x0 (x=0,&hellip;,7) to signal that
+the following code is to be loaded to memory field x.)
+</li>
+<li>
+&ldquo;Copy &amp; Paste&rdquo; and &ldquo;Drag &amp; Drop&rdquo; is supported for the teletype:
+When you paste text into the teletype window, the text is inserted into a typeahead buffer
+from where the teletype reads it sccessively as if the characters were typed at the keyboard.
+New keyboard input is appended at the end of the typeahead buffer. While the typeahead buffer is not
+empty, a button &ldquo;Flush Typeahead Buffer&rdquo; appears in the toolbar of the ASR 33 window that
+you can use to clear the buffer prematurely.
+</li>
+</ul>
+
+<h2>Console Teletype</h2>
+
+<p>
+The console teletype uses I/O address 03 for the keyboard and reader and 04 for the printer
+and punch and supports the following IOTs:
+</p>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th class="left"><br>Description</th>
+</tr>
+<tr>
+	<td>KCF</td>
+	<td>6030</td>
+	<td class="left">
+		Clear the keyboard/reader I/O flag (&ldquo;Console TTY In&rdquo; in the CPU window).
+		Do not start the reader to read the next tape character.
+	</td>
+</tr>
+<tr>
+	<td>KSF</td>
+	<td>6031</td>
+	<td class="left">
+		Skip the next instruction when the keyboard/reader I/O flag is raised, i. e. a new
+		character is loaded into the keyboard buffer register KBB.
+	</td>
+</tr>
+<tr>
+	<td>KCC</td>
+	<td>6032</td>
+	<td class="left">
+		Clear AC and the keyboard/reader I/O flag. When the paper tape reader is turned on,
+		start to read the next character from the tape. When a new value is loaded into KBB
+		(from the tape or &mdash; when the reader is turned off &mdash; because the user
+		typed a key), the flag is raised again.
+	</td>
+</tr>
+<tr>
+	<td>KRS</td>
+	<td>6034</td>
+	<td class="left">
+		Transfer KBB into AC(4&ndash;11) by performing a logical OR (&ldquo;static&rdquo; read).
+	</td>
+</tr>
+<tr>
+	<td>KIE</td>
+	<td>6035</td>
+	<td class="left">
+		Load the keyboard/reader and printer/punch interrupt enable flag from AC(11) to enable
+		or disable teletype interrupts.
+	</td>
+</tr>
+<tr>
+	<td>KRB</td>
+	<td>6036</td>
+	<td class="left">
+		Clear AC and the keyboard/reader I/O flag, then read KBB into AC(4&ndash;11).
+		Microprogrammed combination of KCC and KRS.
+	</td>
+</tr>
+<tr>
+	<td>TFL</td>
+	<td>6040</td>
+	<td class="left">
+		Set the printer/punch I/O flag (&ldquo;Console TTY Out&rdquo; in the CPU window).
+	</td>
+</tr>
+<tr>
+	<td>TSF</td>
+	<td>6041</td>
+	<td class="left">
+		Skip the next instruction when the printer/punch I/O flag is set.
+	</td>
+</tr>
+<tr>
+	<td>TCF</td>
+	<td>6042</td>
+	<td class="left">
+		Clear the printer/punch I/O flag.
+	</td>
+</tr>
+<tr>
+	<td>TPC</td>
+	<td>6044</td>
+	<td class="left">
+		Load the teletype output buffer register TTO with the contents of AC(4&ndash;11) and
+		start to print and, when the punch is turned on, to punch the character from TTO.
+		When the output is completed, the printer/punch I/O flag is raised.
+	</td>
+</tr>
+<tr>
+	<td>TSK</td>
+	<td>6045</td>
+	<td class="left">
+		Skip the next instruction when an interrupt was caused by the teletype, i. e. when
+		the interrupt mask flag for input or output and the corresponding I/O flag are both set. 
+	</td>
+</tr>
+<tr>
+	<td>TLS</td>
+	<td>6046</td>
+	<td class="left">
+		Clear the printer/punch I/O flag, load TTO from AC(4&ndash;11) and start the output.
+		When the output is completed, the printer/punch I/O flag is raised again.
+		Microprogrammed combination of TCF and TPC.
+	</td>
+</tr>
+</table>
+
+<h3>Remark</h3>
+
+<p>
+Earlier PDP-8 models (PDP-8, -8/S, -8/I, -8/L) do not support the IOTs KCF (6030), KIE (6035),
+TFL (6040), and TSK (6045).
+</p>
+
+<h2>Auxiliary Teletype</h2>
+
+<p>
+The PDP-8/E Simulator includes an Auxiliary Teletype that you can activate in the Finder information
+window for the PDP-8/E Simulator application in the area &ldquo;Plug-ins&rdquo;. (With Mac OS X 10.6
+&ldquo;Snow Leopard&rdquo;, Apple has removed the Plug-ins section from the Finder information window,
+and you must open the application package manually and move the Auxiliary Teletype from the folder
+&ldquo;Contents/PlugIns Disabled&rdquo; to &ldquo;Contents/PlugIns&rdquo;.)
+</p>
+
+<p>
+In the CPU window,
+the flags for the Auxiliary Teletype are called &ldquo;Auxiliary TTY In&rdquo; and
+&ldquo;Auxiliary TTY Out&rdquo;. It uses the I/O addressed 40 for input and 41 for output and
+supports the following IOTs:
+</p>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th class="left">Corresponding<br>Console Teletype IOT</th>
+</tr>
+<tr>
+	<td>AKCF</td>
+	<td>6400</td>
+	<td class="left">KCF (6030)</td>
+</tr>
+<tr>
+	<td>AKSF</td>
+	<td>6401</td>
+	<td class="left">KSF (6031)</td>
+</tr>
+<tr>
+	<td>AKCC</td>
+	<td>6402</td>
+	<td class="left">KCC (6032)</td>
+</tr>
+<tr>
+	<td>AKRS</td>
+	<td>6404</td>
+	<td class="left">KRS (6034)</td>
+</tr>
+<tr>
+	<td>AKIE</td>
+	<td>6405</td>
+	<td class="left">KIE (6035)</td>
+</tr>
+<tr>
+	<td>AKRB</td>
+	<td>6406</td>
+	<td class="left">KRB (6036)</td>
+</tr>
+<tr>
+	<td>ATFL</td>
+	<td>6410</td>
+	<td class="left">TFL (6040)</td>
+</tr>
+<tr>
+	<td>ATSF</td>
+	<td>6411</td>
+	<td class="left">TSF (6041)</td>
+</tr>
+<tr>
+	<td>ATCF</td>
+	<td>6412</td>
+	<td class="left">TCF (6042)</td>
+</tr>
+<tr>
+	<td>ATPC</td>
+	<td>6414</td>
+	<td class="left">TPC (6044)</td>
+</tr>
+<tr>
+	<td>ATSK</td>
+	<td>6415</td>
+	<td class="left">TSK (6045)</td>
+</tr>
+<tr>
+	<td>ATLS</td>
+	<td>6416</td>
+	<td class="left">TLS (6046)</td>
+</tr>
+</table>
+
+<h2>Additional Teletypes</h2>
+
+<p>
+When you need additional teletypes, you can duplicate the Console or Auxiliary Teletype plugin and
+then modify the property list that describes the I/O addresses and IOTs for the plugin. You find
+this property list inside the plugin package at Contents/Resources/English.lproj/auxtty-io-info.plist.
+</p>
+
+</body>
+</html>

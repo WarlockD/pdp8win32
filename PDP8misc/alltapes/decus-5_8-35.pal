@@ -1,0 +1,149 @@
+/CONVERSION SUBROUTINE FOR BINARY TO BINARY CODED DECIMAL
+/DOUBLE PRECISION
+/IT WILL HANDLE SIX DECIMAL DIGIT FIGURES UP TO
+/999,999(10)
+/IT WILL WIND UP WITH THREE BCD DIGITS IN TWO REGISTERS
+/ONE DIGIT IN EACH OF FOUR BITS (BINARY)
+/STARTING WITH THE MOST SIGNIFICANT DIGITS IN 0-3, 4-7,
+/8-11 IN THE FIRST REGISTER, AND THE SAME ORDER IN THE
+/NEXT REGISTER, HIANS MOST SIGNIFICANT, LOANS LEAST 
+/SIGNIFICANT
+
+
+
+BCD,     0
+         DCA INPUT1
+         JMP I BCD  /GOES BACK FOR SECOND #
+         0
+         DCA INPUT2
+         TAD CNTRL1
+         DCA POINTR
+         TAD CNTRL2
+         DCA INDEX
+         TAD PUT
+         DCA ANSCO
+         CLL
+         TAD MANY
+         DCA NUMBER
+         DCA HIANS
+         DCA LOANS
+         DCA SMWHR
+         JMP LOCN-1
+         DCA ANSCO
+         TAD INPUT2
+LOCN,    TAD I POINTR
+         DCA TEMPL
+         RAL
+         TAD INPUT1
+         TAD I INDEX
+         DCA TEMPH
+LABEL,   SZL          /IF LINK IS ZERO
+         JMP FIGURE   /IF LINK IS ONE
+         ISZ POINTR/INCREMENT POINTER
+         
+         ISZ INDEX    /INCREMENT INDEX
+         RAL
+         DCA SMWHR
+         TAD NUMBER
+         IAC
+         CLL
+        SNA
+         JMP FINISH
+         DCA NUMBER   /AND PUT IT BACK
+         TAD SMWHR
+         TAD LOANS
+         RAL
+         DCA LOANS
+         TAD SMWHR
+         CLA
+         DCA SMWHR
+         TAD ANSCO
+         IAC
+         SZA
+         JMP LOCN-2
+         CLL
+         TAD PUT
+         DCA ANSCO
+         TAD LOANS
+         RAR
+         DCA HIANS
+         DCA LOANS
+         JMP LOCN-1
+FIGURE,  TAD TEMPL
+         DCA INPUT2
+         TAD TEMPH
+         DCA INPUT1
+         JMP LABEL+2
+
+FINISH,  TAD SMWHR
+
+         TAD LOANS
+         RTL
+         RTL
+         TAD INPUT2
+         DCA LOANS
+         JMP I BCD+3
+
+
+
+/CONSTANTS AND VARIABLES
+
+CNTRL1,   TABLE1
+CNTRL2,   TABLE2
+MANY,     -0024
+PUT,      -0014
+INPUT1,   0
+INPUT2,   0
+
+TABLE1,   -2400  /LOW ORDER PART OF 800,000(10) MINUS
+          -5200  /400,000
+          -6500  /200,000
+          -3240  /100,000
+          -4200  /80,000
+          -6100  /40,000
+          -7040  /20,000
+          -3420  /10,000
+          -7500  /8,000
+          -7640  /4,000
+          -3720  /2,000
+          -1750  /1,000
+          -1440  /800
+          -0620  /400
+         
+          -0310  /200
+          -0144  /100
+          -0120  /80
+          -0050  /40
+          -0024  /20
+          -0012  /10
+TABLE2,   -0304  /HI ORDE OFORDER PART OF 800,000(10) MINUS
+          -0142  /400,000
+          -0061  /200,000
+          -0031  /100,000
+          -0024  /80,000
+          -0012  /40,000
+          -0005  /20,000
+          -0003  /10,000
+          -0002  /8,000
+          -0001  /4,000
+          -0001  /2,000
+          -0001  /1,000
+          -0001  /800
+         -0001  /400
+          -0001  /200
+          -0001  /100
+          -0001  /80
+          -0001  /40
+          -0001  /20
+          -0001  /10
+*0165
+POINTR,    0
+INDEX,     0
+NUMBER,    0
+ANSCO,     0
+HIANS,     0
+LOANS,     0
+TEMPH,     0
+TEMPL,     0
+SMWHR,     0
+$

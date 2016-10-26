@@ -1,0 +1,150 @@
+ $..........:::::::::::::::----:----------------------=-======IIIIIIIILLLLLLYLYYYYYYYYYYYX$$$$$$$$X$$
+ $.......:.:.:.:.:.:.:.::::::::::::::::::::::::.:.:.:.:.:.:.:.:.::-:-:=:=-I-=-=-========IIXXXX$X$XL$$
+ $...........::::::::::::::::----------------:-:-:-----:-------:----:-:-::::::....::::--IIXXXX$$$$-$$
+ $..........:.::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::...:-=LLXX$$$$-$$
+ $..............:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::.::::::::=IYYYX$$$$=$$
+ $................:::::::::::::::::::::::::::::::::::::::::::::::::::::::::.......::.:::ILYYXXXX$$=$$
+ $................::::::::::::::::::::::::::::::::::::::::::::::::::::::..........:::::-IYYYXX$$$$I$$
+ $................:.::::::::::::::::::::::::::::::::::::::::::::::::::.::.........:.::--YYYYX$$$$$I$$
+ $..................:.::::::::::::::::::::::::::::::::::::::::::::::::::..........::::-=YLYX$$$$$$I$$
+ $...................:::::::::::::::::::::::::::::::::::::::::::::::::::.:.........::--ILLYX$$$$$$I$$
+ $..................::.:::::::::::::::::::::::::::::::::::::::::::::::............:::-ILLLXX$$$$$$I$$
+ $..................:::::::::::::::::::::::::::::.::::::::::::.:::::.............:::-:LLLYX$$$$$$$I$$
+ $...................::::::::::::::::::::::::::.:.::::::::::::::::.:............::::--LLLYXX$$$$$$I$$
+ $....................:::::::::::::::::::::::......::.::::::.:.:::....:....::...::--=LLLYYXXXXX$$$:$$
+ $.....................::::::::::::::::::::..:..........:.........::...:...::::::-=ILYYYYYXXXXX$XX.$$
+ $........................:.::::::::::::::.............:...:......::::..::::::::-=LLLYYYYYXYYYXXXX.$$
+ $........................::::::::::::::.:::.....................:::::::::::---=LLLYYXYLLYYYYYXXXY.$$
+ $........................::.::::::::::::::............:..::....:::::::::--==IILYYYYYXYYLYYXXXXXXX.$$
+ $......................:..::::::::::::::::...........:..:.:.::::::::---=I=ILLLYYYXXXXXYXXXXXXX$XX.$$
+ $.........................:::::::::::::::::........:::::::::::::::-====IILLLYYYXXXXXXXXXX$XXX$X$X.$$
+ $......................::::::::::::::::::::..:.....::::::::::---====IIILLYYYYYXXXXXXXXXX$$$$X$X$X:$$
+ $.......................::::::::::::.:::::.:.....:::::::::----===IILLLYYYYYXXXXXXXXXXXX$$$$XX$X$X=$$
+ $........................:::::::::::::::::::::::::::::::--===IILLLLYYYYYYXXXXXXXXXX$$X$$$$$$$$XXX=$$
+ $.......................:::::::::::::::::::::::::::::--===IIILLLLLYYYYXXXXXXXXXX$$$$$$$$$$$$$$XXXI$$
+ $......................::::::::::::::::::::::::::--===IIILLLLLLYYYYYXXXXXXXX$$$$$$$$$$$$$$$$$$$$XI$$
+ $.....................::..:::::::::::::::::-----==IILLLLLLYYYYYYYXXXXXXXXX$X$$$$X$$$$$$$$$$$$$$$X=$$
+ $.......................:::::::::::::::---==IIILLLLLLLYYYYYYYYYYXXXXXXXXXXXXXXX$$$$$$$$$$$$$$$$$$=$$
+ $.......................:::::::::::---==IIILLLLLLYYYYYYYYYYXXXXXXXXXXXXXXXXXXXXXX$$$$$$$$$$$$$$$XI$$
+ $......................:::::::-:--=IIILLLLLLLYYYYYYYYYXXXXXXXXXXXXXXXXXXXXXXXXXXX$$$$$$$$$$$$XYX$$$$
+ $...................:.::::::--=IIIIILLLLLYLYYYYYYYYYYXXXXXXXXXXXXX$XXXXXXXXXXXXXX$$$$$$$$$XXYX$$$$$$
+ $...................::::--==IIIIILLLLLLLYYYYYYYYYYYYXXXXXXXXX$$$$$XXXXXYYYXYYYYYXXXXX$$XXYYX$$$$$X$$
+ $.................::::===IIIILLLLLLLLLYYYYYYYYYYXXXXXXXXXXXX$XXXXXXXXXXYYYYYYYYYYYYYXXXYYX$$$$$$$I$$
+ $...............::-=IIIILILLLLYLYYYYYYYYYYYYXYXXXXXXXXXXXXXXXXXXXXXXXYXYYYYYYYYYYYYYYXYXXXX$$$$XXI$$
+ $............::-==IILLLLLLYYYYYYYYYYYYYYYYYXXXXXXX$XXX$XXXXXXXYYYXXXXYXYXYYYYYYYYYYXXXXXXXXXX$$$XI$$
+ $...........-=IILLLLLYYYYYYYYYYYYYYYYYYXYXXXXXXXXXX$X$XXXXYYYXXYYYYYYXXXYXYXXXXXXXXXX$$$XXXXX$$$$Y$$
+ $.........-=ILLLLYYYYYYXXXYXYYYYYXYXXXYYYYXXXXXX$$$$$$$$$XXXXXXXXXXXYXXXXXXX$$$$$$$$$XXYYYLYYXX$$Y$$
+ $.......:=ILLLYYYXYYXYXYXYXYXYYXXXXXXXYYYXYYLYLYYXX$X$X$X$$$$$$$$X$X$X$$$$$$$$$$$$$$$$$$$$$YYL=YYL$$
+ $......:=ILLLYYYYXXXXYXXXXXYXXXXXXXXXXYYLI=-------===IILILLLLYX$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$L$$
+ $.....:=ILLLYYXYXXXXXX$XXXX$XXYXLIIIIII=-::...::::----==III=-==IIYY$$$$$$$$$$$$$$$$$$$$XXYYLLLYX$Y$$
+ $....-=IIILYYYYXXXXX$X$X$XXYI=I=-===ILYI=-:........::--==II=---=-=ILYLLYYYYXXXXXXXXXYXYYLLIII==ILI$$
+ $:..:=IIILLLYYYYXXXX$XXXYL=---=::--=IYYLL=-..........::--===-======IILYII=I=IIIIIIIIIIIII=I==-====$$
+ $...-=IILLLLLLYXXXXXXYYI-:.::-=::--=YYLII=-:.........::--------====-=ILYXI=================-=---=.$$
+ $.:-==ILLYYYLYYYYYXXYI-.....::-::--=YYYLII=::..........::--=III------=ILYXY===---=-===---=-------.$$
+ $..==ILLYYYLYYYYYXXY=:.......:--:--=YYYII==-:........:.::--IY==---:---=LYXXYI==-=-=-=------------.$$
+ $:-=ILLYYYYXXXYYXXL-..........:==-=-=LII==-::..........::--=II==-------IIYXXXI======-------------.$$
+ $-IILLYYYYXXXXXYXL=............=I====LL===-:...........::::-=II==-::::-==YYXXLI====-====---------.$$
+ $=LLYYXYXXXXXXXYY=:............:-=======:-:::::::----:...::-=II===-.:::-=LYYXXL==========------:-.$$
+ $IYYYXXXXXXXXXXYL:..............:=-====::::--------=IL=...:-III=I=-..::--ILYYXXII============----.$$
+ $YYYYXXXXXXXXXYI=................:.:----------::.:.=III::..:=L===I=....:-ILYYXXLI====III=========.$$
+ $YYXXXXXXX$X$XY=...................................-=LL-:...-L=-=I=....:-IIYXXXXYI=====II===I====.$$
+ $YXXXXXX$$$$XYL....................................-=LL=:...:LI-=I=....:-IIYXXX$$II==I=III=I=====.$$
+ $XXXXXX$X$XXXY=....................................=IYL-....-LI==II.....:IIYYXX$XYII=IIIIII======.$$
+ $$$XXXXXX$XXXL=...................................:ILYL.....-YI=II=.....:=IXXXX$XXLLIIIIII=======.$$
+ $$XXXXXXXXXXXI:....................:---........:-----I=.....-YI===-.....:IYXXXXXXXYLIIIII=I=====-.$$
+ $X$XYYXXXXXYL:...................:====-..........:::--......:LI==-:....-=LYXXXXXXYYILIIIIII=====-.$$
+ $XYYYYXXXXXYI....................======-:...................-LI=-::...:-=LYXXXXYXYYLLIIIII=======.$$
+ $XYLXXXXXYYI-...................:=-------::................:=LI::..:.::=IYYXXXYYYYXLLII======IIIIY$$
+ $=LXXYXYYLI=-..................:--:---=-::-................:=I=....::--IIYYXYYYYYXXLL=I====IILLLIL$$
+ $-IXYYLYYYYL=:.................:-..::LLI===................::-::::::--=ILYYYYYYXXXYLII=IILLLLII=IL$$
+ $=-YYXYXXXYYL=-................:...:.YYYI==:.............:...:::----==ILYYYXYXYXYXYLIIILLYLYLIIILL$$
+ $--XYXY$XXXXYII:...................:.LYLII=:.............:::::----=-==LLYYXYYYYYYXLYLYLYYYYLLLLLYX$$
+ $::LLXYXX$XXYYLI=::................::=LI===............::----------=ILYYXYXXXXX$XXYXX$X$XYYLLYYXXX$$
+ $..ILLYYXYXYXYYLYII--..........::..::-III=-...........:-=====--=-=ILLXXXXX$XXX$$$$$X$$$XXYXLYXX$$$$$
+ $..-ILLYYYYYYYXYYYXIIII-=::::::-=::-=-=II-:.........:-=======IIILYXX$$$$$$$$$$$$$$$$$XXXXXYLYYXX$$$$
+ $...:IILLYYYXYYYXYYYYYYLLLLLLLLLLLLILILI=--......::-==IILLLLYXXX$$X$$$$$$$XXXX$XXXXXXX$XXXXYYYYXX$$$
+ $....=IIILYLYYYYYYYYYYYYYYYYYYYYYYYYYLLLLII====IIILLLYYYYXXXXXXXXXXXYXXXXXYYYXXYYYYXXXXXXXXXXYXXX$$$
+ $.....:ILIILLLLLLLLLLLLLLYYYYXXXXXYYYYYYYLLLLYYYYYYYLLLLLYYYYYYXYYYLLYYYYYXYYYXYYYYLYYXXYYYYYXXXY$$$
+ $......--IIIIIILILLLLLLLLLYYYYYYYYYYYYYYYYYYYYYYYYYLLLLLLLLLLLLLLLLLLYYYYLLLLLLYLLLLLLYYYYYYXXYXXX$$
+ $........--IIIIIILLLLLLLYLLLLLLYYYYYYYYYYYYYYYYYYLLLLLIIIIIIIIILLLLLLLLLLLLLLLLLLLLLLLYYYYYXYYYXX$$$
+ $.........:-==IIIIILLLLYYYYYYLLLLYYYYYYYYYYYYYYYYLLLLLIIII=I==IIILLLLLLLLLLLLLLLLLLLLLYYYYYXXYYYXX$$
+ $...........:--IIILLLLLYYYYXXXXYYYYYYYYYYYYYYYYYYLLLLIIII======IIIILLLLLLLILLLLLLLLLLYYYYYYXXYYXX$$$
+ $..............:-==LLLLYYYYYXXXXXXXXXYYYYYYYYYYLLLLIIII====IIIIIIILLLLLLLLLLYYYLYLLLLYYYYYYYYYYYX$$$
+ $................::--IILYYYYYYYYXXXXXXXYXYYYYYYLLLLLIIIII===I=IILLILLLLLLLLLLYYYYYYYYYYYYYYYYYLYYX$$
+ $....................::--IILLYYYYYYYYYYYYYYYYYYLLLIIIIII=======IIIIIILLLLLLYYYYYYYYYYYYYYYYYYXYYYX$$
+ $.....................::::::-==IILLYYYYYYYYYYYYYYLLIIII==I=========IILLLLLYYYYYLYYYYYYYXXYYYYXX$$Y$$
+ $.......................:::::::::--==IILLLLLLLLLLLLLLLIIIIIIIIIIIIIILLLLYYYYYYYYLYYYYYXXXYYXXXXXXX$$
+ $.......................::...::::::::::--=IIIIIIIIIIILLLLIIIIIILLILILLYYYYYYYYYYYYYYYYYXXXYYYYYXXX$$
+ $.......................:::...:::::::::::::--========IIIIILIIIILLLLLLYYYYYYYYYYYYYYYYYXXXXXYYYYYYX$$
+ $........................:..::::::::::::.:::::::---========IIIIIIILLLLLYYYYXYYYYYYYYYYYYYYXXYYYXXX$$
+ $.........................:..::::::::::::::::::::::----======IIIIIILLLLLLLYYYYYYLLLLLYYYYXXXXXYXX$$$
+ $...........................:.::::::::::::::::::::::::------=====IIILILLLLLLLLLLLLLLLYYYYXXXXYYXX$$$
+ $...............................::...::::.:::::.::::::::------=====II=IIIIIIIILIILLLLLYYYXXXXXXXXX$$
+ $...............................:..:::::::::::::.::::::::::::--=========I===IIIIIIILLLLYYXXXXXXXXX$$
+ $.................................:::::::::::::::::::::::::::::---=--====I====I=IIILLLYYYXXXXXXYXX$$
+ $............................::..::::::::::::::::::::::::::::::::-:-=-=--====I=I=IILLYYYYXXXYXXXXX$$
+ $..........................:::::::::::::::::::::::::::::::::::::::::-------====IIIIILYYYYXXXXXXXX$$$
+ $..........................:::::::::::::::::::::::::::::::::::::::::::----:-=====IIIILYYYXXXXXX$$$$$
+ $.......................:..:::::::::::::::::::::::::::::::::::::::::::::-------===IIILYYXYYXXXXXXX$$
+ $.........................::::.:::::::::::::::::::::::::::::::::::::::::::------=======LLYYYYYYXXX$$
+ $...........................:::::::::::::::::::::::::::::::::::::::::::::::------==III=IIILLYYYYXX$$
+ $........................:::::::::::::::::::::::::::::::::::::::::::::::::::::---==IIIILLIIIILLYYY$$
+ $..................::::::::::::::::::::::::::::::::::::::::::::::::::::::::::------===I=IIILLILYYY$$
+ $..............::::::::::::::::::::::::::::::::::::::::::::::::::::::::::-:--------====III=IILLLYY$$
+ $............:::::::::::::::::::::::::::::::::::::::::-::-:-:-::::::-:---------------====IIIIIILLX$$
+ $...........::::::::::::::::::::::::::::::::::::::::::::::::::-::::::-:::-:------------====IILLLLY$$
+ $..........::::::::::::::::::::::::::::::::::::::::::::---:--:::::-:---------------------====IILLX$$
+ $.......::--=====III=IIIIIIIILLLLLLLLLLLLLLLLYLLLYLYYYYYYYYLYYYYYYYYLILLLLLLYIIIIIIIIIIILLLLYYYYXX$$
+ $L=IILYXXXXXXXXXX$$$$$$$$$$X$$$$$$$$$$$$$$$$$$$$$X$$$$$$$$X$$XXX$XXXXXXXX$XXXXXXXXX$X$$$$$$$$$$$$$$$
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$XXXXXXXXXXXX$XXXXXXXXXX$$
+ $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  

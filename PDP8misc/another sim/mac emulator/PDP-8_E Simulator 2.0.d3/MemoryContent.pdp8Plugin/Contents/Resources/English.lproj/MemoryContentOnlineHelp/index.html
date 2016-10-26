@@ -1,0 +1,61 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	index.html - Online help for the Memory Content Plugin
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+	<title>Memory Content Plugin Help</title>
+	<meta name="description"
+		content="Describes the functioning of the Memory Content Plugin">
+	<meta name="AppleTitle" content="Memory Content Plugin Help">
+	<meta name="AppleIcon" content="pdp8e.png">
+	<link href="styles.css" rel="stylesheet" media="all">
+</head>
+<body>
+
+<h1>Memory Content Plugin for the PDP-8/E Simulator</h1>
+
+<p>
+The Memory Content Plugin provides a window that shows the content of the PDP-8/E memory while the
+machine is running.
+</p>
+
+<p>
+Each 12-bit word is represented by a pixel. A black pixel is 0, a white pixel is 7777,
+other values are taken as a RGB value with 4 bits for each color: 7400 is red, 0360 is green, 0017 is blue.
+</p>
+
+<p>
+Each vertical block in the window represents a 4K memory field beginning with field 0 at the left.
+Each memory page of 128 words is a vertical line with the start address at the top of the line.
+Page 0 is the most left line in each memory field block.
+So the PDP-8/E address 00000 is at the top left of the windows, address 77777 is at the bottom right.
+</p>
+
+<p>
+<a href="colorfun.pa" target="_top">COLORFUN.PA</a> is a little demo program that displays
+beautiful colors in the Memory Content Plugin windows.
+</p>
+
+</body>
+</html>

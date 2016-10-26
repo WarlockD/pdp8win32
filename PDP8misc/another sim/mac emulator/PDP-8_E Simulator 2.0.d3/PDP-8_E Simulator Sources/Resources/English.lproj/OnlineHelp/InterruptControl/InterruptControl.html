@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	InterruptControl.html - Online help - Interrupt control instructions
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta name="AppleTitle" content="Interrupt Control">
+	<title>Interrupt Control</title>
+	<meta name="description"
+		content="Describes interrupt system of the PDP-8 and the instructions to control it">
+	<link href="../resources/styles.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+
+<h1>Interrupt Control</h1>
+
+<p>
+On the PDP-8, an interrupt can occur when the interrupt enable flag is set and
+the delay and inhibit flags are cleared. With the PDP-8/E (not with earlier
+models), any I/O device has an interrupt enable flag. They and the I/O flags of
+the devices are collected in the interrupt enable and I/O flags table of the CPU
+window. When a devices interrupt mask flag is set, this device can cause an
+interrupt by setting its I/O flag when completing an I/O operation to signal that
+it is ready for new I/O operations or that new input is available. The interrupt
+mask flags can be set or cleared by device specific IOTs.
+</p>
+
+<p>
+When the CPU accepts an interrupt, i.&nbsp;e. when the interrupt enable flag is set,
+the delay and inhibit flags are cleared and a device thats interrupt mask flag is set
+raises its I/O flag, the following happens: The CPU completes the execution of the
+instruction in progress and acknowledges the interrupt. The interrupt enable flag
+is cleared, i.&nbsp;e. no further interrupts can occur, the content of PC is saved in
+memory location 0 (on field 0), and PC is set to one. So execution continues at
+location 1 where the interrupt service routine must reside. When the PDP-8 has
+a KM8-E Memory Extension, additionally the values of DF, IF and UB are saved
+in the 7-bit register SF (UB in SF(0), IF in SF(1&ndash;3), and DF in SF(4&ndash;6)),
+and DF, IF, IB, UB, and UF are cleared, i.&nbsp;e. the CPU switches to memory field 0
+and to system mode (UF=0).
+</p>
+
+<p>
+When the interrupt service routine has serviced the I/O request, it must enable
+interrupts and return to the user program. (Eventually it has to restore DF, IF, and UF;
+for that and the function of the inhibit flag see the KM8-E help.) To re-enable
+interrupts, it executes an ION instruction which sets the interrupt enable and delay
+flag, and a JMP I 0. Because the delay flag is set, no interrupt can occur between the
+ION and JMP instruction which would destroy the return address in location 0. The
+delay flag is cleared in any instruction cycle after checking for interrupts and
+before execution of the instruction; so new interrupts can occur after execution of
+the JMP instruction.
+</p>
+
+<p>
+The machine instructions for controlling the interrupt facility are IOTs with
+I/O address 0:
+</p>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th class="left"><br>Description</th>
+</tr>
+<tr>
+	<td>SKON</td>
+	<td>6000</td>
+	<td class="left">
+		Skip the next instruction if interrupts are enabled and disable interrupts,
+		i.&nbsp;e. clear the interrupt enable flag.
+	</td>
+</tr>
+<tr>
+	<td>ION</td>
+	<td>6001</td>
+	<td class="left">
+		Turn interrupts on and enable the computer to respond to an interrupt request.
+		When this instruction is given, the computer executes the next instruction,
+		then enables interrupts. The additional instruction allows exit from the
+		interrupt service routine before allowing another interrupt to occur.
+	</td>
+</tr>
+<tr>
+	<td>IOF</td>
+	<td>6002</td>
+	<td class="left">
+		Turn interrupts off, i.&nbsp;e. disable interrupts.
+	</td>
+</tr>
+<tr>
+	<td>SRQ</td>
+	<td>6003</td>
+	<td class="left">
+		Skip on interrupt request. When the interrupt enable flag and the I/O flag of
+		any I/O device are set, the next instruction is skipped.
+	</td>
+</tr>
+<tr>
+	<td>GTF</td>
+	<td>6004</td>
+	<td class="left">
+		Get interrupt flags. All status flags of the CPU are loaded into AC:<br>
+		AC(0) = L flag,<br>
+		AC(1) = GTF (when the EAE is running in mode B),<br>
+		AC(2) = 1 when an interrupt request is pending, else 0,<br>
+		AC(3) = 0 (the KM8-E was specified to load the interrupt inhibit flag into
+		AC(3), but the hardware ignores this flag),<br>
+		AC(4) = interrupt enable flag,<br>
+		AC(5&ndash;11) = SF.
+	</td>
+</tr>
+<tr>
+	<td>RTF</td>
+	<td>6005</td>
+	<td class="left">
+		Restore interrupt flags. This is the invers operation of GTF and loads the
+		CPU status flags from AC:<br>
+		L = AC(0),<br>
+		GTF = AC(1) (when the EAE is running in mode B),<br>
+		SF = AC(5&ndash;11),<br>
+		UB = AC(5),<br>
+		IB = AC(6&ndash;8),<br>
+		DF = AC(9&ndash;11),<br>
+		Interrupt inhibit flag = 1,<br>
+		Interrupt enable flag = 1,<br>
+		Interrupt delay flag = 1.
+	</td>
+</tr>
+<tr>
+	<td>SGT</td>
+	<td>6006</td>
+	<td class="left">
+		Clear all flags. This instruction clears L, AC, the interrupt enable, delay
+		and inhibit flag, the I/O flags, the interrupt enable flags (it sets the
+		enable flags for TTY input and output and, if UB is one, the user mode mask);
+		it switches the EAE to mode A and clears GTF, and it clears the input and
+		output registers of all attached I/O devices.
+	</td>
+</tr>
+</table>
+
+<h3>Remark</h3>
+
+<p>
+Earlier PDP-8 models (PDP-8, -8/S, -8/I, -8/L) do not support IOTs SKON (6000) and
+SRQ, GTF, RTF, SGF, CAF (6003&ndash;6007).
+</p>
+
+</body>
+</html>

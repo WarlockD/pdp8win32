@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	MemoryExtension.html - Online help - KM8-E instructions
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta name="AppleTitle" content="KM8-E Memory Extension">
+	<title>KM8-E Memory Extension</title>
+	<meta name="description"
+		content="Describes the PDP-8 instructions for working with more than 4K words">
+	<link href="../resources/styles.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+
+<h1>KM8-E Memory Extension</h1>
+
+<p>
+The KM8-E IOTs enable programs to change the instruction and data field
+registers (IF and DF) of the KM8-E Memory Extension to address up to 32K
+words of memory and to operate the time sharing capabilities of the
+extended PDP-8. For information about memory field addressing with the
+KM8-E, see
+<a href="../MemoryReferenceInstructions/MemoryReferenceInstructions.html">here</a>.
+</p>
+
+<p>
+The time sharing option of the KM8-E can be enabled with a jumper on the
+board. When this jumper is in place, loading of the UF flip flop from the
+UBB flip flop is inhibited. When the jumper is removed, loading of UF is
+enabled. With the PDP-8/E Simulator, this jumper is emulated by a checkbox
+in the PDP-8/E CPU preferences panel.
+</p>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th class="left"><br>Description</th>
+</tr>
+<tr>
+	<td>CDF x0</td>
+	<td>662x1</td>
+	<td class="left">
+		Change to data field x (x=0,&hellip;,7). The data field register DF 
+		is loaded with the selected field number x. All subsequent memory
+		requests for operands are automatically switched to that memory
+		field until the field number is changed by a new CDF command or an
+		interrupt occurs.
+	</td>
+</tr>
+<tr>
+	<td>CIF x0</td>
+	<td>62x2</td>
+	<td class="left">
+		Prepare to change to instruction field x (x=0,&hellip;,7). The
+		instruction field buffer IB is loaded with the selected field
+		number x, and the interrupt inhibit flag is set. The next JMP or
+		JMS insruction causes the value of IB to be loaded into IF and the
+		inhibit flag to be cleared. This enables a program to continue at
+		a defined location on the new instruction field and disables
+		interrupts while the new field setting is pending.
+	</td>
+</tr>
+<tr>
+	<td>CDI x0</td>
+	<td>62x3</td>
+	<td class="left">
+		Microprogrammed combination of CDF x0 and CIF x0.
+	</td>
+</tr>
+<tr>
+	<td>CINT</td>
+	<td>6204</td>
+	<td class="left">
+		Clear the user mode I/O flag. The user mode I/O flag is set when
+		the CPU executes a privileged instruction (IOT or HLT) when running
+		in user mode (UF=1). Then an interrupt will occur to enable the
+		operating system to handle this exception and to clear the flag
+		with CINT.
+	</td>
+</tr>
+<tr>
+	<td>RDF</td>
+	<td>6214</td>
+	<td class="left">
+		Read data field DF into AC(6&ndash;8) (logical OR of IF with
+		AC(6&ndash;8)). The other bits of AC are not affected.
+	</td>
+</tr>
+<tr>
+	<td>RIF</td>
+	<td>6224</td>
+	<td class="left">
+		Same as RDF except that the instruction field IF is read.
+	</td>
+</tr>
+<tr>
+	<td>RIB</td>
+	<td>6234</td>
+	<td class="left">
+		Read interrupt buffer SF (save field) into AC(5&ndash;11) (logical
+		OR of SF with AC(5&ndash;11)). The other bits of AC are not
+		affected.
+	</td>
+</tr>
+<tr>
+	<td>RMF</td>
+	<td>6244</td>
+	<td class="left">
+		Restore memory fields to exit from an interrupt service routine.
+		This instruction loads UB from SF(0), IB from SF(1&ndash;3) and
+		DF from SF(4&ndash;6).
+	</td>
+</tr>
+<tr>
+	<td>SINT</td>
+	<td>6254</td>
+	<td class="left">
+		Skip the next instruction if the user mode I/O flag is set.
+		Usefull for checking if an interrupt was caused by the execution
+		of a privileged instruction in user mode.
+	</td>
+</tr>
+<tr>
+	<td>CUF</td>
+	<td>6264</td>
+	<td class="left">
+		Clear user flag. This instruction clears the UB flip flop.
+	</td>
+</tr>
+<tr>
+	<td>SUF</td>
+	<td>6274</td>
+	<td class="left">
+		Set user flag. This instruction sets the UB flip flop and the
+		interrupt inhibit flag. The next JMP or JMS instruction loads
+		UB into UF and clears the inhibit flag and so switches the CPU
+		to user mode operation.
+	</td>
+</tr>
+</table>
+
+</body>
+</html>

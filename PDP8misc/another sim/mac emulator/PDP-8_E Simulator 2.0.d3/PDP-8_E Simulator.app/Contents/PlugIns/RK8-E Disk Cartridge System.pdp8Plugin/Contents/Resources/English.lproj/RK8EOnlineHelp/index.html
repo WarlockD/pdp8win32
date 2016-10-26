@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	index.html - Online help for the RK8-E Disk Cartridge System
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+	<title>RK8-E Disk Cartridge System Help</title>
+	<meta name="description"
+		content="Describes the functioning and PDP-8 IOTs of the RK8-E Disk Cartridge System">
+	<meta name="AppleTitle" content="RK8-E Disk Cartridge System Help">
+	<meta name="AppleIcon" content="pdp8e.png">
+	<link href="styles.css" rel="stylesheet" media="all">
+</head>
+<body>
+
+<h1>IOTs for the RK8-E Disk Cartridge System</h1>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th class="left"><br>Description</th>
+</tr>
+<tr>
+	<td>DSKP</td>
+	<td>6741</td>
+	<td class="left">
+		Disk Skip on Flag. If the RK8-E I/O flag is set, the next instruction is skipped.
+		The flag is raised when an I/O operation is completed or an I/O error occured.
+	</td>
+</tr>
+<tr>
+	<td>DCLR</td>
+	<td>6742</td>
+	<td class="left">
+		Disk Clear. The function is regulated by AC(10&ndash;11):<br>
+		AC(10&ndash;11) = 00 (DCLS): Clear AC and the status register.<br>
+		AC(10&ndash;11) = 01 (DCLC): Clear AC and all RK8-E registers.
+		This instruction aborts any disk command in progress and resets the maintenance mode.<br>
+		AC(10&ndash;11) = 10 (DCLD): Clear AC and the status register and recalibrate the
+		selected drive to cylinder 0.<br>
+		AC(10&ndash;11) = 11: Undefined. Performs the same function as with AC(10&ndash;11) = 00.
+	</td>
+</tr>
+<tr>
+	<td>DLAG</td>
+	<td>6743</td>
+	<td class="left">
+		Load Address and Go. The disk cylinder, surface and sector bits (12 least significant
+		bits of the block number) are loaded from AC(0&ndash;6), AC(7) and AC(8&ndash;11)
+		respectively, and the function indicated by the current content of the command register
+		is executed.
+	</td>
+</tr>
+<tr>
+	<td>DLCA</td>
+	<td>6744</td>
+	<td class="left">
+		Load Current Address. The content of AC is loaded into the disk current address register
+		(12 least significant bits of the memory address). The next data transfer between memory
+		and the disk will use this memory start address. After the transfer is completed, the
+		content of the current address register is incremented by the size of the transferred
+		data block.
+	</td>
+</tr>
+<tr>
+	<td>DRST</td>
+	<td>6745</td>
+	<td class="left">
+		Read Status. The content of the disk status register is transferred into AC.
+	</td>
+</tr>
+<tr>
+	<td>DLDC</td>
+	<td>6746</td>
+	<td class="left">
+		Load Command. The content of AC is loaded into the disk command register.
+		Then AC and the disk status register are both cleared.
+	</td>
+</tr>
+<tr>
+	<td>DMAN</td>
+	<td>6747</td>
+	<td class="left">
+		Maintenance instruction. This instruction is only used by hardware diagnostic software.
+		The function is regulated by bits in the AC which cannot be microprogrammed:<br>
+		AC(0) = 1: Enter maintenance mode and disable the DLAG IOT.<br>
+		AC(1) = 1: Enable a shift to the lower data buffer DB4.<br>
+		AC(2) = 1: Check CRC register. AC(10), the CRC register and the lower data buffer are
+		connected as a shift register, and AC(10) shifts to the CRC, CRC shifts to
+		lower data buffer.<br>
+		AC(3) = 1: Check command register. The command register is shifted by one bit to the
+		lower data buffer.<br>
+		AC(4) = 1: Check surface and sector register. The surface and sector register (12 LSBs
+		of the current block number) is shifted by one bit to the lower data buffer.<br>
+		AC(5) = 1: Check data buffer. AC(10) is shifted to the upper data buffer,
+		the upper data buffer sinks to the lower data buffers when it is full (after 12 shifts).<br>
+		AC(6) = 1: Check data break request. A single cycle data break request is performed.
+		The direction of data transfer is regulated by the function in the command register.<br>
+		AC(7) = 1: Transfer the content of the lower data buffer DB4 to the AC.<br>
+		AC(8): Not used.<br>
+		AC(9): Not used.<br>
+		AC(10): Used as data for some maintenance functions.<br>
+		AC(11): Not used.
+	</td>
+</tr>
+</table>
+
+<h2>Formatting a DECpack Disk Cartridge</h2>
+
+<p>
+With the PDP-8/E Simulator, formatting a new DECpack disk cartridge is not necessary and would increase
+the size of the DECpack disk file to its maximum amount (see Technical Notes, below). With the simulator,
+the Read and Read All resp. the Write and Write All commands are identical. With a hardware RK8-E, to
+format a new disk, a program has to address every sector and write test patterns (containing the sector
+number) with the Write All command, which writes the data and the sector header word. The sector header
+word is used internally by the disk control and cannot be accessed by PDP-8 software. The Read All
+command then can be used to verify the data written to the initialized sectors. The Read All command
+prevents the RK8-E from reading sector header words and report header errors that will certainly exist
+on an unformatted disk.
+</p>
+
+<h2>Normal Read and Write Operations</h2>
+
+<p>
+For a normal disk read or write, a program has to perform the following steps:
+</p>
+
+<ul>
+<li>
+	Set up the memory transfer address using DLCA.
+</li>
+<li>
+	Set up the command register with 00xy for read and 10xy for write using DLDC (xy is determined
+	by the memory field for the data transfer, the selected disk drive and the disk block number;
+	see the RK8-E window for the exact bit assignment.)
+</li>
+<li>
+	Set up the required disk address (block number) and start the I/O operation using DLAG.
+</li>
+<li>
+	Wait until the data is transferred by &ldquo;Data Break&rdquo; (Direct Memory Access, DMA) and
+	the RK8-E I/O flag is raised (using DSKP), then check for errors (using DRST to read the
+	status register).
+</li>
+</ul>
+
+<h2>Seek Only</h2>
+
+<p>
+The sequence for seek only (command register function bits equal three) is different from normal read
+or write operation. It is necessary to put two skip or interrupt sequences in the program:
+</p>
+
+<ul>
+<li>
+	Set up the command register with 300x for seek only and the desired drive number.
+</li>
+<li>
+	Load the disk address (block number) and go.
+</li>
+<li>
+	Wait for the RK8-E I/O flag.
+</li>
+<li>
+	Clear the RK8-E I/O flag. The drive has started to move the head to the desired track.
+</li>
+<li>
+	If the RK8-E I/O flag is to be set when the seek is complete, bit 4 of the command register must
+	be set to one. So issue a load command (DLDC) with the selected drive number in AC(10&ndash;11)
+	and AC(4) = 1.
+</li>
+<li>
+	Wait for the RK8-E I/O flag.
+</li>
+</ul>
+
+<p>
+The alternative to the last two steps is to check the &ldquo;Head in Motion&rdquo; bit of the
+RK8-E status register (bit 1) which is zero when the seek is completed.
+</p>
+
+<p>
+When seek operations are started for more than one RK05 drive simultaneously (overlapped seek),
+care has to be taken to determine which drive has completed its seek operation when the RK8-E I/O flag
+is raised or a disk interrupt occurs. There are two methods to do this:
+</p>
+
+<ul>
+<li>
+	Before selecting a new drive to check its seek status, clear bit 4 of the command register
+	without changing the old drive number. Then change the drive number with bit 4 of the
+	command register equal to a one. When the new drive has completed the seek, there will be
+	no confusion as to which drive set the RK8-E I/O flag.
+</li>
+<li>
+	Leave bit 4 of the command register set and check bit 1 (&ldquo;Head in Motion&rdquo;) of the
+	status register to determine if the now or previously selected drive set the RK8-E I/O flag.
+</li>
+</ul>
+
+<h2>Capacity of a DECpack Disk Cartridge</h2>
+
+<p>
+A DECpack cartridge has two surfaces, each surface has 200 (+ 3 spare) cylinders, each cylinder has
+16 sectors (blocks) with 256 12-bit words. So a disk has block numbers 0&ndash;6,495 and a capacity of
+1,662,976 words (nearly 2.5 MB); a PDP-8 with four RK05 drives has online access to nearly 10 MB of
+mass storage.
+</p>
+
+<h2>Technical Notes</h2>
+
+<ul>
+<li>
+	The PDP-8/E Simulator stores DECpack disk cartridges in files with the extension .rk05.
+	(For compatibility reasons, files with the file type &lsquo;RK8E&rsquo; and creator
+	&lsquo;RK8E&rsquo; used by the Classic PDP-8/E Simulator are still recognized.)
+	The disk is stored as an unstructured sequence of DECpack disk blocks, each block with 256 12-bit
+	words. Two consecutive 12-bit words aaaaaaaaAAAA BBBBbbbbbbbb are stored in three consecutive bytes
+	aaaaaaaa AAAABBBB bbbbbbbb (MSB at the left in both cases).
+</li>
+<li>
+	Cylinders of newly created DECpack disk files are not stored in the file until a block of the
+	cylinder is read or written by the PDP-8. Reading never written data returns zeros. The simulator
+	always buffers a complete DECpack disk cylinder in memory.
+</li>
+<li>
+	The RK8-E uses threads for each RK05 drive, so the drives really work parallel to the simulated PDP-8.
+</li>
+<li>
+	The header words of the sectors are not simulated explicitly. They are assumed to be always correct.
+	It is impossible for PDP-8 software to access this word temporarily stored in the CRC register
+	with the DMAN IOT.
+</li>
+<li>
+	The block CRC words are not stored in the DECpack disk file because there is no danger of single
+	bit errors with the simulated disks. The CRC is calculated when a block is read or written and is
+	available for the PDP-8 via the DMAN IOT. However, the PDP-8 can write wrong CRCs to the disk by
+	issuing DMAN instructions shifting the CRC register while an I/O operation is in progress. Then
+	the PDP-8 can read the block back and check for CRC errors. For this purpose, the simulator holds
+	a bit for every block indicating that the CRC of the block was willfully destroyed. This bit array
+	is not stored with the disk image, so CRC errors disappear by unmounting and remounting a DECpack
+	disk or by restarting the simulator.
+</li>
+</ul>
+
+</body>
+</html>

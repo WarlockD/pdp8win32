@@ -1,0 +1,745 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	OperateInstructions.html - Online help - OPR instructions
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta name="AppleTitle" content="Operate Instructions">
+	<title>Operate Instructions</title>
+	<meta name="description"
+		content="Describes the operate instructions and microprogramming for the PDP-8">
+	<link href="../resources/styles.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+
+<h1>Operate Instructions</h1>
+
+<p>
+The operate instructions allow a program to manipulate or test the
+data located in AC and the L flag. Many different instructions are
+possible with one operation code because the operand bits are not
+needed to specify an address as they are in a MRI and can be used
+to specify different instructions. Combining more than one operation
+in an OPR instruction by setting more than one operation bit is
+called <em>Microprogramming</em>. The instructions that can be
+combined in one OPR &mdash; called <em>Microoperations</em> &mdash;
+are executed in a defined order: they have a Sequence Number
+between one and four, and they are executed in the order of their
+sequence numbers. The operate instructions are separated in two
+groups: Group 1, which contains manipulation instructions,
+and Group 2, which is primarily concerned with testing operations.
+</p>
+
+<h2>Group 1 Microinstructions</h2>
+
+<p>
+Bit assignments of the group 1 microinstructions:
+</p>
+
+<center>
+<table>
+	<tr>
+		<td class="opcode"></td>
+		<td class="opcode" colspan="3">Opcode 111</td>
+		<td class="opcode"></td>
+		<td class="opcode">CLA</td>
+		<td class="opcode">CLL</td>
+		<td class="opcode">CMA</td>
+		<td class="opcode">CML</td>
+		<td class="opcode">RAR</td>
+		<td class="opcode">RAL</td>
+		<td class="opcode"></td>
+		<td class="opcode">IAC</td>
+	</tr>
+	<tr>
+		<td class="opcode">Bits</td>
+		<td class="opcode_tlb">0</td>
+		<td class="opcode_tb">1</td>
+		<td class="opcode_tb">2</td>
+		<td class="opcode_tlb">3</td>
+		<td class="opcode_tlb">4</td>
+		<td class="opcode_tlb">5</td>
+		<td class="opcode_tlb">6</td>
+		<td class="opcode_tlb">7</td>
+		<td class="opcode_tlb">8</td>
+		<td class="opcode_tlb">9</td>
+		<td class="opcode_tlb">10</td>
+		<td class="opcode_tlbr">11</td>
+	</tr>
+	<tr>
+		<td class="opcode" colspan="3"></td>
+		<td class="opcode" colspan="3">
+			Group Bit:<br>
+			0: Group 1<br>
+			1: Group 2<br>
+			&nbsp;
+		</td>
+		<td class="opcode" colspan="4"></td>
+		<td class="opcode" colspan="3">
+			BSW or<br>
+			Rotate Count:<br>
+			0: Rotate once<br>
+			1: Rotate twice
+		</td>
+	</tr>
+</table>
+</center>
+
+<p></p>
+
+<table>
+<tr>
+	<th>Mnemonic</th>
+	<th>Seq.</th>
+	<th class="left">Description</th>
+</tr>
+<tr>
+	<td>CLA</td>
+	<td>1</td>
+	<td class="left">
+		Clear the accumulator. If bit 4 is one, the instruction
+		sets the accumulator to all zeros.
+	</td>
+</tr>
+<tr>
+	<td>CLL</td>
+	<td>1</td>
+	<td class="left">
+		Clear the link flag. If bit 5 is one, the link flag is
+		set to zero.
+	</td>
+</tr>
+<tr>
+	<td>CMA</td>
+	<td>2</td>
+	<td class="left">
+		Complement the accumulator. If bit 6 is one, the
+		accumulator is set to the one&rsquo;s complement
+		of its original value.
+	</td>
+</tr>
+<tr>
+	<td>CML</td>
+	<td>2</td>
+	<td class="left">
+		Complement the link flag. If bit 7 is one, the state
+		of the link flag is reversed by the instruction.
+	</td>
+</tr>
+<tr>
+	<td>RAR</td>
+	<td>4</td>
+	<td class="left">
+		Rotate the accumulator and the link flag right.
+		If bit 8 is one and bit 10 is zero, the instruction
+		treats AC and L as a closed loop and shifts all bits
+		in the loop one position to the right.
+	</td>
+</tr>
+<tr>
+	<td>RTR</td>
+	<td>4</td>
+	<td class="left">
+		Rotate the accumulator and the link flag twice right.
+		If bit 8 is one and bit 10 is also one, a circular
+		shift of two places to the right is executed.
+	</td>
+</tr>
+<tr>
+	<td>RAL</td>
+	<td>4</td>
+	<td class="left">
+		Rotate the accumulator and the link flag left.
+		If bit 9 is one and bit 10 is zero, the instruction
+		treats AC and L as a closed loop and shifts all bits
+		in the loop one position to the left.
+	</td>
+</tr>
+<tr>
+	<td>RTL</td>
+	<td>4</td>
+	<td class="left">
+		Rotate the accumulator and the link flag twice left.
+		If bit 9 is one and bit 10 is also one, a circular
+		shift of two places to the left is executed.
+	</td>
+</tr>
+<tr>
+	<td>BSW</td>
+	<td>4</td>
+	<td class="left">
+		Swap the bytes in the accumulator. If bit 10 is one
+		and bits 8 and 9 are zero, the instruction swaps the
+		two 6-bit bytes in AC(0&ndash;5) and AC(6&ndash;11).
+	</td>
+</tr>
+<tr>
+	<td>IAC</td>
+	<td>3</td>
+	<td class="left">
+		Increment the accumulator. When bit 11 is one, the
+		content of AC is incremented by one.
+	</td>
+</tr>
+<tr>
+	<td>NOP</td>
+	<td>&minus;</td>
+	<td class="left">
+		No operation. If bits 4 through 11 contain zeros,
+		no operation is performed and program control is
+		transferred to the next instruction of the program.
+	</td>
+</tr>
+</table>
+
+<h3>Remarks</h3>
+
+<ul>
+<li>
+	The byte swap operation BSW is not available on earlier
+	PDP-8 models (PDP-8, PDP-8/S, PDP-8/I, PDP-8/L).
+</li>
+<li>
+	The combination of IAC with rotate microoperations is not
+	allowed on the original PDP-8 and the PDP-8/S.
+</li>
+<li>
+	The combination of CMA with rotate microoperations is not
+	allowed on the PDP-8/S.
+</li>
+<li>
+	The meaningless combination of the RAR and RAL
+	microoperation have special effects on the different PDP-8
+	models which allow a program to determine the model it is
+	running on. On the original PDP-8, combinations of RAR and
+	RAL or RTR and RTL have unpredictable results. On the
+	PDP-8/I and PDP-8/L, they produce the logical AND of the
+	expected results from each of the combined shifts. On the
+	PDP-8/E, /F, and /M, the combination of RAR and RAL produces
+	the logical AND of AC with the opcode, and the combination
+	of RTR and RTL does an effective address computation loading
+	the five high bits of AC with the current page and the lower
+	bits of AC with lower seven bits (page address) of the OPR
+	instruction. On the PDP-8/A, combination of RAR and RAL
+	produces the logical AND of AC with the opcode, and the
+	combination of RTR and RTL loads the next address into AC.
+	In the CPU window, OPR instructions with RAR and RAL
+	combinations are disassembled as &ldquo;(reserved)&rdquo;.
+</li>
+</ul>
+
+<h2>Group 2 Microinstructions</h2>
+
+<p>
+Bit assignments of the group 2 microinstructions:
+</p>
+
+<center>
+<table>
+	<tr>
+		<td class="opcode"></td>
+		<td class="opcode" colspan="3"><br>Opcode 111</td>
+		<td class="opcode"></td>
+		<td class="opcode"><br>CLA</td>
+		<td class="opcode">SMA<br>SPA</td>
+		<td class="opcode">SZA<br>SNA</td>
+		<td class="opcode">SNL<br>SZL</td>
+		<td class="opcode"></td>
+		<td class="opcode"><br>OSR</td>
+		<td class="opcode"><br>HLT</td>
+		<td class="opcode"><br>0</td>
+	</tr>
+	<tr>
+		<td class="opcode">Bits</td>
+		<td class="opcode_tlb">0</td>
+		<td class="opcode_tb">1</td>
+		<td class="opcode_tb">2</td>
+		<td class="opcode_tlb">3</td>
+		<td class="opcode_tlb">4</td>
+		<td class="opcode_tlb">5</td>
+		<td class="opcode_tlb">6</td>
+		<td class="opcode_tlb">7</td>
+		<td class="opcode_tlb">8</td>
+		<td class="opcode_tlb">9</td>
+		<td class="opcode_tlb">10</td>
+		<td class="opcode_tlbr">11</td>
+	</tr>
+	<tr>
+		<td class="opcode" colspan="3"></td>
+		<td class="opcode" colspan="3">
+			Group Bit:<br>
+			0: Group 1<br>
+			1: Group 2<br>
+			&nbsp;
+		</td>
+		<td class="opcode" colspan="2"></td>
+		<td class="opcode" colspan="3">
+			Reverse<br> Sensing Bit:<br>
+			0: SMA, SZA, SNL<br>
+			1: SPA, SNA, SZL
+		</td>
+	</tr>
+</table>
+</center>
+<p></p>
+
+<table>
+<tr>
+	<th>Mnemonic</th>
+	<th>Seq.</th>
+	<th class="left">Description</th>
+</tr>
+<tr>
+	<td>CLA</td>
+	<td>2</td>
+	<td class="left">
+		Clear the accumulator. If bit 4 is one, the instruction
+		sets the accumulator to all zeros.
+	</td>
+</tr>
+<tr>
+	<td>SMA</td>
+	<td>1</td>
+	<td class="left">
+		Skip on minus accumulator. If bit 5 is one and bit 8 is
+		zero, the next instruction is skipped if the accumulator
+		is less than zero.
+	</td>
+</tr>
+<tr>
+	<td>SPA</td>
+	<td>1</td>
+	<td class="left">
+		Skip on positive accumulator. If bit 5 is one and bit 8
+		is also one, the next instruction is skipped if the
+		accumulator is greater than or equal to zero.
+	</td>
+</tr>
+<tr>
+	<td>SZA</td>
+	<td>1</td>
+	<td class="left">
+		Skip on zero accumulator. If bit 6 is one and bit 8 is
+		zero, the next instruction is skipped if the accumulator
+		is zero.
+	</td>
+</tr>
+<tr>
+	<td>SNA</td>
+	<td>1</td>
+	<td class="left">
+		Skip on nonzero accumulator. If bit 6 is one and bit 8
+		is also one, the next instruction is skipped if the
+		accumulator is not zero.
+	</td>
+</tr>
+<tr>
+	<td>SNL</td>
+	<td>1</td>
+	<td class="left">
+		Skip on nonzero link. If bit 7 is one and bit 8 is zero,
+		the next instruction is skipped when the link flag is one.
+	</td>
+</tr>
+<tr>
+	<td>SZL</td>
+	<td>1</td>
+	<td class="left">
+		Skip on zero link. If bit 7 is one and bit 8 is also one,
+		the next instruction is skipped when the link flag is zero.
+	</td>
+</tr>
+<tr>
+	<td>SKP</td>
+	<td>1</td>
+	<td class="left">
+		Unconditional skip. If bit 8 is one and bits 5 to 7 are
+		all zeros, the next instruction is skipped.
+	</td>
+</tr>
+<tr>
+	<td>OSR</td>
+	<td>3</td>
+	<td class="left">
+		Logical OR of the switch register and AC. If bit 9 is one,
+		a logical OR operation is performed between the content
+		of the accumulator and the console switch register SR.
+		The result is left in AC.
+	</td>
+</tr>
+<tr>
+	<td>HLT</td>
+	<td>3</td>
+	<td class="left">
+		Halt. If bit 10 is one, the computer will stop at the
+		conclusion of the current machine cycle.
+	</td>
+</tr>
+<tr>
+	<td>NOP</td>
+	<td>&minus;</td>
+	<td class="left">
+		No operation. If bits 4 through 11 contain zeros, no
+		operation is performed and the program control is
+		transferred to the next instruction of the program.
+	</td>
+</tr>
+</table>
+
+<h3>Remarks</h3>
+
+<ul>
+<li>
+	When SMA, SZA or SNL are combined (bit 8 of the instruction
+	is zero), the skip takes place if one of the conditions is
+	true, i.&nbsp;e. when the logical OR of the results of the
+	condition tests is true. When SPA, SNA or SZL are combined
+	(bit 8 of the instruction is one), the skip takes place if
+	all conditions simultaneously are true, i.&nbsp;e. when the
+	logical AND of the results of the condition tests is true.
+</li>
+<li>
+	For Group 2 OPRs, bit 11 is always zero. When the group
+	bit 3 and bit 11 of an OPR instruction are one, it is an
+	instruction for the Extended Arithmetic Element. EAE
+	microoperations are also called <em>Group 3</em>
+	microoperations. 
+</li>
+</ul>
+
+<h2>Mnemonics for OPR instructions</h2>
+
+<p>
+Some usefull microoperation combinations have special mnemonics
+recognized by PDP-8 assemblers. They and the basic OPR
+instructions are listed in the following table. Note that the
+CPU window disassembles combined microoperations as a sequence
+of basic microoperations in the order of their sequence numbers,
+i.&nbsp;e. execution order.
+</p>
+
+<table>
+<tr>
+	<th>Mnemonic</th>
+	<th>Octal</th>
+	<th>Seq.</th>
+	<th class="left" colspan="2">Description</th>
+</tr>
+<tr>
+	<td>NOP</td>
+	<td>7000</td>
+	<td>&minus;</td>
+	<td class="left">No operation.</td>
+	<td class="right"><b>Group&nbsp;1</b></td>
+</tr>
+<tr>
+	<td>IAC</td>
+	<td>7001</td>
+	<td>3</td>
+	<td class="left">Increment AC.</td>
+</tr>
+<tr>
+	<td>RAL</td>
+	<td>7004</td>
+	<td>4</td>
+	<td class="left">Rotate AC and L circular left.</td>
+</tr>
+<tr>
+	<td>RTL</td>
+	<td>7006</td>
+	<td>4</td>
+	<td class="left">Rotate AC and L twice circular left.</td>
+</tr>
+<tr>
+	<td>RAR</td>
+	<td>7010</td>
+	<td>4</td>
+	<td class="left">Rotate AC and L curcular right.</td>
+</tr>
+<tr>
+	<td>RTR</td>
+	<td>7012</td>
+	<td>4</td>
+	<td class="left">Rotate AC and L twice circular right.</td>
+</tr>
+<tr>
+	<td>CML</td>
+	<td>7020</td>
+	<td>2</td>
+	<td class="left">Complement L.</td>
+</tr>
+<tr>
+	<td>CMA</td>
+	<td>7040</td>
+	<td>2</td>
+	<td class="left">Complement AC.</td>
+</tr>
+<tr>
+	<td>CIA</td>
+	<td>7041</td>
+	<td>2,3</td>
+	<td class="left">
+		Complement and increment AC, i.&nbsp;e. built
+		the two&rsquo;s complement of AC.
+	</td>
+</tr>
+<tr>
+	<td>CLL</td>
+	<td>7100</td>
+	<td>1</td>
+	<td class="left">Clear L.</td>
+</tr>
+<tr>
+	<td>CLL RAL</td>
+	<td>7104</td>
+	<td>1,4</td>
+	<td class="left">Shift positive number one left.</td>
+</tr>
+<tr>
+	<td>CLL RTL</td>
+	<td>7106</td>
+	<td>1,4</td>
+	<td class="left">Clear L, rotate two left.</td>
+</tr>
+<tr>
+	<td>CLL RAR</td>
+	<td>7110</td>
+	<td>1,4</td>
+	<td class="left">Shift positive number one right.</td>
+</tr>
+<tr>
+	<td>CLL RTR</td>
+	<td>7112</td>
+	<td>1,4</td>
+	<td class="left">Clear L, rotate two right.</td>
+</tr>
+<tr>
+	<td>STL</td>
+	<td>7120</td>
+	<td>1,2</td>
+	<td class="left">Set L = 1.</td>
+</tr>
+<tr>
+	<td>CLA</td>
+	<td>7200</td>
+	<td>1</td>
+	<td class="left">Clear AC.</td>
+</tr>
+<tr>
+	<td>CLA IAC</td>
+	<td>7201</td>
+	<td>1,3</td>
+	<td class="left">Set AC = 1.</td>
+</tr>
+<tr>
+	<td>GLK</td>
+	<td>7204</td>
+	<td>1,4</td>
+	<td class="left">Get link. Transfer L into AC(11).</td>
+</tr>
+<tr>
+	<td>CLA CLL</td>
+	<td>7300</td>
+	<td>1</td>
+	<td class="left">Clear AC and L.</td>
+</tr>
+<tr>
+	<td>STA</td>
+	<td>7240</td>
+	<td>2</td>
+	<td class="left">Set AC = &minus;1.</td>
+</tr>
+<tr>
+	<td class="bb">BSW</td>
+	<td class="bb">7002</td>
+	<td class="bb">4</td>
+	<td class="bb_left">Byte swap of AC(0&ndash;5) and AC(6&ndash;11).</td>
+	<td class="bb"></td>
+</tr>
+<tr>
+	<td>HLT</td>
+	<td>7402</td>
+	<td>3</td>
+	<td class="left">Halt the computer.</td>
+	<td class="right"><b>Group&nbsp;2</b></td>
+</tr>
+<tr>
+	<td>OSR</td>
+	<td>7404</td>
+	<td>3</td>
+	<td class="left">Logical OR AC with SR.</td>
+</tr>
+<tr>
+	<td>SKP</td>
+	<td>7410</td>
+	<td>1</td>
+	<td class="left">Skip unconditionally.</td>
+</tr>
+<tr>
+	<td>SNL</td>
+	<td>7420</td>
+	<td>1</td>
+	<td class="left">
+		Skip if L &ne; 0.
+	</td>
+</tr>
+<tr>
+	<td>SZL</td>
+	<td>7430</td>
+	<td>1</td>
+	<td class="left">
+		Skip if L = 0.
+	</td>
+</tr>
+<tr>
+	<td>SZA</td>
+	<td>7440</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC = 0.
+	</td>
+</tr>
+<tr>
+	<td>SNA</td>
+	<td>7450</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &ne; 0.
+	</td>
+</tr>
+<tr>
+	<td>SZA SNL</td>
+	<td>7460</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC = 0 or L = 1.
+	</td>
+</tr>
+<tr>
+	<td>SNA SZL</td>
+	<td>7470</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &ne; 0 and L = 0.
+	</td>
+</tr>
+<tr>
+	<td>SMA</td>
+	<td>7500</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &lt; 0.
+	</td>
+</tr>
+<tr>
+	<td>SPA</td>
+	<td>7510</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &ge; 0.
+	</td>
+</tr>
+<tr>
+	<td>SMA SNL</td>
+	<td>7520</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &lt; 0 or L = 1.
+	</td>
+</tr>
+<tr>
+	<td>SPA SZL</td>
+	<td>7530</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &ge; 0 and L = 0.
+	</td>
+</tr>
+<tr>
+	<td>SMA SZA</td>
+	<td>7540</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &le; 0.
+	</td>
+</tr>
+<tr>
+	<td>SPA SNA</td>
+	<td>7550</td>
+	<td>1</td>
+	<td class="left">
+		Skip if AC &gt; 0.
+	</td>
+</tr>
+<tr>
+	<td>CLA</td>
+	<td>7600</td>
+	<td>2</td>
+	<td class="left">
+		Clear AC.
+	</td>
+</tr>
+<tr>
+	<td>LAS</td>
+	<td>7604</td>
+	<td>2,3</td>
+	<td class="left">
+		Load AC with SR.
+	</td>
+</tr>
+<tr>
+	<td>SZA CLA</td>
+	<td>7640</td>
+	<td>1,2</td>
+	<td class="left">
+		Skip if AC = 0, then clear AC.
+	</td>
+</tr>
+<tr>
+	<td>SNA CLA</td>
+	<td>7650</td>
+	<td>1,2</td>
+	<td class="left">
+		Skip if AC &ne; 0, then clear AC.
+	</td>
+</tr>
+<tr>
+	<td>SMA CLA</td>
+	<td>7700</td>
+	<td>1,2</td>
+	<td class="left">
+		Skip if AC &lt; 0, then clear AC.
+	</td>
+</tr>
+<tr>
+	<td>SPA CLA</td>
+	<td>7710</td>
+	<td>1,2</td>
+	<td class="left">
+		Skip if AC &ge; 0, then clear AC.
+	</td>
+</tr>
+</table>
+
+</body>
+</html>

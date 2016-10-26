@@ -1,0 +1,461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	ExtendedArithmeticElement.html - Online help - EAE instructions
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta name="AppleTitle" content="KE8-E Extended Arithmetic Element">
+	<title>KE8-E Extended Arithmetic Element</title>
+	<meta name="description"
+		content="Describes all instructions for the EAE, the so called group 3 operate instructions">
+	<link href="../resources/styles.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+
+<h1>KE8-E Extended Arithmetic Element</h1>
+
+<p>
+The instructions for the KE8-E Extended Arithmetic Element are operate
+instructions with bits 3 and 11 set. They are microprogrammable and are
+often called <em>Group 3 Microoperations</em>.
+</p>
+
+<p>
+With the PDP-8/E (not with earlier models), the EAE has two operation modes.
+In mode A, the EAE is software compatible to older PDP-8 EAEs; in mode B,
+it provides an extended set of instructions. The PDP-8/E (not the earlier
+models PDP-8, -8/S, -8/I, -8/L) has the MQ register and the group 3
+microoperations NOP (7401), MQL (7421), MQA (7501), and CLA (7601)
+(and their microprogrammed combinations, e.&nbsp;g. SWP (7521),
+CAM (7621), ACL (7701)) even if it has no EAE.
+</p>
+
+<p>
+Some of the EAE instructions require a direct operand in an extension word
+of the instruction. Some mode B instructions use this extension word for
+indirect addressing of the operand. In this case, when the extension word
+is located in an autoindexing memory location (0010&ndash;0017 on each
+field), autoincrementing takes place, i.&nbsp;e. the extension word is
+incremented before it is used as the operands address.
+</p>
+
+<p>
+Bit assignments of the group 3 microinstructions:
+
+<center>
+<table>
+<tr>
+	<td class="opcode_left" colspan="3">Mode A:</td>
+	<td class="opcode" colspan="4"></td>
+	<td class="opcode">SCA</td>
+	<td class="opcode" colspan="5">
+		<center>
+		<table>
+		<tr>
+			<td colspan="2">Bits 8&ndash;10</td>
+		</tr>
+		<tr>
+			<td class="left">0 - NOP</td>
+			<td class="left">4 - NMI</td>
+		</tr>
+		<tr>
+			<td class="left">1 - SCL</td>
+			<td class="left">5 - SHL</td>
+		</tr>
+		<tr>
+			<td class="left">2 - MUY</td>
+			<td class="left">6 - ASR</td>
+		</tr>
+		<tr>
+			<td class="left">3 - DVI</td>
+			<td class="left">7 - LSR</td>
+		</tr>
+		</table>
+		</center>
+	</td>
+</tr>
+<tr>
+	<td class="opcode_left" colspan="3">Mode A and B:</td>
+	<td class="opcode" colspan="2"></td>
+	<td class="opcode">CLA</td>
+	<td class="opcode">MQA</td>
+	<td class="opcode"></td>
+	<td class="opcode">MQL</td>
+	<td class="opcode" colspan="3"></td>
+	<td class="opcode"></td>
+</tr>
+<tr>
+	<td class="opcode"></td>
+	<td class="opcode" colspan="3">Opcode 111</td>
+	<td class="opcode" colspan="8"></td>
+	<td class="opcode">1</td>
+</tr>
+<tr>
+	<td class="opcode">Bits</td>
+	<td class="opcode_tlb">0</td>
+	<td class="opcode_tb">1</td>
+	<td class="opcode_tb">2</td>
+	<td class="opcode_tlb">3</td>
+	<td class="opcode_tlb">4</td>
+	<td class="opcode_tlb">5</td>
+	<td class="opcode_tlb">6</td>
+	<td class="opcode_tlb">7</td>
+	<td class="opcode_tlb">8</td>
+	<td class="opcode_tb">9</td>
+	<td class="opcode_tb">10</td>
+	<td class="opcode_tlbr">11</td>		
+</tr>
+<tr>
+	<td class="opcode_left" colspan="3">Mode B:</td>
+	<td class="opcode" colspan="3">
+		Group Bit: 1<br>
+		(with Bit 11 = 1):<br>
+		Group 3<br><br><br><br><br><br><br><br><br><br>
+	</td>
+	<td class="opcode"></td>
+	<td class="opcode" colspan="5">
+		<center>
+		<table>
+		<tr>
+			<td colspan="2">Bits 6 and 8&ndash;10</td>
+		</tr>
+		<tr>
+			<td class="left">00 - NOP</td>
+			<td class="left">10 - SCA</td>
+		</tr>
+		<tr>
+			<td class="left">01 - ACS</td>
+			<td class="left">11 - DAD</td>
+		</tr>
+		<tr>
+			<td class="left">02 - MUY</td>
+			<td class="left">12 - DST</td>
+		</tr>
+		<tr>
+			<td class="left">03 - DVI</td>
+			<td class="left">13 - SWBA</td>
+		</tr>
+		<tr>
+			<td class="left">04 - NMI</td>
+			<td class="left">14 - DPSZ</td>
+		</tr>
+		<tr>
+			<td class="left">05 - SHL</td>
+			<td class="left">15 - DPIC</td>
+		</tr>
+		<tr>
+			<td class="left">06 - ASR</td>
+			<td class="left">16 - DCM</td>
+		</tr>
+		<tr>
+			<td class="left">07 - LSR</td>
+			<td class="left">17 - SAM</td>
+		</tr>
+		</table>
+		</center>
+	</td>
+	<td class="opcode"></td>
+	</td>
+</tr>
+</table>
+</center>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th>Sequence/<br>EAE Mode</th>
+	<th class="left"><br>Description</th>
+</tr>
+<tr>
+	<td>NOP</td>
+	<td>7401</td>
+	<td>&minus;/A,B</td>
+	<td class="left">
+		No operation.
+	</td>
+</tr>
+<tr>
+	<td>CLA</td>
+	<td>7601</td>
+	<td>1/A,B</td>
+	<td class="left">
+		Clear AC. The AC is cleared during sequence 1, allowing this
+		command to be combined with EAE commands that load AC during
+		sequence 2.
+	</td>
+</tr>
+<tr>
+	<td>MQA</td>
+	<td>7501</td>
+	<td>2/A,B</td>
+	<td class="left">
+		Load MQ into AC (by performing a logical OR of AC and MQ).
+	</td>
+</tr>
+<tr>
+	<td>MQL</td>
+	<td>7421</td>
+	<td>2/A,B</td>
+	<td class="left">
+		Load MQ from AC, then clear AC.
+	</td>
+</tr>
+<tr>
+	<td>SWP</td>
+	<td>7521</td>
+	<td>2/A,B</td>
+	<td class="left">
+		Swap the contents of AC and MQ. Microprogrammed combination
+		of MQA and MQL.
+	</td>
+</tr>
+<tr>
+	<td>ACL</td>
+	<td>7701</td>
+	<td>1,2/A,B</td>
+	<td class="left">
+		Load MQ into AC. Microprogrammed combination of CLA and MQA.
+	</td>
+</tr>
+<tr>
+	<td>CAM</td>
+	<td>7621</td>
+	<td>1,2/A,B</td>
+	<td class="left">
+		Clear AC and MQ. Microprogrammed combination of CLA and MQL.
+	</td>
+</tr>
+<tr>
+	<td>SWAB</td>
+	<td>7431</td>
+	<td>2/A,B</td>
+	<td class="left">
+		Switch to EAE mode B (and execute MQL).
+	</td>
+</tr>
+<tr>
+	<td>SCA #</td>
+	<td>7403</td>
+	<td>3/A</td>
+	<td class="left">
+		Load SC from memory. Loads the complement of bis 7&ndash;11 of
+		the memory word following the instruction into the step counter.
+	</td>
+</tr>
+<tr>
+	<td>ACS</td>
+	<td>7403</td>
+	<td>3/B</td>
+	<td class="left">
+		Load SC from AC(7&ndash;11) and then clear AC.
+	</td>
+</tr>
+<tr>
+	<td>MUY #</td>
+	<td>7405</td>
+	<td>3/A</td>
+	<td class="left">
+		Multiply. The number held in MQ is multiplied by the number
+		held in the memory word following the instruction. The most
+		significatn 12 bits of the product are containted in AC and
+		the least significatn 12 bits are contained in MQ.
+	</td>
+</tr>
+<tr>
+	<td>DVI #</td>
+	<td>7407</td>
+	<td>3/A</td>
+	<td class="left">
+		Divide. The 24-bit dividend held in AC (most significant 12 bits)
+		and MQ (least significant 12 bits) is divided by the number held
+		in the memory word following the instruction. After execution of
+		this instruction the quotient is held in MQ, the remainder is
+		held in AC, and L is cleared. If L contains a one, a divide
+		overflow occured and the operation was aborted after the first
+		cycle of the division.
+	</td>
+</tr>
+<tr>
+	<td>DVI #</td>
+	<td>7407</td>
+	<td>3/B</td>
+	<td class="left">
+		Same as mode A divide, but the word following the instruction
+		does not contain the divisor, but the address (in DF) of the
+		divisor.
+	</td>
+</tr>
+<tr>
+	<td>NMI</td>
+	<td>7411</td>
+	<td>3/A,B</td>
+	<td class="left">
+		Normalize. This instruction is used as part of the conversion
+		of a binary number to a fraction and an exponent for use in
+		floating point arithmetic. The combined content of AC and MQ
+		is shifted left by this command until AC(0) &ne; AC(1)
+		(or AC(2&ndash;11) and MQ become zero). Zeros are shifted into
+		the vacated MQ(11) positions. At the conclusion of this operation,
+		the step counter SC contains the number of shifts performed.
+		The content of L is lost. (In mode B operation, if, at the end
+		of the normalization, only AC(0) is set (and AC(1&ndash;11) and
+		MQ are zero), then AC is cleared.) NMI nust not be combined
+		with other EAE operations.
+	</td>
+</tr>
+<tr>
+	<td>SHL #</td>
+	<td>7413</td>
+	<td>3/A,B</td>
+	<td class="left">
+		Shift arithmetic left. This instruction shifts the combined
+		content of AC and MQ to the left one more than the number of
+		positions (mode A) resp. exactly the number of positions (mode B)
+		indicated by the content of the memory location following the
+		instruction. During the shifting, zeros are shifted into
+		vacated MQ(11) positions.
+	</td>
+</tr>
+<tr>
+	<td>ASR #</td>
+	<td>7415</td>
+	<td>3/A,B</td>
+	<td class="left">
+		Arithmetic shift right. The combined content of AC and MQ is
+		shifted right one position more than (mode A) resp. exactly the
+		number of positions (mode B) contained in the memory location
+		following the instruction. The sign bit, contained in AC(0),
+		enters vacated positions. In mode B operation, GTF receives the
+		last digit shifted out of MQ(11). SC is set to zero in mode A
+		and to 37 (octal) in mode B operation.
+	</td>
+</tr>
+<tr>
+	<td>LSR #</td>
+	<td>7417</td>
+	<td>3/A,B</td>
+	<td class="left">
+		Logical shift right. This instruction works as ASR except that
+		zeros enter vacated positions at AC(0) instead of the sign bit.
+	</td>
+</tr>
+<tr>
+	<td>DAD #</td>
+	<td>7443</td>
+	<td>3/B</td>
+	<td class="left">
+		Double word addition. The content of the memory word following
+		the instruction is used as the address (in DF) of a double word
+		in memory (first word: least significant 12 bits, second word:
+		most significant 12 bits.) This double word is added to the
+		24-bit number contained in AC (most significant 12 bits) and
+		MQ (least significant 12 bits). The result is stored in AC and
+		MQ; L receives the carry.
+	</td>
+</tr>
+<tr>
+	<td>SWBA</td>
+	<td>7447</td>
+	<td>3/A,B</td>
+	<td class="left">
+		Switch to EAE mode A (and clear GTF). When it is combined with
+		other EAE operations, SWBA is ignored when running in EAE mode B.
+	</td>
+</tr>
+<tr>
+	<td>DPSZ</td>
+	<td>7451</td>
+	<td>3/B</td>
+	<td class="left">
+		Skip the next instruction if the double word held in AC and MQ
+		is zero.
+	</td>
+</tr>
+<tr>
+	<td>DPIC</td>
+	<td>7573</td>
+	<td>3/B</td>
+	<td class="left">
+		Increment the double word held in AC and MQ by one. If an
+		overflow occurs, L receives the carry. (The DPIC instruction
+		requires the MQA and MQL bits to be set. If they are not set
+		(opcode 7453), the increment takes place for the double word
+		with MSBs in MQ and LSBs in AC.)
+	</td>
+</tr>
+<tr>
+	<td>DCM</td>
+	<td>7575</td>
+	<td>3/B</td>
+	<td class="left">
+		Build the two&rsquo;s complement of the double word held in
+		AC and MQ. If an overflow occurs, L receives the carry.
+		(The DCM instruction requires the MQA and MQL bits to be set.
+		If they are not set (opcode 7455), the complement is build for
+		the double word with MSBs in MQ and LSBs in AC.)
+	</td>
+</tr>
+<tr>
+	<td>SAM</td>
+	<td>7457</td>
+	<td>3/B</td>
+	<td class="left">
+		Subtract. The content of AC is subtracted form the content of MQ,
+		and the result is stored in AC. The values in AC and MQ are
+		treated as signed two&rsquo;s complement numbers. The greater than
+		flag GTF is set to one if the result of the subtraction is
+		positiv, otherwise it is cleared.
+	</td>
+</tr>
+<tr>
+	<td>DLD #</td>
+	<td>7663</td>
+	<td>1&ndash;3/B</td>
+	<td class="left">
+		Load double word. This is the microprogrammed combination of
+		CLA, MQL and DAD.
+	</td>
+</tr>
+<tr>
+	<td>DDZ #</td>
+	<td>7665</td>
+	<td>1&ndash;3/B</td>
+	<td class="left">
+		Store double word zero in memory. This is the microprogrammed
+		combination of CLA, MQL and DST.
+	</td>
+</tr>
+<tr>
+	<td>SGT</td>
+	<td>6006</td>
+	<td>&minus;/B</td>
+	<td class="left">
+		Skip on GTF. The next instruction is skipped if the greater than
+		flag is set. Note that this is an IOT instruction.
+	</td>
+</tr>
+</table>
+
+</body>
+</html>

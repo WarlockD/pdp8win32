@@ -1,0 +1,73 @@
+//
+//	PDP-8/E Simulator
+//
+//	Copyright (c) 1994-2014 Bernhard Baehr
+//
+//	colorfun.pa - Demo program for the Memory Content Plugin
+//
+//	This file is part of PDP-8/E Simulator.
+//
+//	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+//	it under the terms of the GNU General Public License as published by
+//	the Free Software Foundation, either version 3 of the License, or
+//	(at your option) any later version.
+//
+//	This program is distributed in the hope that it will be useful,
+//	but WITHOUT ANY WARRANTY; without even the implied warranty of
+//	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//	GNU General Public License for more details.
+//
+//	You should have received a copy of the GNU General Public License
+//	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
+
+/
+/	ASSEMBLE THIS PROGRAM WITH PAL8, THEN LOAD THE BIN FILE TO FIELD 0
+/	START AT 200 WITH A PDP-8/E WITH ALL EIGHT MEMORY FIELDS AND REALTIME SPEED
+/	USE THE SWITCH REGISTER TO MODIFY THE COLOR SCHEME
+/	USE THE HALT KEY TO STOP THE PROGRAM, OTHERWISE IT WILL NEVER HALT
+/
+/	IT USES THE FIRST 28 WORDS OF MEMORY, ALL OTHER MEMORY IS FILLED WITH COLOR
+/
+
+	FIELD 0
+	*0
+PTR,	END
+FIRSTC,	END		/ ADDRESS OF FIRST LOCATION IN FIELD 0 TO PUT COLOR
+COLOR,	0
+CDFINI,	6171		/ = 6171 + 0010 = 6201 = CDF 0
+CDF8,	0100
+
+	*5
+NEXTC,	TAD FIELD	/ USE FIELD FOR "RANDOMIZATION"
+	OSR		/ GET SWITCH REGISTER TO CHANGE COLOR SCHEME
+	DCA COLOR	/ NEXT COLOR
+
+	*10		/ MAIN ROUTINE (LOCATED IN AUTOINCREMENT REGION!)
+MAIN,	CLA CLL IAC RTL
+	RAL		/ AC=0010
+	TAD FIELD	/ AC=CDF INSTRUCTION FOR NEXT FIELD
+	DCA FIELD	/ WRITE CDF INSTRUCTION FOR NEXT FIELD
+	TAD FIELD
+	AND CDF8	/ CHECK FOR SWITCH TO "FIELD 8" (6301)
+	SZA CLA
+	JMP RESET
+FIELD,	6171		/ NOTE: THIS IS LOCATION 20 (NOT AUTOINCREMENTING!)
+	TAD COLOR
+	DCA I PTR	/ PUT COLOR TO MEMORY CELL
+	ISZ PTR		/ FIELD COMPLETE?
+	JMP .-3		/ LOOP FOR COMPLETE FIELD
+	TAD COLOR
+	JMP NEXTC	/ NEXT INSTRUCTIONS IN THE GAP BETWEEN DATA AND MAIN
+
+RESET,	TAD CDFINI	/ RESET THE CDF INSTRUCTION
+	DCA FIELD
+	TAD FIRSTC
+	DCA PTR		/ SET POINTER TO END ADDRESS FOR FIELD 0 TO AVOID OVERWRITING THIS PROGRAM
+	JMP MAIN
+END,	0
+
+	*200
+START,	JMP MAIN
+
+$

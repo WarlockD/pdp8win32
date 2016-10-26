@@ -1,0 +1,4 @@
+#define vdotted3_width 1
+#define vdotted3_height 3
+static char vdotted3_bits[] = {
+   0x01, 0x00, 0x00};

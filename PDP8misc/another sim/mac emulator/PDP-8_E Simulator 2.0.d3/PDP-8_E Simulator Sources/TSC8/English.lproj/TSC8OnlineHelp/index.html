@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	index.html - Online help for the TSC8-75 Board
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=iso-8859-1">
+	<title>TSC8-75 Board Help</title>
+	<meta name="description"
+		content="Describes the functioning and PDP-8 IOTs of the TSC8-75 Board">
+	<meta name="AppleTitle" content="TSC8-75 Board Help">
+	<meta name="AppleIcon" content="pdp8e.png">
+	<link href="styles.css" rel="stylesheet" media="all">
+</head>
+<body>
+
+<h1>TSC8-75 Board for ETOS</h1>
+
+<p>
+The TSC8-75 board is a proprietary piece of hardware for the PDP-8/E required
+to run ETOS,
+<a href="http://www.pdp8.net/pdp8docs/etos_wp.tif">EduComp&rsquo;s Timeshared Operating System</a>
+(later called Extended Timeshared Operating System when EduComp was renamed to QuoData).
+</p>
+
+<p>
+The following description of the functioning of the TSC8-75 board was derived from the
+TSC8.SV hardware diagnostic program (available on the ETOS disk images from ftp://ftp.pdp8.net/images/etos;
+to convert them to the image format required for the PDP-8/E Simulator, use these download links:
+<a href="http://www.pdp8.net/images/convert_mac.shtml/etosv5b-demo.rk05?loc=images/etos/etosv5b-demo.rk05">etosv5b-demo.rk05</a>,
+<a href="http://www.pdp8.net/images/convert_mac.shtml/etosv5b-pl5-config.rk05?loc=images/etos/etosv5b-pl5-config.rk05">etosv5b-pl5-config.rk05</a>,
+<a href="http://www.pdp8.net/images/convert_mac.shtml/etosv5b-pl5-dist.rk05?loc=images/etos/etosv5b-pl5-dist.rk05">etosv5b-pl5-dist.rk05</a>),
+from the <a href="http://highgate.comm.sfu.ca/pdp8/etos-docs/">ETOS manuals</a>
+(testing the ETOS board is described in the System Manager Guide chapter 2.11, pp. 2-41 - 2-48)
+and the <a href="http://www.pdp8.net/pdp8docs/etos_wp.tif">ETOS white paper</a>.
+</p>
+
+<p>
+The TSC8-75 provides the following registers:
+</p>
+
+<ul>
+<li>
+An enable flag. When it is cleared, the PDP-8/E works as usual.
+When it is set, the TSC8-75 is operational.
+</li>
+
+<li>
+An interrupt flag. When the TSC8-75 and interrupts are enabled and this flag is set,
+an interrupt occurs.
+</li>
+
+<li>
+A 12-bit register holding the opcode of the last JMS, JMP, IOT, HLT or OSR
+instruction performed by the PDP-8/E running in user mode. We refer to it with
+the name <b>ERIOT register</b> (the original name is unknown).
+</li>
+
+<li>
+A 12-bit register holding the address of the last JMS or JMP instruction performed
+by the PDP-8/E running in user mode. We call it the <b>ERTB register</b>
+(the original name is unknown).
+</li>
+
+<li>
+A 1-bit register that is set whenever a CDF opcode (62x1) is loaded into the
+ERIOT register. It is cleared when any other opcode is loaded into the ERIOT
+register or when a ECDF or skipping ESME instruction is performed. We call it
+the <b>ECDF flag</b> (the original name is unknown).
+
+</li>
+</ul>
+
+<p>
+Every TSC8-75 provides the following IOT instructions (at I/O address 36).
+The mnemonics were retrieved from the error messages of the TSC8.SV diagnostics.
+</p>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th class="left"><br>Description</th>
+</tr>
+<tr>
+	<td>ETDS</td>
+	<td>6360</td>
+	<td class="left">Disable the TSC8-75 by clearing the enable and interrupt flag.</td>
+</tr>
+<tr>
+	<td>ESKP</td>
+	<td>6361</td>
+	<td class="left">Skip the next instruction when the interrupt flag of the TSC8-75 is set.</td>
+</tr>
+<tr>
+	<td>ECTF</td>
+	<td>6362</td>
+	<td class="left">Clear the interrupt flag of the TSC8-75.</td>
+</tr>
+<tr>
+	<td>ECDF</td>
+	<td>6363</td>
+	<td class="left">Move ERIOT(6-8) to AC(9-11) by performing a logical OR (when ERIOT holds a CIF,
+	CDF or CDI, this is the field number of the instruction). When the ECDF flag is set
+	(then ERIOT holds a CDF instruction (62x1)), additionally the next instruction is
+	skipped. The ECDF flag is cleared.<td>
+</tr>
+<tr>
+	<td>ERTB</td>
+	<td>6364</td>
+	<td class="left">Clear AC, then move the ERTB register to AC.</td>
+</tr>
+<tr>
+	<td>ERIOT</td>
+	<td>6366</td>
+	<td class="left">Clear AC, then move the ERIOT register to AC.</td>
+</tr>
+<tr>
+	<td>ETEN</td>
+	<td>6367</td>
+	<td class="left">Enable the TSC8-75 by setting the enable flag.</td>
+</tr>
+</table>
+
+<p>
+TSC8-75 boards starting with serial number 699 additionally provide the so called
+<b>ESME feature</b> (see ETOS System Manager Guide chapter 3.5, pp. 3-10 - 3-11).
+This feature enables the software to skip the emulation of unnecessary CDF instructions
+when the data field of the CDF is the current field.
+The TSC8.SV diagnostics is supposed to test the ESME feature (when SR9=1),
+but it gives no indicator for what the feature actually does.
+Inspecting the interrupt service routine of ETOS shows that the ESME feature is
+implemented by the IOT 6365 (this is the first instruction in the interrupt service
+routine), refered by the mnemonic ESME (the original mnemonic is unknown):
+</p>
+
+<table>
+<tr>
+	<th>Mnemonic<br>Symbol</th>
+	<th>Octal<br>Code</th>
+	<th class="left"><br>Description</th>
+</tr>
+<tr>
+	<td>ESME</td>
+	<td>6365</td>
+	<td class="left">Serial number of TSC8-75 board before 699: NOP<br>
+	Serial number of TSC8-75 board 699 or higher:
+	Skip the next instruction when the ECDF flag is set (then the ERIOT register
+	contains a CDF opcode (62x1)) and the target data field of this CDF in
+	ERIOT(6-8) is equal to SF(4-6), the data field that was active before the
+	last interrupt. When a skip occurs, the ECDF flag is cleared, otherwise not.
+	</td>
+</tr>
+</table>
+
+<p>
+When a TSC8-75 board is installed in a PDP-8/E, the following instructions behave not
+as usual when executed while the processor is running in user mode:
+</p>
+
+<ul>
+<li>
+HLT (7402), OSR (7404) and microprogrammed combinations with HLT and OSR:
+Additional to raising a user mode interrupt, the current OPR opcode is moved
+to the ERIOT register and the ECDF flag is cleared.
+</li>
+
+<li>
+IOT (6xxx): Additional to raising a user mode interrupt, the current IOT opcode is moved
+to the ERIOT register. When the IOT is a CDF instruction (62x1), the ECDF flag is set,
+otherwise it is cleared.
+</li>
+
+<li>
+JMP (5xxx): The current JMP opcode is moved to the ERIOT register, the ECDF flag is
+cleared. The address of the JMP instruction is loaded into the ERTB register and
+the TSC8-75 I/O flag is raised. Then the JMP is performed as usual (including the
+setting of IF, UF and clearing the interrupt inhibit flag).
+</li>
+
+<li>
+JMS (4xxx):  The current JMS opcode is moved to the ERIOT register, the ECDF flag
+is cleared. The address of the JMS instruction is loaded into the ERTB register and
+the TSC8-75 I/O flag is raised. When the TSC8-75 is enabled, the target addess of the
+JMS is loaded into PC, but nothing else (loading of IF, UF, clearing the interrupt
+inhibit flag, storing of the return address in the first word of the subroutine)
+happens. When the TSC8-75 is disabled, the JMS is performed as usual.
+</li>
+</ul>
+
+</body>
+</html>

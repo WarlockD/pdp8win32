@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+ *	PDP-8/E Simulator
+ *
+ *	Copyright © 1994-2014 Bernhard Baehr
+ *
+ *	MemoryReferenceInstructions.html - Online help - MRI instructions
+ *
+ *	This file is part of PDP-8/E Simulator.
+ *
+ *	PDP-8/E Simulator is free software: you can redistribute it and/or modify
+ *	it under the terms of the GNU General Public License as published by
+ *	the Free Software Foundation, either version 3 of the License, or
+ *	(at your option) any later version.
+ *
+ *	This program is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *	GNU General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public License
+ *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<html>
+<head>
+	<meta name="AppleTitle" content="Memory Reference Instructions">
+	<title>Memory Reference Instructions</title>
+	<meta name="description"
+		content="Describes the seven memory reference instructions and adressing modes of the PDP-8">
+	<link href="../resources/styles.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+
+<h1>Instruction Format of Memory Reference Instructions (MRIs)</h1>
+
+<center>
+<table>
+	<tr>
+		<td class="opcode"></td>
+		<td class="opcode" colspan="3"><br>Opcode</td>
+		<td class="opcode"></td>
+		<td class="opcode">
+			Page<br>
+			Bit
+		</td>
+		<td class="opcode" colspan="7"><br>Page Address</td>
+	</tr>
+	<tr>
+		<td class="opcode">Bits</td>
+		<td class="opcode_tlb">0</td>
+		<td class="opcode_tb">1</td>
+		<td class="opcode_tb">2</td>
+		<td class="opcode_tlb">3</td>
+		<td class="opcode_tlb">4</td>
+		<td class="opcode_tlb">5</td>
+		<td class="opcode_tb">6</td>
+		<td class="opcode_tb">7</td>
+		<td class="opcode_tb">8</td>
+		<td class="opcode_tb">9</td>
+		<td class="opcode_tb">10</td>
+		<td class="opcode_tbr">11</td>
+	</tr>
+	<tr>
+		<td class="opcode" colspan="3"></td>
+		<td class="opcode" colspan="3">
+			Address<br>
+			Mode Bit
+		</td>
+	</tr>
+</table>
+</center>
+
+<p></p>
+
+<table>
+<tr>
+	<th>Mnemonic</th>
+	<th>Opcode</th>
+	<th class="left">Description</th>
+</tr>
+<tr>
+	<td>AND Y</td>
+	<td>000</td>
+	<td class="left">
+		Logical AND. The AND operation is performed between the
+		content of memory location Y and the content of AC. The
+		result is left in AC, the original content of AC is
+		lost, and the content of Y is unchanged.
+	</td>
+</tr>
+<tr>
+	<td>TAD Y</td>
+	<td>001</td>
+	<td class="left">
+		Two&rsquo;s complement add. The content of memory
+		location Y is added to the content of AC in
+		two&rsquo;s complement arithmetic. The result of this
+		addition is held in AC, the original content of AC is
+		lost, and the content of Y is unchanged. If there is
+		a carry from the MSB of AC, the L flag is
+		complemented.
+	</td>
+</tr>
+<tr>
+	<td>ISZ Y</td>
+	<td>010</td>
+	<td class="left">
+		Increment and skip if zero. The content of memory
+		location Y is incremented by one. If the resultant
+		content of Y equals zero, the content of PC is
+		incremented and the next instruction is skipped.
+		If the resultant content of Y does not equal zero,
+		the program proceeds to the next instruction.
+	</td>
+</tr>
+<tr>
+	<td>DCA Y</td>
+	<td>011</td>
+	<td class="left">
+		Deposit and clear AC. The content of AC is deposited
+		in core memory at the address Y and AC is cleared.
+		The previous content of memory location Y is lost.
+	</td>
+</tr>
+<tr>
+	<td>JMS Y</td>
+	<td>100</td>
+	<td class="left">
+		Jump to subroutine. The incremented content of PC is
+		deposited in core memory location Y, and PC is loaded
+		with the address of the memory location Y+1. So the
+		first word of the subroutine contains the return
+		address and execution continues at the second word
+		of the subroutine.
+	</td>
+</tr>
+<tr>
+	<td>JMP Y</td>
+	<td>101</td>
+	<td class="left">
+		Jump to Y. The address Y is loaded into PC so that the
+		next instruction is taken from core memory location Y.
+		The original content of PC is lost.
+	</td>
+</tr>
+</table>
+
+<h2>Addressing Modes</h2>
+
+<p>
+When the Address Mode Bit is zero, the memory location
+specified by the instruciton word contains the operand
+<em>(direct addressing)</em>. When the Address Mode Bit is
+one, the memory location specified by the instruction word
+contains the address of the operand
+<em>(indirect addressing)</em>. In symbolic notation,
+indirect addressing is indicated by the letter &ldquo;I&rdquo;
+between the mnemonic and the actual address, e. g.
+&ldquo;TAD I 10&rdquo;.
+</p>
+
+<h2>The Page Bit</h2>
+
+<p>
+The basic 4K core memory is (logically) partitioned into 32
+pages of 128 (octal 200) words each. A page number determines
+the five most significant bits of an address. When the Page
+Bit of a MRI is zero, the operand is taken from memory page
+zero. When the Page Bit is one, the page number of the operand
+is the number of the page where the instruction resides,
+i.&nbsp;e. the five MSBs of the operand address are identical
+to the five MSBs of the instruction words address. The offset
+inside the designated page is taken from the Page Address part
+(bits 5&ndash;11) of the instruction word.
+</p>
+
+<h2>Autoindexing Memory Locations</h2>
+
+<p>
+Memory locations 0010&ndash;0017 (of all memory fields,
+i.&nbsp;e. locations 00010&ndash;00017, 10010&ndash;10017,
+20010&ndash;20017, &hellip;) are special registers which are
+automatically incremented when they are used as pointer
+addresses of indirectly addressed memory reference
+instructions. The increment takes place <em>before</em> the
+value is used as indirect address. When these locations are
+addressed directly, they behave as any other memory location.
+</p>
+
+<p>
+Note that the CPU window displays disassembled instructions
+as if the increment of autoindexing memory locations has
+already occured; showing the location the instruction will
+really access. The autoindexing addresses appear underlined
+in the CPU window.
+</p>
+
+<h2>Memory Reference Instructions with the KM8-E Memory Extension</h2>
+
+<p>
+When the PDP-8 has a KM8-E Memory Extension, it can have up to
+32K words of core memory, partitioned in eight 4K fields. The
+value of the KM8-E register IF (Instruction Field) is used as
+a 3-bit extension of the PC. IF not only determines the
+memory field where the next instruction is to be taken from,
+but also the field where directly addressed operands and the
+pointer addresses of indirectly addressed operands are to be
+taken from. The final operand of the indirect addressing is
+taken from the memory field designated by the KM8-E register
+DF (Data Field).
+</p>
+
+<h2>Example</h2>
+
+<p>Assume DF=1, IF=2, PC=205 (octal).<br>
+<center><img src="MRI-Example.png"></center>
+</p>
+
+</body>
+</html>
