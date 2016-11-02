@@ -1,11 +1,11 @@
 /***********************************************************************
- * $RCSfile: connect.cpp,v $		$Revision: 1.21 $
+ * $RCSfile: connect.cpp,v $		$Revision: 1.25 $
  *
- * $Date: 1998/12/20 06:24:39 $		$Locker:  $
+ * $Date: 2004/07/15 16:19:10 $		$Locker:  $
  *
  * --------------------------------------------------------------------
- * DigiTcl 0.3.0 - An Elementary Digital Simulator 
- * (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+ * DigiTcl 0.3.2 - An Elementary Digital Simulator 
+ * (C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,15 @@
  *
  ***********************************************************************/
 
-#include	<string.h>
+#include	<list>
+#include	<iostream>
+
 #include	"sim.h"			/* For generate_tabs() decl	*/
 #include	"comp.h"		/* For propagate() & display()	*/
 #include	"connect.h"
+
+using std::list;
+using std::endl;
 
 /*
  * Method definitions for the Connector class.  Connectors are responsible

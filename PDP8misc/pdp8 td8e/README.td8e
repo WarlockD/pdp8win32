@@ -1,0 +1,107 @@
+Welcome to the TD8E plugin for Douglas W. Jones pdp8 emulator
+
+This TD8E plugin simulates a TD8E simple DECtape controller
+with a dual TU56 DECtape unit.
+This simulation is NOT complete and far away from being an
+emulation. But is complete enough to boot OS/8 from a
+TD8E boot tape (tested with OS/8 V3B and V3D).
+
+This distribution was built under RedHat Linux 7 on a 2.2.16-22
+Kernel (OK it's outdated but you can recompile it yourself)
+and tested under RedHat AS 2.1 with Kernel 2.4.20-20.7 too.
+
+Hope you enjoy it.
+
+	Gerold Pauler
+	http://pdp8.de
+
+Modified files are:
+
+Makefile	TD8E added
+kk8e.c		stubs for TD8E inserted
+ttyaccess.c	modified for Linux
+utility.c	fixed one minor bug (corefile shrinking 1 word)
+kc8e.c		fixed startup glitch
+
+New files added are:
+
+README.td8e	this file
+td8e.boot	core image of TD8E bootstrap (start at 0 7300)
+td8e.c		the TD8E / TU56 plugin
+os8.djg	OS/8	bootable tape in David Gessweins format
+os8.dwj	OS/8	ubootable tape more like Douglas Jones format
+empty.djg	an empty tape in David Gessweins format
+empty.dwj	an empty tape more like Douglas Jones format
+pdp8		compiled emulator (set up to directly
+		support David Gessweins TD8E images look at
+		http://www.pdp8.net
+		)
+
+
+========
+
+Little FAQ
+
+How to start OS/8 from tape file?
+
+	Start the pdp8 emulator with the bootstrap core image.
+	./pdp8 td8e.boot
+	Change core file to something else.
+	This prevents bootstrap core image to be modified when
+	exiting the emulator.
+	Change device to DTA0 and insert name of bootable
+	TD8E image file.
+	Set switch register to 7300, press Addr.Load, Clear and Cont.
+	Wait till OS/8 prompt "." appears.
+
+
+Where to find more TD8E images?
+
+	Look at David Gessweins pdp8 homepage
+	http://www.pdp8.net
+
+
+Where to find more information about pdp8  emulators?
+
+	Look at Douglas Jones homepage
+	http://www.cs.uiowa.edu/~jones/pdp8
+
+How to create a new tape?
+
+	Depending on the #define DJG in td8e.c
+	create a DJG* new "DECtape" using
+	dd if=/dev/zero of=newtape bs=380292 count=1
+
+	or create a more DWJ** style new "DECtape" using
+	echo tu56 | dd of=a bs=4 count=1
+	dd if=/dev/zero of=b bs=380292 count=1
+	cat a b >newtape
+	rm a b
+
+	Now you can use and mount this tape on the emulator.
+	First thing you want to do with it is to write a new
+	(zero) directory on it. To do this use the OS/8 CCL
+	command ZERO or run PIP /Z.
+
+	Now you have an empty tape ready for use under OS/8.
+
+
+How to convert from DJG to DWJ format?
+
+	Just use the following two unix commands:
+	echo tu56 | dd of=a bs=4 count=1
+	cat a image.djg >image.dwj
+
+
+How to convert from DWJ to DJG format?
+
+	Just use:
+	dd if=image.dwj of=image.djg bs=1 skip=4 count=380292 
+
+
+--------
+* DJG:	compatible with DECtape images (129 words/block)
+	from David Gessweins pdp8 page.
+** DWJ:	slightly more like the files of the other simulator
+	devices, but still not in conformance with Douglas
+	Jones DECtape format.

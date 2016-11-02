@@ -38,5 +38,11 @@
     <ClInclude Include="VT100.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="simple_wire.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="memory_view.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

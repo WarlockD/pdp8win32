@@ -36,6 +36,9 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <sstream>
+#include <iomanip>      // std::setw
+#include <unordered_map>
 
 // bit operations
 // useful functions to deal with bit shuffling encryptions
@@ -163,3 +166,4 @@ struct CharAttributes {
 	bool double_width() const { return (attrib & DOUBLE_W) != 0; }
 	bool double_height() const { return (attrib & (DOUBLE_T| DOUBLE_B)) != 0; }
 };
+

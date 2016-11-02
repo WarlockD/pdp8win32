@@ -150,6 +150,8 @@
     <ClInclude Include="global.h" />
     <ClInclude Include="main_window.cpp" />
     <ClInclude Include="main_window.h" />
+    <ClInclude Include="memory_view.h" />
+    <ClInclude Include="simple_wire.h" />
     <ClInclude Include="terminal_view.h" />
     <ClInclude Include="VT100.h" />
     <ClInclude Include="vt_terminal_parser.h" />

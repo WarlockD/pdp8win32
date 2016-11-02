@@ -1,12 +1,13 @@
 #pragma once
 #include "global.h"
 #include "terminal_view.h"
+#include "memory_view.h"
 
 //template <class T>//, class TBase = CWindow, class TWinTraits = CDxAppWinTraits >
 class AppWindow : public CFrameWindowImpl<AppWindow>    //CWindowImpl<AppWindow, CWindow, CDxAppWinTraits >
 {
 	TerminalView m_term;
-
+	MemoryViewer m_memory_view;
 public:
 	BEGIN_MSG_MAP(AppWindow)
 		MSG_WM_CREATE(OnCreate)
@@ -68,6 +69,9 @@ public:
 		m_term.Create(m_hWnd, rcHorz, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
 
 		SetTimer(2, 1000 / 15);
+		m_memory_view.Create(m_hWnd, CWindow::rcDefault, _T("MemoryViewWindow"));
+		m_memory_view.ShowWindow(SW_SHOW);
+		m_memory_view.UpdateWindow();
 //		_memwnd.Create(m_hWnd, CWindow::rcDefault, _T("MemoryViewWindow"));
 	//	_memwnd.ShowWindow(SW_HIDE);
 	//	_memwnd.UpdateWindow();
@@ -78,7 +82,7 @@ public:
 	}
 	void OnDestroy() {
 		KillTimer(2);
-		//_memwnd.DestroyWindow();
+		if(m_memory_view.m_hWnd) m_memory_view.DestroyWindow();
 
 		PostQuitMessage(0);
 		SetMsgHandled(false);

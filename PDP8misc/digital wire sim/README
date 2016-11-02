@@ -1,5 +1,5 @@
-		DigiTcl 0.3.0 - An Elementary Digital Simulator 
-		(C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+		DigiTcl 0.3.2 - An Elementary Digital Simulator 
+		(C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
 
 Introduction:
 ~~~~~~~~~~~~~
@@ -28,18 +28,18 @@ assumptions about the user's platform and available software:
 
 - The preferred target machine is running the X Window System, Version
 11 on a UNIX or UNIX-like operating system.  The software may also work
-under Microsoft Windows 95/98/NT, but has not been recently tested on
-these platforms.  The distribution assumes that the underlying
-file system is capable of storing long file names (up to 20 characters).
+under various versions Microsoft Windows, but has not been recently tested
+on these platforms.  The distribution assumes that the underlying file
+system is capable of storing long file names (up to 20 characters).
 
 - The circuit editor requires Tcl/Tk 8.0, which is available
 at ftp://ftp.scriptics.com/.  This document assumes that Tcl/Tk have
 been downloaded and installed successfully on your machine.
 
-- A C++ compiler (e.g. g++2.7.2) and the Standard Template Library
-(STL) is required for compiling the simulator engine under Unix (NOTE:
-g++ 2.6.3 will not successfully link the application).  The supplied
-Makefile can be adapted for use under Microsoft Windows.
+- A C++ compiler and the C++ standard library are required for
+compiling the simulator engine under Unix (the simulator engine compiles
+successfully with g++ v3.3.3).  The supplied Makefile can be adapted
+for use under Microsoft Windows.
 
 - The software requires a three-button mouse.  A two button mouse,
 unfortunately, is not sufficient.
@@ -49,12 +49,12 @@ Extracting the Archive File:
 The compressed archive file is distributed in two formats, both of which
 can be found on the aforementioned web page.
 
-- For UNIX platforms, use 'digitcl-0.3.0.tar.gz' which has been tarred
+- For UNIX platforms, use 'digitcl-0.3.2.tar.gz' which has been tarred
 and gzipped.  It can be extracted using the command:
 
-	$ gzip -dc digitcl-0.3.0.tar.gz | tar oxvf -
+	$ gzip -dc digitcl-0.3.2.tar.gz | tar oxvf -
 
-- For Microsoft Windows 95/98/NT platforms, use 'digitcl-0.3.0.zip' which
+- For Microsoft Windows platforms, use 'digitcl-0.3.2.zip' which
 has been zipped using InfoZip's 'zip' archiver.  Because the archive
 contains long file names, it MUST be extracted with a compatible
 dearchiver.  Note that PKZIP 2.04g will NOT work.  Instead, get
@@ -62,15 +62,15 @@ an appropriate binary from the ftp site:
 
 	ftp://ftp.uu.net/pub/archiving/zip/WIN32/
 
-Once the unzip.exe program has been extracted, digitcl-0.3.0.zip itself
+Once the unzip.exe program has been extracted, digitcl-0.3.2.zip itself
 can be extracted using the command:
 
-	c:\> unzip digitcl-0.3.0.zip
+	c:\> unzip digitcl-0.3.2.zip
 
 Note that if you downloaded DigiTcl using a web browser on Microsoft
-Windows, the archive file may be renamed to 'digitcl-0_3_0.zip'.
+Windows, the archive file may be renamed to 'digitcl-0_3_2.zip'.
 
-Upon extraction of the archive, a directory called 'digitcl-0.3.0' will
+Upon extraction of the archive, a directory called 'digitcl-0.3.2' will
 be created and all the relevant files and subdirectories will be placed
 in that directory.  These files and subdirectories are described below:
 
@@ -94,9 +94,8 @@ digisim/*       This directory contains the C++ source and Makefile
 Recompiling the Simulator Engine:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In order to simulate circuits, the simulator engine must be compiled.
-The GNU C++ compiler, version 2.7.2, should be able to successfully
-compile the engine.  egcs-1.0.2 can also be used to compile the engine.
-The
+The GNU C++ compiler, version 3.3.3, should be able to successfully
+compile the engine.
 
 To compile the simulator engine under Unix, change to the 'digisim'
 directory and type 'make'.  Note that you may have to do some
@@ -105,12 +104,12 @@ during the compiling and linking, a 'digisim' executable should be
 created in the directory.  This binary will be executed as a subprocess
 by DigiTcl --- there is no need to run the binary directly.
 
-If you are using Microsoft Windows 95/98/NT, you will have to customize
-the Makefile to work for a Microsoft Windows-based compiler.  There
-are no special flags required for compiling -- just make sure that a
-recent version of the STL is installed on your machine.  Note that Tk
-(or is it NT?) seems to require that the simulator engine be compiled as
-a 32-bit application, not 16-bit.
+If you are using Microsoft Windows, you will have to customize the
+Makefile to work for a Microsoft Windows-based compiler.  There are no
+special flags required for compiling -- just make sure that your compiler
+supports the C++ standard library.  Note that Tk (or is it Windows?) seems
+to require that the simulator engine be compiled as a 32-bit application,
+not 16-bit.
 
 Environment Variables:
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -144,8 +143,8 @@ Environment Variables Used by DigiTcl:
 Environment	Description:
 Variable:
 
-DIGISIM		Set to the location of the simulator engine compiled earlier.
-		An absolute pathname should be used.
+DIGISIM		Set to the filename of the simulator engine compiled
+		earlier.  An absolute pathname should be used.
 
 DIGILIB		Set to the location of auxiliary bitmap and cursor files
 		required by the circuit editor.  Again, an absolute pathname
@@ -163,22 +162,22 @@ and the environment variables have been set, the DigiTcl circuit editor
 may be started.
 
 On UNIX platforms:
-	Type './digitcl' while in the 'digitcl-0.3.0' directory.  For
-	convenience, the full path of the 'digitcl-0.3.0' directory may
+	Type './digitcl' while in the 'digitcl-0.3.2' directory.  For
+	convenience, the full path of the 'digitcl-0.3.2' directory may
 	be added to the PATH environment variable, thereby letting the
 	user execute the script while in any directory.
 
-For Microsoft Windows 95/98/NT platforms:
+For Microsoft Windows platforms:
 	DigiTcl can be started by typing 'wish80 digitcl', while in the
-	'digitcl-0.3.0' directory.  
+	'digitcl-0.3.2' directory.  
 
 If the location of the wish executable was not included in the user's
 PATH, then the circuit editor must be invoked by specifying the full
 path of the wish binary and providing the pathname of the digitcl
 script as an argument.  For example:
 
-	$ /usr/local/bin/wish ~/digitcl-0.3.0/digitcl	(Unix)
-	c:\> c:\tcl\bin\wish80 d:\apps\ckt\digitcl	(MS Windows 95/98/NT)
+	$ /usr/local/bin/wish ~/digitcl-0.3.2/digitcl	(Unix)
+	c:\> c:\tcl\bin\wish80 d:\apps\ckt\digitcl	(MS Windows)
 
 If the DIGIUSER environment variable was not set, then the contents of
 the directory that was current when DigiTcl was invoked will be
@@ -187,7 +186,7 @@ box is displayed whenever the user activates the 'Open...', 'Save...' or
 'Save As...' options of the File pull-down menu.
 
 Unfortunately, a Makefile or Setup program that installs the
-distribution files in standard directories does not exist.  Any
+distribution files in standard directories has not been written.  Any
 changes to the locations of the files will have to be done in accordance
 with the installation information provided above.  In particular, the
 environment variables have to be modified appropriately when moving the
@@ -228,22 +227,18 @@ Known Problems:
 ~~~~~~~~~~~~~~~
 For a relatively complete list of the currently known problems and
 restrictions of DigiTcl, please check the DigiTcl Home page, mentioned
-above.  With respect to Microsoft Windows NT, the following problems are
+above.  With respect to Microsoft Windows, the following problems are
 known to occur (Note: these problems were noted with version 0.2.0
 of DigiTcl running under an older version of Tcl/Tk.  Newer releases
 of Tcl/Tk have fixed some of the problems.)
 
-- Tcl/Tk under Microsoft Windows 95/98/NT does not permit cursor
-customization.  As a result, the cursor does not change when you are
-create wires or soldering circuit wire points.
+- Tcl/Tk under Microsoft Windows does not permit cursor customization.
+As a result, the cursor does not change when you are create wires or
+soldering circuit wire points.
 
 - The performance is kind of sluggish (especially screen refreshes)
 Hopefully, speed will improve as the Tcl/Tk release matures on this
 platform.
-
-- The GUI has a Motif look and feel instead of a Microsoft
-Windows 95/98/NT look and feel.  A native look and feel for Microsoft
-Windows 95/98/NT should be available sometime in the future.
 
 - Tcl/Tk seems to have problems creating lines with a stipple pattern.
 As a result, grid lines cannot be created on the workarea canvas and the
@@ -258,6 +253,14 @@ into the main circuit editor window.
 
 Change Log:
 ~~~~~~~~~~~
+0.3.2: 	* Code for simulator engine should now compile with more recent
+	  C++ compilers.
+
+	* Updated this README File.
+
+0.3.1: 	Fixed bug in the logic of the Or2::process() method
+	(thanks to Jian Cheng, Lin)
+
 0.3.0: 	Modifications for inclusion in DDJ.
 
 	* Removed win32 simulator engine binary and Microsoft/Borland
@@ -281,8 +284,8 @@ Change Log:
 
 Legal Stuff:
 ~~~~~~~~~~~~
-DigiTcl 0.3.0 - An Elementary Digital Simulator 
-Copyright (C) 1995-1998  Donald C. Craig
+DigiTcl 0.3.2 - An Elementary Digital Simulator 
+Copyright (C) 1995-2004  Donald C. Craig
 
 This program is free software; you can redistribute it and/or modify
 it under  the terms of the GNU General Public License as published by

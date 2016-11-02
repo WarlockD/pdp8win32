@@ -1,11 +1,11 @@
 /***********************************************************************
- * $RCSfile: main.cpp,v $		$Revision: 1.21 $
+ * $RCSfile: main.cpp,v $		$Revision: 1.25 $
  *
- * $Date: 1998/12/20 06:25:41 $		$Locker:  $
+ * $Date: 2004/07/15 16:19:10 $		$Locker:  $
  *
  * --------------------------------------------------------------------
- * DigiTcl 0.3.0 - An Elementary Digital Simulator 
- * (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+ * DigiTcl 0.3.2 - An Elementary Digital Simulator 
+ * (C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@
  *
  ***********************************************************************/
 
-#include	<iostream.h>
 #include	"sim.h"			/* For generate_tabs() decl	*/
 #include	"rtcomp.h"
 #include	"parser.h"

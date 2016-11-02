@@ -1,11 +1,11 @@
 /***********************************************************************
- * $RCSfile: connect.h,v $		$Revision: 1.21 $
+ * $RCSfile: connect.h,v $		$Revision: 1.25 $
  *
- * $Date: 1998/12/20 06:24:52 $		$Locker:  $
+ * $Date: 2004/07/15 16:19:10 $		$Locker:  $
  *
  * --------------------------------------------------------------------
- * DigiTcl 0.3.0 - An Elementary Digital Simulator 
- * (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+ * DigiTcl 0.3.2 - An Elementary Digital Simulator 
+ * (C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #if !defined(CONNECT_H_)		/* protect from multiple inclusion */
 #  define CONNECT_H_
 
-#include	<iostream.h>	/* For ostream declaration		*/
+#include	<iostream>	/* For ostream declaration		*/
 #include	"signal.h"	/* Signal size req'd by Connector	*/
 #include	<list>		/* 'fan_out' is a linked list		*/
 
@@ -55,7 +55,7 @@ protected:
 							// connectors can be
 							// created.
 private:
-	list<Component *> fan_out;	// Components in fan-out
+	std::list<Component *> fan_out;	// Components in fan-out
 	char 		 *name;		// Name of connector.
 };
 

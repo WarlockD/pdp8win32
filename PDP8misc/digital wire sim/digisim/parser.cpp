@@ -1,11 +1,11 @@
 /***********************************************************************
- * $RCSfile: parser.cpp,v $		$Revision: 1.21 $
+ * $RCSfile: parser.cpp,v $		$Revision: 1.25 $
  *
- * $Date: 1998/12/20 06:26:19 $		$Locker:  $
+ * $Date: 2004/07/15 16:19:10 $		$Locker:  $
  *
  * --------------------------------------------------------------------
- * DigiTcl 0.3.0 - An Elementary Digital Simulator 
- * (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+ * DigiTcl 0.3.2 - An Elementary Digital Simulator 
+ * (C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,20 @@
  *
  ***********************************************************************/
 
-#include	<iostream.h>
-#include	<strstream.h>
-#include	<string.h>
+#include	<iostream>
+#include	<list>
+#include	<sstream>
+
 #include	"wire.h"
 #include	"rtcomp.h"
 #include	"parser.h"
 #include	"signal.h"
-#include	<list>
+
+using std::cin;
+using std::cerr;
+using std::endl;
+using std::list;
+using std::istringstream;
 
 Parser::Parser(int bufsize) :
 	line_size(bufsize), line_num(0), tmp_buf(0), cached(0), read_one(0)
@@ -221,7 +227,7 @@ boolean Parser::read_signals(Wire *wire)
 		/*
 		 * Convert the time from ASCII to integer.
 		 */
-		istrstream	 ist(word, strlen(word));
+		istringstream	 ist(word);
 		ist >> time;
 
 		if ((word = get_word(" {}")) == 0)

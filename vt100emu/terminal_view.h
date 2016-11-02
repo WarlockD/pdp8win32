@@ -2,32 +2,10 @@
 #include "global.h"
 #include <bitset>
 #include <array>
-/*
 
-enum class CharAttributes : uint16_t
-{
-	None = 0x00,
-	Blink = 0x01,
-	Underline = 0x02,
-	Bold = 0x04,
-	Inverted = 0x08,
-	AltChar = 0x10
-};
-MAKE_CLASSENUM_OPERATIONS(CharAttributes)
-*/
-enum class LineAttributes : uint16_t
-{
-	None = 0x00,
-	DoubleHeightTopHalf = 0x01,
-	DoubleHeightBottomHalf = 0x02,
-	DoubleWidth = 0x04,
-	ScrollRegion = 0x08
-};
-MAKE_CLASSENUM_OPERATIONS(LineAttributes)
 
 
 class TerminalView : public CDoubleBufferWindowImpl<TerminalView, CWindow, CFrameWinTraits > {
-//class TerminalView : public CWindowImpl<TerminalView, CWindow, CFrameWinTraits > {
 	std::bitset <20> bittt;
 	typedef std::bitset<8 * 10> vt_glyph;
 
@@ -36,7 +14,7 @@ class TerminalView : public CDoubleBufferWindowImpl<TerminalView, CWindow, CFram
 		CharAttributes attrib;
 	};
 	struct Line {
-		LineAttributes attrib = LineAttributes::None;
+		CharAttributes attrib = CharAttributes::NORMAL;
 		std::vector<wchar_t> line;
 		bool changed = false;
 		void swap(Line& other) {
@@ -73,12 +51,8 @@ class TerminalView : public CDoubleBufferWindowImpl<TerminalView, CWindow, CFram
 	std::vector<uint8_t> _char_rom;
 	CImage _screen;
 	CDCHandle _screen_dc;
-	//CDC _screen_dc;
-//	std::vector<vt100_glyph> _glyphs;
 	int _topMargin = 0;
 	int _bottomMargin = 23;
-	//	std::atomic_flag _vrequest = { 0 };
-	//	std::atomic_flag _vrupdated = { 0 };
 public:
 	TerminalView() : _lines(24) {
 	}
@@ -125,30 +99,8 @@ public:
 			std::fill_n(reinterpret_cast<COLORREF*>(end), black_pixels, _background);
 		//	dline = dline + line_size *(size.cy - std::abs(i));
 		//	sline = dline + line_size *(size.cy)
-			
 		}
 		this->RedrawWindow();
-		/*
-	
-		if (i > 0) { // scroll down
-			while (i-- > 0) {
-				for (size_t l = _topMargin; l < _bottomMargin; l++) {
-					_lines[l].swap(_lines[l + 1]);
-				}
-				_lines[_bottomMargin].line.clear();
-			}
-		}
-		else {
-			while (i++ < 0) {
-				for (size_t l = _bottomMargin; l > _topMargin; l--) {
-					std::swap(_lines[l], _lines[l - 1]);
-				}
-			}
-			_lines[_topMargin].line.clear();
-		}
-		for (auto& l : _lines) l.changed = true;
-		//	update_display();
-		*/
 	}
 	BEGIN_MSG_MAP(TerminalView)
 		MSG_WM_CREATE(OnCreate)
@@ -390,30 +342,6 @@ public:
 		} // for (scan_line)
 
 	}
-	/*
-
-		for (size_t y = 0; y < 10; y++) {
-			COLORREF* line = reinterpret_cast<COLORREF*>(_screen.GetPixelAddress(col * 10, row * 10 + y));
-			line++; // we skip the first col as thats filled in by the previous bit
-			prevbit = false;
-			for (int x = 0; b < 8; b++)
-			{
-				bit = BIT((rom_bits << b), 7) ? true : false;
-				glyph.set(b + y * 10, (bit || prevbit));
-				prevbit = bit;
-			}
-			glyph.set(8 + y * 10, (bit || prevbit));
-			glyph.set(9 + y * 10, bit);
-		}
-		_glyphs.emplace_back(glyph);
-		for (size_t i = 0; i < 10; i++) {
-			COLORREF* line = reinterpret_cast<COLORREF*>(_screen.GetPixelAddress(x * 10, y * 10+i));
-			for (int b = 0; b < 10; b++)
-			{
-				line[b] = glyph.test(i * 10 + b) ? _forground :  _background;
-			}
-		}
-		*/
 
 	LRESULT OnCreate(LPCREATESTRUCT lpcs) {
 		_forground = RGB(0x00, 0xFF, 0x00);
@@ -430,70 +358,15 @@ public:
 		if (!_screen.Create(800, 320, 32)) throw 0;
 		_screen_dc = _screen.GetDC();
 		_glyph_dc.CreateCompatibleDC(_screen_dc);
-		
-
-
-
-
-
-		
-		//	sim->m_vsync = [this]() {
-			//	_vrequest.clear();
-		//		update_display(); // update display in seperate thread?
-								  //while (_vrupdated.test_and_set()); // block the rendering thread till we update
-
 
 	
-		putstr(0, 0, "Fuck me in the ASSS");
+		putstr(0, 0, "Line test this thing SS");
 		putstr(0, 2, "abcdefghijklmnopqrstuvwxyz");
-	//	update_display();
-		//_lines[1].line = _lines[0].line;
-		//_lines[3].line = _lines[0].line;
-		//_lines[0].attrib += LineAttributes::DoubleWidth + LineAttributes::DoubleHeightTopHalf;
-		//_lines[1].attrib += LineAttributes::DoubleWidth + LineAttributes::DoubleHeightBottomHalf;
 		//SetTimer(1, 1000 / 15);
 	}
 
 	
-	void draw_scanline(size_t line, size_t ch_line,  const Line& cline) {
-		/*
-
-		uint32_t* bits = static_cast<uint32_t*>(_screen.GetPixelAddress(0, line));
-		// clear line
-		for(size_t i=0; i < _screen.GetWidth();i++) bits[i] = screen_rev ? RGB(0, 255, 0) : RGB(0, 0, 0);
-		if (cline.line.size() == 0) return; // skip if blank
-		if(cline.attrib % LineAttributes::DoubleHeightTopHalf)
-			ch_line = (ch_line >> 1); 
-		else if(cline.attrib % LineAttributes::DoubleHeightBottomHalf)
-			ch_line = (ch_line >> 1) + 5;
-		// modify line since that is how it is stored in rom
-		if (ch_line == 0) ch_line = 15; else ch_line--;
-		COLORREF fg = RGB(0, 255, 0);
-		COLORREF bg = RGB(0, 0, 0);
-		bool prevbit = false, bit = false;
-		
-		size_t x = 0;
-		for (auto& ci : cline.line) {
-			uint8_t rom_bits = _char_rom[ci.ch * 16 + ch_line];
-			bool invert = screen_rev ^ ci.attrib.hasAttrib(CharAttributes::Inverted);
-			for (int b = 0; b < 8; b++)
-			{
-				prevbit = bit;
-				bit = BIT((rom_bits << b), 7);
-				*bits++ = (bit | prevbit) ^ invert ? fg : bg;
-				if (cline.attrib % LineAttributes::DoubleWidth) *bits++ = bit ^ invert ? fg : bg;
-			}
-			prevbit = bit;
-			// char interleave is filled with last bit
-			*bits++ = (bit | prevbit) ^ invert ? fg : bg;
-			*bits++ = bit ^ invert ? fg : bg;
-			if (cline.attrib % LineAttributes::DoubleWidth) {
-				*bits++ = bit ^ invert ? fg : bg;
-				*bits++ = bit ^ invert ? fg : bg;
-			}
-		}
-		*/
-	}
+	void draw_scanline(size_t line, size_t ch_line,  const Line& cline) {	}
 	void update_display_old() {
 		size_t scan_line = 0;
 		for (auto& l : _lines) {
@@ -512,17 +385,15 @@ public:
 		KillTimer(1);
 		_glyph_dc.SelectBitmap(NULL);
 		_glyph_dc.DeleteDC();
-	//	_screen_dc.SelectBitmap(NULL);
-		//sim->m_vsync = nullptr;
 		_screen.ReleaseDC();
 		_screen.Destroy();
 	}
 
 	void DoPaint(CDCHandle dc)
 	{
-		//CPaintDC dc(*this);
 		CRect rect;
 		GetClientRect(&rect);
-		_screen.Draw(dc, rect);// rect);
+		dc.SetStretchBltMode(WHITEONBLACK);
+		_screen.Draw(dc, rect);
 	}
 };

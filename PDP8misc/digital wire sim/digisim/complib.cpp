@@ -1,11 +1,11 @@
 /***********************************************************************
- * $RCSfile: complib.cpp,v $		$Revision: 1.21 $
+ * $RCSfile: complib.cpp,v $		$Revision: 1.24 $
  *
- * $Date: 1998/12/20 06:23:49 $		$Locker:  $
+ * $Date: 2004/07/15 16:19:10 $		$Locker:  $
  *
  * --------------------------------------------------------------------
- * DigiTcl 0.3.0 - An Elementary Digital Simulator 
- * (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+ * DigiTcl 0.3.2 - An Elementary Digital Simulator 
+ * (C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ Or2::process(ckt_time t)
 
 	if (sigval1 == SIG_HIGH || sigval2 == SIG_HIGH)
 		O1.send_signal(Signal(t + delay, SIG_HIGH));
-	else if (sigval1 == SIG_LOW && sigval1 == SIG_LOW)
+	else if (sigval1 == SIG_LOW && sigval2 == SIG_LOW)
 		O1.send_signal(Signal(t + delay, SIG_LOW));
 	else
 		O1.send_signal(Signal(t + delay, SIG_X));

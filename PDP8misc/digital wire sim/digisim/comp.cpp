@@ -1,11 +1,11 @@
 /***********************************************************************
- * $RCSfile: comp.cpp,v $		$Revision: 1.21 $
+ * $RCSfile: comp.cpp,v $		$Revision: 1.25 $
  *
- * $Date: 1998/12/20 06:19:31 $		$Locker:  $
+ * $Date: 2004/07/15 16:19:10 $		$Locker:  $
  *
  * --------------------------------------------------------------------
- * DigiTcl 0.3.0 - An Elementary Digital Simulator 
- * (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+ * DigiTcl 0.3.2 - An Elementary Digital Simulator 
+ * (C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,11 +23,16 @@
  *
  ***********************************************************************/
 
-#include	<string.h>
+#include	<iostream>
+#include	<list>
+
 #include	"sim.h"			/* For generate_tabs() decl	*/
 #include	"port.h"		/* Req'd by inputs_are_ready()	*/
 #include	"signal.h"		/* Req'd by inputs_are_ready()	*/
 #include	"comp.h"
+
+using std::endl;
+using std::list;
 
 /*
  * Method definitions of the abstract base class for Component.

@@ -3,8 +3,8 @@
 exec wish "$0" "$@"
 #
 # --------------------------------------------------------------------
-# DigiTcl 0.3.0 - An Elementary Digital Simulator 
-# (C) 1995-1998 Donald C. Craig (donald@cs.mun.ca)
+# DigiTcl 0.3.2 - An Elementary Digital Simulator 
+# (C) 1995-2004 Donald C. Craig (donald@cs.mun.ca)
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,11 @@ exec wish "$0" "$@"
 # GNU General Public License for more details.
 # --------------------------------------------------------------------
 #
-
+package require Tcl	8.6
+package require Tk	8.6
 proc about_dialog {} {
 	utils_dialog .about "About" \
-		"The DigiTcl Layout Tool and Digital Simulator\nVersion 0.3.0" \
+		"The DigiTcl Layout Tool and Digital Simulator\nVersion 0.3.2" \
 		0 "OK"
 }
 
