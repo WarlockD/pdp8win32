@@ -19,6 +19,7 @@
 #include <atlsplit.h>
 #include <atlcrack.h>      // WTL enhanced msg map macros</span>
 #include <atlwinx.h>
+#include "resource.h"
 
 #include <type_traits>
 #include <queue>
@@ -39,6 +40,7 @@
 #include <sstream>
 #include <iomanip>      // std::setw
 #include <unordered_map>
+#include <unordered_set>
 
 // bit operations
 // useful functions to deal with bit shuffling encryptions

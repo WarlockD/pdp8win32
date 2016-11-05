@@ -1,11 +1,12 @@
 #include "global.h"
 #include "main_window.h"
+#include "asembler.h"
 
 CAppModule _Module;
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int  nCmdShow) {
 	CMessageLoop messageLoop;
-	AppWindow mainwnd;
-
+	//AppWindow mainwnd;
+	MACRO8_Asembler mainwnd;
 	_Module.Init(NULL, NULL);
 	_Module.AddMessageLoop(&messageLoop);
 	//	mainwnd.Create(NULL, CWindow::rcDefault, _T("Main Window"));

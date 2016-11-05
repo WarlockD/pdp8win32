@@ -1,6 +1,7 @@
 #pragma once
 #include "global.h"
 
+
 class TerminalView : public CDoubleBufferWindowImpl<TerminalView, CWindow, CDxAppWinTraits > {
 	bool screen_rev = false;
 	CImage _screen;

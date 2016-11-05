@@ -144,17 +144,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="asembler.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="asembler.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="main_window.cpp" />
     <ClInclude Include="main_window.h" />
     <ClInclude Include="memory_view.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="simple_wire.h" />
     <ClInclude Include="terminal_view.h" />
     <ClInclude Include="VT100.h" />
     <ClInclude Include="vt_terminal_parser.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="vt100emu.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
