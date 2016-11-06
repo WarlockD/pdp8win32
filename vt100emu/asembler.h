@@ -39,10 +39,11 @@ namespace util {
 };
 class Symbol {
 	bool m_case_ignore;
+	
 	bool m_fixed;
 	std::string m_name;
-	int m_line_defined;
-	int m_value;
+	mutable int m_line_defined; // HACKS
+	mutable int m_value;
 	std::set<int> m_lines_used;
 public:
 	Symbol(const std::string& name, bool fixed = false, bool ignore_case=true) :
@@ -56,10 +57,10 @@ public:
 	const std::string& name() const { return m_name; }
 	bool case_ignore() const { return m_case_ignore; }
 	int value() const { return m_value; }
-	void value(int v) { m_value = v; }
+	void value(int v) const{ m_value = v; }
 	bool is_defined() const { return m_line_defined == -1; }
 	int line_defined() const { return m_line_defined; }
-	void define(int lineno) { m_line_defined = lineno; }
+	void define(int lineno) const { m_line_defined = lineno; }
 	void add_used(int lineno) { m_lines_used.emplace(lineno); }
 	void remove_used(int lineno) { m_lines_used.erase(lineno); }
 	const std::set<int>& lines_used() const { return m_lines_used; }
@@ -83,10 +84,11 @@ namespace std{
 //template <class T>//, class TBase = CWindow, class TWinTraits = CDxAppWinTraits >
 class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImpl<AppWindow, CWindow, CDxAppWinTraits >
 {
-	static constexpr int SCE_STYLE_ORANGE = 11;
-	static constexpr int SCE_STYLE_PURPLE = 12;
-	static constexpr int SCE_STYLE_BLUE = 13;
-	static constexpr int SCE_STYLE_BLACK = 14;
+	static constexpr int SCE_STYLE_NORMAL = 11;
+	static constexpr int SCE_STYLE_COMMENT = 12;
+	static constexpr int SCE_STYLE_KEYWORD = 13;
+	static constexpr int SCE_STYLE_SYMBOL = 14;
+	static constexpr int SCE_STYLE_NUMBER = 15;
 	static constexpr COLORREF s_black = 0x000000;
 	static constexpr COLORREF s_white = 0xFFFFFF;
 	static constexpr COLORREF s_blue = RGB(0, 0, 0xFF);
@@ -94,8 +96,9 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 	static constexpr COLORREF s_orange = RGB(0xFF, 128, 0);
 	static constexpr const char* s_mem_ref_codes = "and tad isz dca jms jmp";
 	static constexpr const char* s_group1_codes = "cla cll cma cml rar ral rtr rtl iac nop";
-	
-	std::unordered_set<Symbol> m_symbols;
+	typedef std::unordered_set<Symbol> t_symboltable;
+
+	t_symboltable m_symbols;
 
 	static constexpr const char* s_keywords = 
 		""
@@ -192,40 +195,103 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 
 	HMODULE m_SciLexer_dll = nullptr;
 	CWindow m_edit;
+	std::string m_buffer;
+	enum class ParseMode {
+		OPCODE,
+		ASSIGN,
+		LABEL,
+		SYMBOL
+	};
+	struct Token {
+		int start;
+		int size;
+		int style;
+	};
+	void Parse(int start_pos, int end_pos, std::vector<Token>& tokens) {
+#define CHANGE_STATE(STATE) { if(t.size>0) { tokens.emplace_back(t); t = { i, 0, (STATE) };}; t.style = (STATE); goto restart_state;}
+#define CHANGE_STATE_CONTINUE(STATE) { if(t.size>0) { tokens.emplace_back(t); t = { i, 0, (STATE) };}; t.style = (STATE); continue;}
+		Token t = { start_pos, 0, SCE_A68K_DEFAULT };
+		int i = start_pos;
+		while (i <= end_pos) {
+			char ch = SendEditor(SCI_GETCHARAT, (WPARAM)i);
+		restart_state: // love gotos/hate gotos this is is WAY more elegante than another embeded loop
+			switch (t.style) {
+			case SCE_A68K_DEFAULT:
+				if (::isalpha(ch)) { m_buffer.clear(); CHANGE_STATE(SCE_A68K_IDENTIFIER); }
+				if (::isdigit(ch)) { m_buffer.clear(); CHANGE_STATE(SCE_A68K_NUMBER_HEX); }
+				if (ch == '/') CHANGE_STATE(SCE_A68K_COMMENT);
+
+				break;
+			case SCE_A68K_IDENTIFIER:
+				if (::isalnum(ch)) m_buffer.push_back(ch);
+				else {
+					if (ch == ',') {
+						t.style = SCE_A68K_LABEL;
+						t.size++;
+						i++;
+						CHANGE_STATE_CONTINUE(SCE_A68K_DEFAULT);
+					 }else
+					//if(mode == ParseMode::ASSIGN)
+					CHANGE_STATE(SCE_A68K_DEFAULT);
+				}
+				break;
+			case SCE_A68K_NUMBER_HEX:
+				if (::isdigit(ch)) m_buffer.push_back(ch);
+				else {
+					/*
+					if (mode == ParseMode::ASSIGN) {
+
+					auto& symbol = m_symbols.emplace(Symbol(equ));
+					t_symboltable::iterator& it = symbol.first;
+					if (!it->is_defined()) {
+					int value = strtol(m_buffer.data(), nullptr, 8);
+					it->value(value);
+					it->define(line_number + 1);
+					}
+					}
+					*/
+					CHANGE_STATE(SCE_A68K_DEFAULT);
+				}
+				break;
+			case SCE_A68K_COMMENT:
+				if (ch == '\n') {
+					CHANGE_STATE(SCE_A68K_DEFAULT);
+				}
+				break;
+			}
+			t.size++;
+			i++;
+		}
+	}
 	LRESULT OnStyleNeeded(LPNMHDR nmhdr) {
 		SCNotification* notify = (SCNotification*)nmhdr;
-		const int line_number = SendEditor(SCI_LINEFROMPOSITION, SendEditor(SCI_GETENDSTYLED));
-		const int start_pos = SendEditor(SCI_POSITIONFROMLINE, (WPARAM)line_number);
+		ParseMode mode = ParseMode::OPCODE;
+		int ended = SendEditor(SCI_GETENDSTYLED);
+		const int line_number = SendEditor(SCI_LINEFROMPOSITION, ended);
+		const int start_pos = SendEditor(SCI_POSITIONFROMLINE, line_number);
 		const int end_pos = notify->position;
-		int line_length = SendEditor(SCI_LINELENGTH, (WPARAM)line_number);
-		int state;
-		// The SCI_STARTSTYLING here is important
-		SendEditor(SCI_STARTSTYLING, start_pos);
 
-		if (start_pos == 0) {
-			SendEditor(SCI_SETSTYLING, start_pos, SCE_STYLE_BLACK);
-				state = SCE_STYLE_BLACK;
+		m_buffer.clear();
+		std::vector<Token> tokens;
+		Parse(start_pos, end_pos, tokens);
+		for (auto& t: tokens) {
+			SendEditor(SCI_STARTSTYLING, t.start);
+			SendEditor(SCI_SETSTYLING, t.size, t.style);
 		}
-		else {
-			state = SendEditor(SCI_GETSTYLEAT, start_pos);
-		}
-
-		for (int i = start_pos; i <= end_pos; i++) {
-			char ch = SendEditor(SCI_GETCHARAT, (WPARAM)i);
-			if (ch == '\\') {
-				SendEditor(SCI_STARTSTYLING, i);
-				SendEditor(SCI_SETSTYLING, end_pos-i, SCE_STYLE_PURPLE);
-			}
-			//else if (ch == '\n') {
-			//	SendEditor(SCI_SETSTYLING, start_pos, SCE_STYLE_BLACK);
-			//}
-		}
+	
 		return TRUE;
 	}
-	LRESULT SendEditor(UINT Msg, WPARAM wParam = 0, LPARAM lParam = 0) {
-		return m_edit.SendMessageA(Msg, wParam, lParam);
+	template<typename WTYPE, typename LTYPE>
+	LRESULT SendEditor(UINT Msg, WTYPE wParam, LTYPE lParam) {
+		return m_edit.SendMessageA(Msg, (WPARAM)wParam, (LPARAM)lParam);
 	}
-
+	template<typename WTYPE>
+	LRESULT SendEditor(UINT Msg, WTYPE wParam) {
+		return m_edit.SendMessageA(Msg, (WPARAM)wParam);
+	}
+	LRESULT SendEditor(UINT Msg) {
+		return m_edit.SendMessageA(Msg);
+	}
 	void OnSize(UINT func, CSize size) {
 		m_edit.ResizeClient(size.cx, size.cy, true);
 	}
@@ -244,15 +310,24 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 			CRect rect;
 			GetClientRect(&rect);
 			m_edit.Create("Scintilla", m_hWnd, rect, "", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_CLIPCHILDREN, 0, (HMENU)IDR_SCIEDIT);
-			ATLASSERT(::IsWindow(m_edit.m_hWnd));
+			ATLASSERT(::IsWindow(m_edit.m_hWnd)); 
+				SendEditor(SCLEX_A68K, SCLEX_A68K);
 			m_edit.SendMessageA(SCI_SETLEXER, SCLEX_CONTAINER);
 			m_edit.SendMessageA(SCI_STYLESETFORE, STYLE_DEFAULT, s_black);
 			m_edit.SendMessageA(SCI_STYLESETBACK, STYLE_DEFAULT, s_white);
 			m_edit.SendMessageA(SCI_STYLECLEARALL);
-			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_STYLE_BLACK, s_black);
-			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_STYLE_ORANGE, s_orange);
-			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_STYLE_PURPLE, s_purple);
-			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_STYLE_BLUE, s_blue);
+			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_A68K_IDENTIFIER, s_black);
+			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_A68K_COMMENT, RGB(0x00,0xFF,0x00));
+			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_A68K_NUMBER_HEX, s_purple);
+			m_edit.SendMessageA(SCI_STYLESETFORE, SCE_A68K_LABEL, RGB(0x20,0x50,0x20));
+			std::ifstream test("..\\PDP8misc\\tests\\src\\MAINDEC-08-D1GB-D.pal");
+			assert(test.good());
+			test.seekg(0, std::ios::end);
+			size_t size = test.tellg();
+			test.seekg(0, std::ios::beg);
+			std::vector<char> buffer(size);
+			test.read(buffer.data(), size);
+			SendEditor(SCI_SETTEXT, size, buffer.data());
 		}
 
 		return 0;
