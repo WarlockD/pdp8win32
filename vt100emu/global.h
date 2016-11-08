@@ -169,3 +169,4 @@ struct CharAttributes {
 	bool double_height() const { return (attrib & (DOUBLE_T| DOUBLE_B)) != 0; }
 };
 
+void debug_out(const char* fmt, ...);

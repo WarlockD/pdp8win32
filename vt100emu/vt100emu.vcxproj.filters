@@ -50,7 +50,10 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="asembler.h">
+    <ClInclude Include="asembler_editor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="maco8_asembler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

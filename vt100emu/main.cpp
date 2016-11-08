@@ -1,6 +1,15 @@
 #include "global.h"
 #include "main_window.h"
-#include "asembler.h"
+#include "asembler_editor.h"
+
+void debug_out(const char* fmt, ...) {
+	char buffer[512];
+	va_list va;
+	va_start(va, fmt);
+	vsprintf_s(buffer, fmt, va);
+	va_end(va);
+	::OutputDebugStringA(buffer);
+}
 
 CAppModule _Module;
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int  nCmdShow) {

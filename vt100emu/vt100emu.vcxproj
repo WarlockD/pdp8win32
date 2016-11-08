@@ -148,8 +148,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="asembler.h" />
+    <ClInclude Include="asembler_editor.h" />
     <ClInclude Include="global.h" />
+    <ClInclude Include="maco8_asembler.h" />
     <ClInclude Include="main_window.cpp" />
     <ClInclude Include="main_window.h" />
     <ClInclude Include="memory_view.h" />

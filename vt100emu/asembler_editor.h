@@ -1,5 +1,6 @@
 #pragma once
 #include "global.h"
+#include "maco8_asembler.h"
 #include <Scintilla.h>
 #include <SciLexer.h>
 
@@ -37,50 +38,8 @@ namespace util {
 		return luaS_hash(text.c_str(), text.size(), ignore_case, seed);
 	}
 };
-class Symbol {
-	bool m_case_ignore;
-	
-	bool m_fixed;
-	std::string m_name;
-	mutable int m_line_defined; // HACKS
-	mutable int m_value;
-	std::set<int> m_lines_used;
-public:
-	Symbol(const std::string& name, bool fixed = false, bool ignore_case=true) :
-		m_name(name), 
-		m_line_defined(-1), 
-		m_value(0) , 
-		m_case_ignore(ignore_case),
-		m_fixed(fixed) {
-	}
-	bool fixed() const { return m_fixed; }
-	const std::string& name() const { return m_name; }
-	bool case_ignore() const { return m_case_ignore; }
-	int value() const { return m_value; }
-	void value(int v) const{ m_value = v; }
-	bool is_defined() const { return m_line_defined == -1; }
-	int line_defined() const { return m_line_defined; }
-	void define(int lineno) const { m_line_defined = lineno; }
-	void add_used(int lineno) { m_lines_used.emplace(lineno); }
-	void remove_used(int lineno) { m_lines_used.erase(lineno); }
-	const std::set<int>& lines_used() const { return m_lines_used; }
-	std::set<int>& lines_used()  { return m_lines_used; }
-	bool operator<(const Symbol& other) const { 
-		return m_case_ignore ? _stricmp(m_name.c_str(), other.m_name.c_str()) < 0 : m_name < other.m_name; 
-	}
-	bool operator==(const Symbol& other) const {
-		return m_case_ignore ? _stricmp(m_name.c_str(), other.m_name.c_str()) == 0 : m_name == other.m_name;
-	}
-	bool operator!=(const Symbol& other) const { return !(*this == other); }
-};
-namespace std{
-	template<>
-	struct hash<Symbol> {
-		size_t operator()(const Symbol& sym) const { 
-			return util::luaS_hash(sym.name(), sym.case_ignore());
-		}
-	};
-};
+
+
 //template <class T>//, class TBase = CWindow, class TWinTraits = CDxAppWinTraits >
 class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImpl<AppWindow, CWindow, CDxAppWinTraits >
 {
@@ -96,9 +55,7 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 	static constexpr COLORREF s_orange = RGB(0xFF, 128, 0);
 	static constexpr const char* s_mem_ref_codes = "and tad isz dca jms jmp";
 	static constexpr const char* s_group1_codes = "cla cll cma cml rar ral rtr rtl iac nop";
-	typedef std::unordered_set<Symbol> t_symboltable;
-
-	t_symboltable m_symbols;
+	macro8::SymbolTable m_table;
 
 	static constexpr const char* s_keywords = 
 		""
@@ -195,90 +152,35 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 
 	HMODULE m_SciLexer_dll = nullptr;
 	CWindow m_edit;
-	std::string m_buffer;
-	enum class ParseMode {
-		OPCODE,
-		ASSIGN,
-		LABEL,
-		SYMBOL
-	};
-	struct Token {
-		int start;
-		int size;
-		int style;
-	};
-	void Parse(int start_pos, int end_pos, std::vector<Token>& tokens) {
-#define CHANGE_STATE(STATE) { if(t.size>0) { tokens.emplace_back(t); t = { i, 0, (STATE) };}; t.style = (STATE); goto restart_state;}
-#define CHANGE_STATE_CONTINUE(STATE) { if(t.size>0) { tokens.emplace_back(t); t = { i, 0, (STATE) };}; t.style = (STATE); continue;}
-		Token t = { start_pos, 0, SCE_A68K_DEFAULT };
-		int i = start_pos;
-		while (i <= end_pos) {
-			char ch = SendEditor(SCI_GETCHARAT, (WPARAM)i);
-		restart_state: // love gotos/hate gotos this is is WAY more elegante than another embeded loop
-			switch (t.style) {
-			case SCE_A68K_DEFAULT:
-				if (::isalpha(ch)) { m_buffer.clear(); CHANGE_STATE(SCE_A68K_IDENTIFIER); }
-				if (::isdigit(ch)) { m_buffer.clear(); CHANGE_STATE(SCE_A68K_NUMBER_HEX); }
-				if (ch == '/') CHANGE_STATE(SCE_A68K_COMMENT);
+	std::vector<char> m_buffer;
 
-				break;
-			case SCE_A68K_IDENTIFIER:
-				if (::isalnum(ch)) m_buffer.push_back(ch);
-				else {
-					if (ch == ',') {
-						t.style = SCE_A68K_LABEL;
-						t.size++;
-						i++;
-						CHANGE_STATE_CONTINUE(SCE_A68K_DEFAULT);
-					 }else
-					//if(mode == ParseMode::ASSIGN)
-					CHANGE_STATE(SCE_A68K_DEFAULT);
-				}
-				break;
-			case SCE_A68K_NUMBER_HEX:
-				if (::isdigit(ch)) m_buffer.push_back(ch);
-				else {
-					/*
-					if (mode == ParseMode::ASSIGN) {
 
-					auto& symbol = m_symbols.emplace(Symbol(equ));
-					t_symboltable::iterator& it = symbol.first;
-					if (!it->is_defined()) {
-					int value = strtol(m_buffer.data(), nullptr, 8);
-					it->value(value);
-					it->define(line_number + 1);
-					}
-					}
-					*/
-					CHANGE_STATE(SCE_A68K_DEFAULT);
-				}
-				break;
-			case SCE_A68K_COMMENT:
-				if (ch == '\n') {
-					CHANGE_STATE(SCE_A68K_DEFAULT);
-				}
-				break;
-			}
-			t.size++;
-			i++;
-		}
-	}
 	LRESULT OnStyleNeeded(LPNMHDR nmhdr) {
 		SCNotification* notify = (SCNotification*)nmhdr;
-		ParseMode mode = ParseMode::OPCODE;
-		int ended = SendEditor(SCI_GETENDSTYLED);
-		const int line_number = SendEditor(SCI_LINEFROMPOSITION, ended);
-		const int start_pos = SendEditor(SCI_POSITIONFROMLINE, line_number);
-		const int end_pos = notify->position;
+		int start_pos = SendEditor(SCI_GETENDSTYLED); // from
+		int end_pos = notify->position; // too
+		// but we need the begining of the line to properly style it
+		int line_number = SendEditor(SCI_LINEFROMPOSITION, start_pos);
+		start_pos = SendEditor(SCI_POSITIONFROMLINE, line_number);
+		m_buffer.resize(end_pos - start_pos + 1);
+		Sci_TextRange range = { { start_pos, end_pos }, m_buffer.data() };
+		//const int line_len2 = SendEditor(SCI_GETLINE, line_number, buffer.data());
+		const int line_len2 = SendEditor(SCI_GETTEXTRANGE, 0, &range);
+		m_buffer[m_buffer.size()-1] = 0;
 
-		m_buffer.clear();
-		std::vector<Token> tokens;
-		Parse(start_pos, end_pos, tokens);
-		for (auto& t: tokens) {
-			SendEditor(SCI_STARTSTYLING, t.start);
-			SendEditor(SCI_SETSTYLING, t.size, t.style);
+		macro8::Lexer lex;
+		lex.parse(m_buffer.data(), m_buffer.size());
+		for (auto& t: lex.tokens()) {
+			SendEditor(SCI_STARTSTYLING, start_pos+t.pos());
+			int style = 0;
+			switch (t.token()) {
+			case macro8::Lexer::COMMENT: style = SCE_A68K_COMMENT; break;
+			case macro8::Lexer::NUMBER: style = SCE_A68K_NUMBER_HEX; break;
+			case macro8::Lexer::SYMBOL: style = SCE_A68K_IDENTIFIER; break;
+			default: style = SCE_A68K_DEFAULT; break;
+			}
+			SendEditor(SCI_SETSTYLING, t.size(), style);
 		}
-	
 		return TRUE;
 	}
 	template<typename WTYPE, typename LTYPE>
