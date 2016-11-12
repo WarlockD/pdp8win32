@@ -9,6 +9,37 @@
 
 void debug_out(const char* fmt, ...);
 
+namespace util {
+	class String {
+	public:
+		String();
+		String(const String& a);
+		String(String&& a);
+		String& operator=(const String& a);
+		String& operator=(String&& a);
+		~String();
+
+		void assign(const char* str, size_t size);
+
+		String(const char* str, size_t size);
+		String(const std::string& str) : String(str.c_str(), str.size()) {}
+		String(const char* str) : String(str, ::strlen(str)) {}
+
+
+		const char* c_str() const { return m_str; }
+		size_t size() const { return *reinterpret_cast<const size_t*>(m_str - 4) & 0x00FFFFFF; }
+		const char* begin() const { return m_str; }
+		const char* end() const { return m_str + size(); }
+		char at(size_t i) const { return m_str[i]; }
+		char operator[](size_t i) const { return m_str[i]; }
+		friend inline bool operator==(const String& l, const String& r) { return l.m_str == r.m_str; }
+		friend inline bool operator!=(const String& l, const String& r) { return l.m_str != r.m_str; }
+	private:
+		friend class StringTable;
+		const char* m_str;
+	};
+};
+
 namespace macro8 {
 	enum class SymbolType {
 		Undefined = 0,
@@ -30,62 +61,6 @@ namespace macro8 {
 	inline bool operator!=(Position l, Position r) { return !(l == r); }
 	inline bool operator<(Position l, Position r) { return  l.line < r.line && l.col < r.col; }
 
-	// strings that self interns a string and is just a handle to it
-	// 
-	class istring {
-		struct _istring {
-			_istring() = delete;
-			_istring(const _istring&) = delete;
-			_istring(_istring&&) = delete;
-			_istring* next;
-			size_t size;
-			size_t hash;
-			char str[1];
-		};
-		const _istring* m_str;
-		friend class istring_table;
-	public:
-		// removes all strings not being used
-		static void collect_garbage();
-		void clear();
-		void assign(const char * str, size_t s);
-		void assign(const istring& s);
-		void assign(const char * str) { assign(str, ::strlen(str)); }
-		void assign(const std::string& str) { assign(s.c_str(), s.size()); }
-		void swap(istring&& s);
-		// have to rull of 5 this garbage collection class
-		istring() : m_str(nullptr) {}
-		istring(const istring& s) : m_str(nullptr) { assign(s); }
-		istring(istring&& s) : m_str(nullptr) { assign(s); }
-		istring(const char* str) : m_str(nullptr) { assign(str); }
-		istring(const char* str, size_t len) : m_str(nullptr) { assign(str,len); }
-		istring& operator=(const istring& s)  { assign(s); return *this;  }
-		istring& operator=(istring&& s)  { assign(s); s.clear(); return *this; }
-		~istring() { clear(); }
-		
-		// some converters
-		istring(const std::string& str) : m_str(nullptr) {  assign(str);  }
-		istring(std::string&& str) : m_str(nullptr) {  assign(str); }
-		operator std::string() { return m_str ? std::move(std::string(m_str->str, m_str->size)) : ""; }
-		istring& operator=(const std::string& s) { assign(s); return *this; }
-		istring& operator=(std::string&& s)  { assign(s); s.clear(); return *this; }
-		bool equal(const istring& o) const { return m_str == o.m_str; }
-		bool equal(const char* o) const { return m_str && m_str->str == o || ::strcmp(m_str->str, o) == 0; }
-		// case invarent equal
-		bool iequal(const istring& o) const { return (m_str && o.m_str &&  ::strcmpi(m_str->str, o.m_str->str)); }
-		bool iequal(const char* o) const { return (m_str &&  ::strcmpi(m_str->str, o)); }
-		
-		const char* begin() const { return m_str ? m_str->str : nullptr; }
-		const char* end() const { return m_str ? m_str->str + m_str->size: nullptr;}
-		std::string::size_type size() const { return m_str ? m_str->size : 0; }
-		std::string::value_type at(std::string::size_type i) const { return m_str ? m_str->str[i] : 0; }
-		std::string::value_type operator[](std::string::size_type i) const { return m_str ? m_str->str[i] : 0; }
-
-		size_t hash() const { return m_str ? m_str->hash : 0; }
-		friend inline bool operator==(const istring& l, const istring& r) { return l.equal(r); }
-		friend inline bool operator!=(const istring& l, const istring& r) { return !l.equal(r); }
-	};
-	
 	
 	class Symbol {
 		Symbol(const std::string& name) : m_name(name), m_fixed(false), m_value(0), m_type(SymbolType::Undefined) {}
@@ -96,7 +71,7 @@ namespace macro8 {
 		void fixed(bool value) { m_fixed = value; }
 	public:
 		const SymbolType type() const { return m_type; }
-		const istring& name() const { return m_name; }
+		const util::String& name() const { return m_name; }
 		const bool fixed() const { return m_fixed; }
 		
 		int value() const { return m_value; }
@@ -106,7 +81,7 @@ namespace macro8 {
 		}
 	private:
 		friend class SymbolTable;
-		istring m_name;
+		util::String m_name;
 		std::set<int> m_lineno_ref;
 		std::set<std::pair<int,int>> m_lineno_defined;
 		SymbolType m_type;
@@ -127,11 +102,11 @@ namespace std {
 	};
 	template <>
 	struct hash<macro8::Symbol> {
-		std::size_t operator()(const macro8::Symbol& p) const { return std::hash<std::string>()(p.name()); }
+		std::size_t operator()(const macro8::Symbol& p) const { return size_t(p.name().c_str()); }
 	};
 	template <>
-	struct hash<macro8::istring> {
-		std::size_t operator()(const macro8::istring& p) const { return std::hash<std::string>()(p); }
+	struct hash<util::String> {
+		std::size_t operator()(const util::String& p) const { return size_t(p.c_str()); }
 	};
 };
 
@@ -274,7 +249,7 @@ namespace macro8 {
 					return t;
 				case Kind::Symbol:
 					if((k == Kind::Symbol || k == Kind::Value || ch == '_')) break;
-					t.m_symbol = &m_table.lookup(istring(m_text + t.pos(), t.size()));
+					t.m_symbol = &m_table.lookup(util::String(m_text + t.pos(), t.size()));
 					return t;
 				case Kind::Value:
 					if (k == Kind::Value) {

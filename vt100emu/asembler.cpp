@@ -83,212 +83,122 @@ namespace {
 		std::list<int*> test;
 	};
 };
+namespace util {
+	// copied from Lua 5.3.3
+	class StringTable {
+		struct istring {
+			// for compiler errors
+			istring(const istring&) = delete;
+			istring(istring&&) = delete;
+			void mark() { _size |= (0x01 << 24); }
+			void  unmark() { _size &= ~(0x01 << 24); }
+			bool marked() const { return _size & 0xFF000000 != 0; }
+			bool fixed() const { return _size & 0x10000000 != 0; }
+			size_t size() const { return _size & 0x00FFFFFF; }
+			size_t _size;
+			char str[1];
+		};
+		union istring_find {
+			struct {
+				size_t size;
+				const char* str;
+			} find;
+			istring org;
+		};
+		struct hasher {
+			size_t operator()(const istring* l) const { return luaS_hash(l->str, l->size()); };
+		};
+		struct equaler {
+			bool operator()(const istring* l, const istring* r) const { return l->size() == r->size() && ::memcmp(l->str, r->str, sizeof(char)*l->size()) == 0; };
+		};
+		std::unordered_set<istring*, hasher, equaler> m_string_table;
+		std::unordered_set<const String*> m_istrings;
+		size_t m_strings_used = 0;
 
-namespace macro8 {
-	class istring_table {
-		std::vector<istring::_istring*> m_string_table;
-		std::multimap<size_t, char*> m_free_memory;
-		std::vector<char> m_storage;
-		std::unordered_set<const istring*> m_istrings;
-		size_t m_strings_used;
-		void remove(istring::_istring* s) {
-			istring::_istring** p = m_string_table.data() + lmod(s->hash, m_string_table.size());
-			while (*p != s) p = &(*p)->next; // find previous element
-			*p = (*p)->next;  /* remove element from its list */
-			deallocate(s);
-			m_strings_used--;
+
+		void clear_marks() {
+			for (auto a : m_string_table) a->unmark(); // a->size &= ~(0x10 << 24);
 		}
-		void resize_string_table(size_t newsize) {
-			if (newsize > m_string_table.size()) {
-				m_string_table.resize(newsize); // auto nulls
-				//for (int i = m_string_table.size(); i < newsize; i++)
-					//m_string_table
-					//tb->hash[i] = NULL;
-			}
-			// rehash
-			for (size_t i = 0; i < m_string_table.size(); i++) {  /* rehash */
-				istring::_istring* p = m_string_table[i];
-				m_string_table[i] = nullptr;
-				while (p) {  /* for each node in the list */
-					istring::_istring* hnext = p->next;  /* save next */
-					size_t h = lmod(p->hash, newsize);  /* new position */
-					p->next = m_string_table[i];  /* chain it */
-					m_string_table[i] = p;
-					p = hnext;
-				}
-			}
-			if (newsize < m_string_table.size()) {// vanishing slice should be empty 
-				m_string_table.resize(newsize); 
-			}
-		}
-		istring::_istring*  intern(const char* str, size_t l) {
-			istring::_istring* ts;
-			size_t h = luaS_hash(str, l);
-			istring::_istring** list = &m_string_table[lmod(h, m_string_table.size())];
-			for (ts = *list; ts != nullptr; ts = ts->next) {
-				if (l == ts->size && ::memcmp(str, ts->str, sizeof(char)*l) == 0) ts; // found!
-			}
-			// not found, must create
-			if (m_strings_used >= m_string_table.size() && m_string_table <= (std::numeric_limits<int>::max() / 2)) {
-				resize_string_table(m_string_table.size() * 2);
-				list = &m_string_table[lmod(h, m_string_table.size())];  /* recompute with new size */
-			}
-			ts = allocate(l);
-			ts->size = l;
-			ts->hash = h;
+	public:
+		istring*  intern(const char* str, size_t l) {
+			istring_find search = { l , str };
+			auto it = m_string_table.find(&search.org);
+			if (it != m_string_table.end()) return *it;
+			istring* ts = reinterpret_cast<istring*>(new char[sizeof(istring) + l]);
+			ts->_size = l & 0x00FFFFFF;
 			::memcpy(ts->str, str, sizeof(char)*l);
 			ts->str[l] = 0;
-			ts->next = *list;
-			*list = ts; // link
-			m_strings_used++;
+			m_string_table.emplace(ts);
 			return ts;
 		}
-
-	
-
-		void deallocate(istring::_istring* ptr) {
-			char* cptr = reinterpret_cast<char*>(ptr);
-			size_t size = sizeof(istring::_istring) + ptr->size;
-			m_free_memory.emplace(std::make_pair(size, cptr));
-#ifdef _DEBUG
-			::memset(cptr, 0, sizeof(istring::_istring) + ptr->size);// we do this just for debugging
-#endif
+		static istring s_empty;
+		StringTable() {
+			m_string_table.emplace(&s_empty);
 		}
-		istring::_istring* allocate(size_t str_size) {
-			size_t size = sizeof(istring::_istring) + str_size;
-
-			while (true) {
-				for (auto it = m_free_memory.begin(); it != m_free_memory.end(); it++) {
-					if (it->first >= size) {
-						char* ptr = it->second;
-						m_free_memory.erase(it);
-						m_free_memory.emplace(std::make_pair(it->second - size, ptr + size));
-						return reinterpret_cast<istring::_istring*>(ptr);
-					}
+		void make_perm(istring* s) {
+			s->_size |= (0x10 << 24);
+		}
+		void collect_garbage() {
+			for (auto s : m_istrings) {
+				istring* str = const_cast<istring*>(reinterpret_cast<const istring*>(s->c_str() - 4));
+				str->mark();
+			}
+			for (auto it = m_string_table.begin(); it != m_string_table.end();) {
+				istring* str = (*it);
+				if (str->fixed() || str->marked()) {
+					it++;
+					str->unmark();
 				}
-				// couldn't find any free space so we have to remake it all
-				if (!collect_garbage()) { // nothing to collect so we got to defragment and resize
-					std::vector<char> new_storage(m_storage.size() * 2);
-					char* start = new_storage.data();
-					size_t used = 0;
-					for (auto it = m_istrings.begin(); it != m_istrings.end(); it++) {
-						size_t it_size = sizeof(istring::_istring) + it->first->size;
-						istring::_istring* i = reinterpret_cast<istring::_istring*>(new_storage.data() + used);
-						::memcpy(i, it->first, it_size);
-						used += it_size;
-						n_string_table.emplace(i);
-						for (auto o : it->second) {
-							assert(o);
-							istring* is = const_cast<istring*>(o);
-							is->m_str = i;
-						}
-						n_istrings[i] = std::move(it->second); // save on alloc
-					}
-					s_istrings = std::move(n_istrings);
-					s_istring_table = std::move(n_string_table);
-					m_free_memory.clear();
-					m_free_memory.emplace(std::make_pair(used, new_storage.data() + used));
+				else {
+					it = m_string_table.erase(it);
+					delete str;
 				}
 			}
-			assert(false);
-			return nullptr;
 		}
-
-	public:
-		istring_table() : m_storage(4096) { m_free_memory.emplace(std::make_pair(m_storage.size(), m_storage.data())); }
-		const istring::_istring* intern(const char* str, size_t size) {
-			fake search = { size, luaS_hash(str,size), str };
-			auto it = s_istring_table.find(&search.real);
-			if (it != s_istring_table.end()) return *it;
-			istring::_istring* ptr = reinterpret_cast< istring::_istring*>(new char[sizeof(istring::_istring) + size]);
-			ptr->hash = search.real.hash;
-			ptr->size = size;
-			::memcpy(ptr->str, str, sizeof(char) * size);
-			ptr->str[size] = 0;
-			s_istring_table.emplace(ptr);
-			return ptr;
+		void add_string(const String* str) {
+			if (str->c_str() != StringTable::s_empty.str)
+				m_istrings.emplace(str);
 		}
-		size_t collect_garbage() {
-			size_t items_deleted = 0;
-			for (auto it = s_istrings.begin(); it != s_istrings.end(); ) {
-				if (it->second.empty()) {
-					istring::_istring* ptr = const_cast<istring::_istring*>(it->first);
-					deallocate(ptr);
-					items_deleted++;
-					it = s_istrings.erase(it);
-				}
-				else ++it;
-			}
-			return items_deleted;
+		void del_string(const String* str) {
+			if (str->c_str() != StringTable::s_empty.str)
+				m_istrings.erase(str);
 		}
-		// ugh... this is slow
-		void istring_assign(istring* i, const istring::_istring* s) {
-			if (i->m_str != s) {
-				if (i->m_str) s_istrings[i->m_str].erase(i);
-				if(s) s_istrings[s].emplace(i);
-				i->m_str = s;
+		void swap_string(String* l, String* r) {
+			if (l->m_str != r->m_str) {
+				if (l->m_str == s_empty.str) { m_istrings.emplace(l); m_istrings.erase(r); }
+				else if (r->m_str == s_empty.str) { m_istrings.emplace(r); m_istrings.erase(l); }
+				std::swap(l->m_str, r->m_str);
 			}
 		}
+		void assign_string(String* l, const char* r) {
+			if (l->m_str != r) {
+				if (l->m_str == s_empty.str)  m_istrings.emplace(l);
+				else if (r == s_empty.str)  m_istrings.erase(l);
+				l->m_str = r;
+			}
+		}
+		static const char* cast(const istring* str) { return str->str; }
 	};
-	static istring_table m_istring_table;
-	Kind Lexer::oneCharLookup(char c) { return s_char_lookup.at((uint8_t)c); }
-	// removes all strings not being used
-	void istring::collect_garbage() { m_istring_table.collect_garbage(); }
-	void istring::swap(istring&& s);	// swap interface
-	{
-		if (m_str != s.m_str) {
-			auto temp = m_str;
+	StringTable::istring StringTable::s_empty = { (0x10 << 24), 0 };
+	static StringTable s_string_table;
 
-			istring temp(*this);
-			assign(s);
-			s.assign(temp);
-		}
-	}
-	void istring::clear() {
-		if (m_str) {
-			m_str = nullptr;
-			m_istring_table.istring_ref(this);
-		}
-	}
-	void istring::assign(const istring& str) {
-		if (m_str != str.m_str) {
+	String::String() : m_str(StringTable::s_empty.str) { }
+	String::String(const String& a) : m_str(a.m_str) { s_string_table.add_string(this); }
+	String::String(String&& a) : String() { s_string_table.swap_string(this, &a); }
+	String& String::operator=(const String& a) { s_string_table.assign_string(this, a.m_str); return *this; }
+	String& String::operator=(String&& a) { s_string_table.swap_string(this, &a); return *this; }
+	String::~String() { s_string_table.del_string(this); }
 
-		}
-		
+	void String::assign(const char* str, size_t size) {
+		auto p = s_string_table.intern(str, size);
+		s_string_table.assign_string(this, p->str);
+	}
+
+	String::String(const char* str, size_t l) : m_str(s_string_table.intern(str, l)->str) { s_string_table.add_string(this); }
 
 
-	}
-	void istring::assign(const char* str, size_t size) {
+};
 
-	}
-	void istring::assign(const std::string& str) {
-		if (str.empty()) {
-			if(m_str) s_istring_used.erase(this);
-			m_str = nullptr;
-		}
-		else {
-			if(!m_str) s_istring_used.emplace(this);
-			auto it = s_istring_table.find(&str);
-			if (it != s_istring_table.end()) m_str = (*it);
-			else {
-				m_str = new std::string(str);
-				s_istring_table.emplace(m_str);
-			}
-		}
-	}
-	void istring::assign(std::string&& str) {
-		if (str.empty()) {
-			if (m_str) s_istring_used.erase(this);
-			m_str = nullptr;
-		}
-		else {
-			if (!m_str) s_istring_used.emplace(this);
-			auto it = s_istring_table.find(&str);
-			if (it != s_istring_table.end()) m_str = (*it);
-			else {
-				m_str = new std::string(std::move(str));
-				s_istring_table.emplace(m_str);
-			}
-		}
-	}
+namespace macro8 {
+
 };
