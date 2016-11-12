@@ -57,108 +57,41 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 	static constexpr const char* s_group1_codes = "cla cll cma cml rar ral rtr rtl iac nop";
 	macro8::SymbolTable m_table;
 
-	static constexpr const char* s_keywords = 
-		""
-		""
-		"";
+
 	BEGIN_MSG_MAP(AppWindow)
 		MSG_WM_CREATE(OnCreate)
 		MSG_WM_DESTROY(OnDestroy)
 		MSG_WM_SIZE(OnSize)
 		NOTIFY_HANDLER_EX(IDR_SCIEDIT, SCN_STYLENEEDED,  OnStyleNeeded)
-		//MSG_WM_TIMER(OnTimer)
-		//MSG_WM_KEYUP(OnKeyUp)
-	//	MSG_WM_KEYDOWN(OnKeyDown)
-	//	MSG_WM_KEYUP(OnKeyUp)
-	//	MSG_WM_SIZE(OnSize)
+		MSG_WM_TIMER(OnTimer)
 		CHAIN_MSG_MAP(CFrameWindowImpl<MACRO8_Asembler>)
 	END_MSG_MAP()
 	// Return values for GetOperatorType
 #define NO_OPERATOR     0
 #define OPERATOR_1CHAR  1
 #define OPERATOR_2CHAR  2
+	void OnTimer(UINT_PTR id) {
+		if (id == 1) {
+			asemble();
 
-
-	/**
-	*  IsIdentifierStart
-	*
-	*  Return true if the given char is a valid identifier first char
-	*/
-
-	static inline bool IsIdentifierStart(const int ch)
-	{
-		return (isalpha(ch) || (ch == '_') || (ch == '\\'));
+		}
+		else SetMsgHandled(false);
 	}
 
-
-	/**
-	*  IsIdentifierChar
-	*
-	*  Return true if the given char is a valid identifier char
-	*/
-
-	static inline bool IsIdentifierChar(const int ch)
-	{
-		return (isalnum(ch) || (ch == '_') || (ch == '@') || (ch == ':') || (ch == '.'));
-	}
-
-
-	/**
-	*  GetOperatorType
-	*
-	*  Return:
-	*  NO_OPERATOR     if char is not an operator
-	*  OPERATOR_1CHAR  if the operator is one char long
-	*  OPERATOR_2CHAR  if the operator is two chars long
-	*/
-
-	static inline int GetOperatorType(const int ch1, const int ch2)
-	{
-		int OpType = NO_OPERATOR;
-
-		if ((ch1 == '+') || (ch1 == '-') || (ch1 == '*') || (ch1 == '/') || (ch1 == '#') ||
-			(ch1 == '(') || (ch1 == ')') || (ch1 == '~') || (ch1 == '&') || (ch1 == '|') || (ch1 == ','))
-			OpType = OPERATOR_1CHAR;
-
-		else if ((ch1 == ch2) && (ch1 == '<' || ch1 == '>'))
-			OpType = OPERATOR_2CHAR;
-
-		return OpType;
-	}
-
-
-	/**
-	*  IsBin
-	*
-	*  Return true if the given char is 0 or 1
-	*/
-
-	static inline bool IsBin(const int ch)
-	{
-		return (ch == '0') || (ch == '1');
-	}
-
-
-	/**
-	*  IsDoxygenChar
-	*
-	*  Return true if the char may be part of a Doxygen keyword
-	*/
-
-	static inline bool IsDoxygenChar(const int ch)
-	{
-		return isalpha(ch) || (ch == '$') || (ch == '[') || (ch == ']') || (ch == '{') || (ch == '}');
-	}
-
+	
 	HMODULE m_SciLexer_dll = nullptr;
 	CWindow m_edit;
 	std::vector<char> m_buffer;
-
-
-	LRESULT OnStyleNeeded(LPNMHDR nmhdr) {
-		SCNotification* notify = (SCNotification*)nmhdr;
-		int start_pos = SendEditor(SCI_GETENDSTYLED); // from
-		int end_pos = notify->position; // too
+	macro8::Lexer lex;
+	macro8::Assembler asembler;
+	void asemble() {
+		int size = SendEditor(SCI_GETLENGTH);
+		m_buffer.resize(size + 1);
+		size = SendEditor(SCI_GETTEXT,m_buffer.size(),m_buffer.data());
+		lex.set_text(m_buffer.data(), m_buffer.size());
+		asembler.parse(lex);
+	}
+	void fix_style(int start_pos, int end_pos) {
 		// but we need the begining of the line to properly style it
 		int line_number = SendEditor(SCI_LINEFROMPOSITION, start_pos);
 		start_pos = SendEditor(SCI_POSITIONFROMLINE, line_number);
@@ -166,21 +99,28 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 		Sci_TextRange range = { { start_pos, end_pos }, m_buffer.data() };
 		//const int line_len2 = SendEditor(SCI_GETLINE, line_number, buffer.data());
 		const int line_len2 = SendEditor(SCI_GETTEXTRANGE, 0, &range);
-		m_buffer[m_buffer.size()-1] = 0;
+		m_buffer[m_buffer.size() - 1] = 0;
 
-		macro8::Lexer lex;
-		lex.parse(m_buffer.data(), m_buffer.size());
-		for (auto& t: lex.tokens()) {
-			SendEditor(SCI_STARTSTYLING, start_pos+t.pos());
+		
+		lex.set_text(m_buffer.data(), m_buffer.size());
+		for (auto& t : lex.tokens()) {
+			SendEditor(SCI_STARTSTYLING, start_pos + t.pos());
 			int style = 0;
 			switch (t.token()) {
-			case macro8::Lexer::COMMENT: style = SCE_A68K_COMMENT; break;
-			case macro8::Lexer::NUMBER: style = SCE_A68K_NUMBER_HEX; break;
-			case macro8::Lexer::SYMBOL: style = SCE_A68K_IDENTIFIER; break;
+			case macro8::Kind::Comment: style = SCE_A68K_COMMENT; break;
+			case macro8::Kind::Value: style = SCE_A68K_NUMBER_HEX; break;
+			case macro8::Kind::Symbol: style = SCE_A68K_IDENTIFIER; break;
 			default: style = SCE_A68K_DEFAULT; break;
 			}
 			SendEditor(SCI_SETSTYLING, t.size(), style);
 		}
+	}
+	LRESULT OnStyleNeeded(LPNMHDR nmhdr) {
+		SCNotification* notify = (SCNotification*)nmhdr;
+		int start_pos = SendEditor(SCI_GETENDSTYLED); // from
+		int end_pos = notify->position; // too
+		fix_style(start_pos, end_pos);
+
 		return TRUE;
 	}
 	template<typename WTYPE, typename LTYPE>
@@ -230,6 +170,7 @@ class MACRO8_Asembler : public CFrameWindowImpl<MACRO8_Asembler>    //CWindowImp
 			std::vector<char> buffer(size);
 			test.read(buffer.data(), size);
 			SendEditor(SCI_SETTEXT, size, buffer.data());
+			SetTimer(1, 50);
 		}
 
 		return 0;

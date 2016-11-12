@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <array>
+#include <stack>
 
 void debug_out(const char* fmt, ...);
 
@@ -28,24 +29,66 @@ namespace macro8 {
 	inline bool operator==(Position l, Position r) { return l.col == r.col && l.line == r.line; }
 	inline bool operator!=(Position l, Position r) { return !(l == r); }
 	inline bool operator<(Position l, Position r) { return  l.line < r.line && l.col < r.col; }
-	class SymbolTable;
-	typedef std::vector<std::unique_ptr<std::string>> StringTable;
-	class Name {
+
+	// strings that self interns a string and is just a handle to it
+	// 
+	class istring {
+		struct _istring {
+			_istring() = delete;
+			_istring(const _istring&) = delete;
+			_istring(_istring&&) = delete;
+			_istring* next;
+			size_t size;
+			size_t hash;
+			char str[1];
+		};
+		const _istring* m_str;
+		friend class istring_table;
 	public:
-		operator const std::string&() const { return *m_handle_lookup.at(m_handle); }
-		size_t handle() const { return m_handle; }
-	public:
-		Name(size_t handle, const StringTable& handle_lookup) : m_handle(handle), m_handle_lookup(handle_lookup) {}
-		friend class SymbolTable;
-		size_t m_handle;
-		const StringTable& m_handle_lookup;
+		// removes all strings not being used
+		static void collect_garbage();
+		void clear();
+		void assign(const char * str, size_t s);
+		void assign(const istring& s);
+		void assign(const char * str) { assign(str, ::strlen(str)); }
+		void assign(const std::string& str) { assign(s.c_str(), s.size()); }
+		void swap(istring&& s);
+		// have to rull of 5 this garbage collection class
+		istring() : m_str(nullptr) {}
+		istring(const istring& s) : m_str(nullptr) { assign(s); }
+		istring(istring&& s) : m_str(nullptr) { assign(s); }
+		istring(const char* str) : m_str(nullptr) { assign(str); }
+		istring(const char* str, size_t len) : m_str(nullptr) { assign(str,len); }
+		istring& operator=(const istring& s)  { assign(s); return *this;  }
+		istring& operator=(istring&& s)  { assign(s); s.clear(); return *this; }
+		~istring() { clear(); }
+		
+		// some converters
+		istring(const std::string& str) : m_str(nullptr) {  assign(str);  }
+		istring(std::string&& str) : m_str(nullptr) {  assign(str); }
+		operator std::string() { return m_str ? std::move(std::string(m_str->str, m_str->size)) : ""; }
+		istring& operator=(const std::string& s) { assign(s); return *this; }
+		istring& operator=(std::string&& s)  { assign(s); s.clear(); return *this; }
+		bool equal(const istring& o) const { return m_str == o.m_str; }
+		bool equal(const char* o) const { return m_str && m_str->str == o || ::strcmp(m_str->str, o) == 0; }
+		// case invarent equal
+		bool iequal(const istring& o) const { return (m_str && o.m_str &&  ::strcmpi(m_str->str, o.m_str->str)); }
+		bool iequal(const char* o) const { return (m_str &&  ::strcmpi(m_str->str, o)); }
+		
+		const char* begin() const { return m_str ? m_str->str : nullptr; }
+		const char* end() const { return m_str ? m_str->str + m_str->size: nullptr;}
+		std::string::size_type size() const { return m_str ? m_str->size : 0; }
+		std::string::value_type at(std::string::size_type i) const { return m_str ? m_str->str[i] : 0; }
+		std::string::value_type operator[](std::string::size_type i) const { return m_str ? m_str->str[i] : 0; }
+
+		size_t hash() const { return m_str ? m_str->hash : 0; }
+		friend inline bool operator==(const istring& l, const istring& r) { return l.equal(r); }
+		friend inline bool operator!=(const istring& l, const istring& r) { return !l.equal(r); }
 	};
-
-	inline bool operator==(const Name& l, const Name& r) { return l.handle() == r.handle(); }
-	inline bool operator!=(const Name& l, const Name& r) { return !(l == r); }
-
+	
+	
 	class Symbol {
-		Symbol(const Name& name) : m_name(name), m_fixed(false), m_value(0), m_type(SymbolType::Undefined) {}
+		Symbol(const std::string& name) : m_name(name), m_fixed(false), m_value(0), m_type(SymbolType::Undefined) {}
 		void value(int value, int lineno) {
 			m_lineno_defined.emplace(std::make_pair(value, lineno));
 			m_value = value;
@@ -53,8 +96,7 @@ namespace macro8 {
 		void fixed(bool value) { m_fixed = value; }
 	public:
 		const SymbolType type() const { return m_type; }
-		const std::string& name() const { return m_name; }
-		size_t name_handle() const { return m_name.handle(); }
+		const istring& name() const { return m_name; }
 		const bool fixed() const { return m_fixed; }
 		
 		int value() const { return m_value; }
@@ -64,15 +106,16 @@ namespace macro8 {
 		}
 	private:
 		friend class SymbolTable;
-		Name m_name;
+		istring m_name;
 		std::set<int> m_lineno_ref;
 		std::set<std::pair<int,int>> m_lineno_defined;
 		SymbolType m_type;
 		bool m_fixed;
 		int m_value;
+		friend inline bool operator==(const Symbol& l, const Symbol& r) { return l == r || ::strcmpi( }
+		friend inline bool operator!=(const Symbol& l, const Symbol& r) { return !(l == r); }
 	};
-	inline bool operator==(const Symbol& l, const Symbol& r) { return l.name_handle() == r.name_handle(); }
-	inline bool operator!=(const Symbol& l, const Symbol& r) { return !(l == r); }
+	
 
 };
 
@@ -83,47 +126,39 @@ namespace std {
 		std::size_t operator()(const macro8::Position& p) const { return size_t(p); }
 	};
 	template <>
-	struct hash<macro8::Name> {
-		std::size_t operator()(const macro8::Name& p) const { return std::hash<std::string>()(p); }
+	struct hash<macro8::Symbol> {
+		std::size_t operator()(const macro8::Symbol& p) const { return std::hash<std::string>()(p.name()); }
 	};
 	template <>
-	struct hash<macro8::Symbol> {
-		std::size_t operator()(const macro8::Symbol& p) const { return p.name_handle(); }
+	struct hash<macro8::istring> {
+		std::size_t operator()(const macro8::istring& p) const { return std::hash<std::string>()(p); }
 	};
 };
 
 namespace macro8 {
-	class SymbolTableException : public std::exception {
+	
+	class AssemblerException : public std::exception {
 		std::string m_what;
 	public:
-		SymbolTableException(const std::string& msg) : m_what(msg), std::exception() {}
+		AssemblerException(const std::string& msg) : m_what(msg), std::exception() {}
 		const char* what() const override { return m_what.c_str(); }
 	};
-	// need to make 
+
 	class SymbolTable {
 	public:
 	
-		SymbolTable(bool case_ignore = false) : m_case_ignore(false) , m_names(new StringTable) {}
+		SymbolTable(bool case_ignore = false) : m_case_ignore(false){}
 
-		const Name& create_name(const std::string& name) {
-			auto& h_name = m_names->emplace(m_names->end());
-			h_name->reset(const_cast<std::string*>(&name)); // hack for lookup
-			auto id = m_names_set.emplace(m_names->size() - 1 , *m_names.get());
-			h_name->release(); // remeber, hack!
-			if (id.second)
-				h_name->reset(new std::string(name));
-			else
-				m_names->pop_back();
-			return *id.first;
-		}
-		Symbol& lookup(const Name& name) { 
-			auto it = m_table.find(name.handle());
-			if (it == m_table.end()) {
-				return m_table.emplace(std::make_pair(name.handle(), Symbol(name))).first->second;
+		Symbol& lookup(istring name) {
+			if (!m_case_ignore) {
+				std::string u_case;
+				std::transform(name.begin(), name.end(), u_case.begin(), ::toupper);
+				name = u_case;
 			}
-			return it->second;
+			auto& ptr = m_table[name];
+			if (!ptr) ptr.reset(new Symbol(name));
+			return *ptr.get();
 		}
-		Symbol& lookup(const std::string& name) { return lookup(create_name(name)); }
 		Symbol& define(const std::string& name, int value, int lineno=-1,bool mri=false) {
 			auto sym = lookup(name);
 			if (sym.type() == SymbolType::Undefined) {
@@ -136,137 +171,174 @@ namespace macro8 {
 	private:
 		friend class Symbol;
 		friend class Name;
-		
-		std::unordered_map<size_t, Symbol> m_table;
-		std::unordered_set<Name> m_names_set;
-
-		std::unique_ptr<StringTable> m_names;
+		std::unordered_map<istring, std::unique_ptr<Symbol>> m_table;
 		bool m_case_ignore;
+	};
+	enum class Kind : int {
+		Error = 0,
+		Value,
+		Symbol,
+		Add,
+		Minus,
+		Star,
+		Equal,
+		LBrack,
+		RBrack,
+		LArrow,
+		RArrow,
+		LParm,
+		RParm,
+		Comma,
+		Comment,
+		WhiteSpace,
+		Eol,
+		Eof
 	};
 	class Token {
 	public:
 		size_t size() const { return m_size; }
-		int token() const { return m_token; }
+		Kind token() const { return m_token; }
 		size_t pos() const { return m_pos; }
+		Symbol* symbol() const {
+			return (m_token != Kind::Symbol) ? nullptr : m_symbol;
+		}
+		int value() const {
+			switch (m_token) {
+			case Kind::Value: return m_value;
+			case Kind::Symbol: return m_symbol->value();
+			default:
+				return 0;
+			}
+		}
 	private:
-		Token() : m_token(-1),  m_size(0) , m_pos(0) {}
 		friend class Lexer;
-		int m_token;
+		Token() : m_token(Kind::Error), m_size(0), m_pos(0), m_symbol(nullptr) {}
+		union {
+			Symbol* m_symbol;
+			int m_value;
+		};
+		Kind m_token;
+		size_t m_size;
+		size_t m_pos;
+	};
+
+	class LexerException : public AssemblerException {
+		Token m_token;
+	public:
+		LexerException(Token t, const std::string& msg) : AssemblerException(msg) {}
+		const Token& token() const { return m_token; }
+	};
+
+	class Lexer {
+	public:
+		void reset() { m_pos = 0; }
+		virtual void set_text(const char* str, size_t size) {
+			reset();
+			m_text = str;
+			m_size = size;
+		}
+		std::vector<Token> tokens() {
+			std::vector<Token> toks;
+			toks.reserve(200);
+			m_pos = 0;
+			for (Token t = next(); t.token() != Kind::Eof; t = next()) {
+				if (m_skip_whitespace && t.token() == Kind::WhiteSpace || t.token() == Kind::Eol) continue;
+				if (m_skip_comment && t.token() == Kind::Comment) continue;
+				toks.push_back(t);
+			}
+			return toks;
+		}
+		std::string token_text(const Token& token) {
+			return std::string(m_text + token.pos(), token.size());
+		}
+	protected:
+		static Kind oneCharLookup(char c);
+		template<typename T>
+		static inline bool isLineEnding(T v) { return v == '\n' || v == '\r'; }
+		template<typename T>
+		static inline bool isWhiteSpace(T v) { return v == ' ' || v == '\t'; }
+		Token next() {
+			Token t;
+			t.m_pos = m_pos;
+			t.m_token = Kind::Error;
+			t.m_size=1;
+			t.m_value = 0;
+			int ch = 0, prev = 0;
+			while (true){
+				ch = m_pos < m_size ? (uint8_t)m_text[m_pos] : 0;
+				Kind k = oneCharLookup(ch);
+				if (t.m_token == Kind::Error) t.m_token = k;
+				switch (t.m_token) {
+				case Kind::Eol:// fix line ending
+					if (prev != ch && isLineEnding(prev)) m_pos++;
+					return t;
+				case Kind::Symbol:
+					if((k == Kind::Symbol || k == Kind::Value || ch == '_')) break;
+					t.m_symbol = &m_table.lookup(istring(m_text + t.pos(), t.size()));
+					return t;
+				case Kind::Value:
+					if (k == Kind::Value) {
+						t.m_value *= m_value_base;
+						switch (m_value_base) {
+						case 8: 
+							if (ch <'0' || ch > '7') throw SymbolTableException("value outside of range of base 8");
+							t.m_value += ch - '0';
+						case 10:
+							if (ch <'0' || ch > '9') throw SymbolTableException("value outside of range of base 10");
+							t.m_value += ch - '0';
+						case 16: // not supported?
+							if (ch < 'a' || ch > 'f' && ch <'0' || ch > '9') throw SymbolTableException("value outside of range of base 16");
+							t.m_value += ch - '0';
+						default:
+							throw SymbolTableException("unsported base for value");
+						}
+						continue;
+					}
+					return t;
+				case Kind::WhiteSpace:
+					if (k == Kind::WhiteSpace) continue;
+					return t;
+				case Kind::Comment:
+					if (k != Kind::Eol) continue;
+					return t;
+				default:
+					throw SymbolTableException("error token base for value");
+				}
+				prev = ch;
+				m_pos++;
+				t.m_size++;
+			}
+			m_pos--; // backup
+			return t;
+		}
+		
+		SymbolTable m_table;
+		bool m_skip_whitespace = true;
+		bool m_skip_comment = true;
+		int m_value_base;
+		std::vector<Token> m_cache;
+		const char* m_text;
+		int m_prev;
+
 		size_t m_size;
 		size_t m_pos;
 	};
 	
-	class Lexer {
-
-	public:
-
-		enum Kind {
-			WHITESPACE = -6,
-			COMMENT = -5,
-			SYMBOL = -4,
-			NUMBER = -3,
-			INVALID = -2,
-			ENDOFFILE = -1,
-		};
-		Lexer() {
-		}
-		template<typename T>
-		static inline bool isLineEnding(T v) { return v == '\n' || v == '\r'; }
-		bool m_skip_whitespace = false;
-		// the tokenizer is set up so that break advances to the next char and continue restarts using the existing one
-		void parse(const char* text, size_t size) {
-			assert(text);
-			Token t;
-			t.m_token = 0;
-			size_t pos = 0;
-			while(true) {
-				int ch = pos < size ? (uint8_t)text[pos] : 0;
-				switch (t.m_token) {
-				case 0:
-					if (ch == 0) return; // all done
-					t.m_pos = pos; // whatever it is, its a token
-					t.m_size = 0; 
-					if (::isspace(ch)) t.m_token = WHITESPACE; // skip spaces
-					else if(::isalpha(ch))  t.m_token = SYMBOL; 
-					else if(::isdigit(ch)) t.m_token = NUMBER; 
-					else if (ch == '/') t.m_token = COMMENT;
-					else {
-						t.m_token = ch;
-						t.m_size = 1;
-						m_tokens.push_back(t); // single token
-						t.m_token = 0; // clear
-					}
-					break; 
-				case WHITESPACE:
-					if (!::isspace(ch)) {
-						if(!m_skip_whitespace) m_tokens.push_back(t);
-						t.m_token = 0; // restart state
-						continue;
-					}
-					break;
-				case COMMENT: // comment
-					if (isLineEnding(ch) || ch == 0) {
-						m_tokens.push_back(t);
-						t.m_token = 0; // restart state
-						continue;
-					}
-					break;
-				case SYMBOL:
-					if (!::isalnum(ch)) {
-						m_tokens.push_back(t);
-						t.m_token = 0; // restart state
-						continue;
-					}
-					break;
-				case NUMBER:
-					if (!::isdigit(ch)) {
-						m_tokens.push_back(t);
-						t.m_token = 0; // restart state
-						continue;
-					}
-					break;
-				default:
-					assert(false);
-					break; // error
-				}
-				pos++; // next charater
-				t.m_size++; // save charater
-			} 
-		}
-		void debug(const char* text) {
-			std::string s;
-			for (auto& t : m_tokens) {
-				debug_out("pos: %3i size %4i ", t.pos(),t.size());
-				switch (t.token()) {
-				case COMMENT:
-					s.assign(text + t.pos(), t.size());
-					debug_out("COMMENT : %s\n", s.c_str());
-					break;
-				case SYMBOL:
-					s.assign(text + t.pos(), t.size());
-					debug_out("SYMBOL : %s\n", s.c_str());
-					break;
-				case NUMBER:
-					s.assign(text + t.pos(), t.size());
-					debug_out("NUMBER : %s\n", s.c_str());
-					break;
-				case WHITESPACE:
-					debug_out("WHITESPACE\n");
-					break;
-				default:
-					debug_out("TOK : 0x%2.2X", t.token());
-					if(::isprint(t.token()))
-						debug_out("('%c')", (char)t.token());
-					debug_out("\n");
-					break;
-				}
-			}
-			
-		}
-		const std::vector<Token>& tokens() const { return m_tokens; }
-	private:
-		std::vector<Token> m_tokens;
-	};
-
 	
+	class Assembler {
+		SymbolTable m_table;
+		Lexer* m_lex;
+		int  error(const char* str) {
+			debug_out(str);
+			return -1;
+		}
+	public:
+		void parse(Lexer& lex) {
+			m_lex = &lex;
+
+
+		}
+	private:
+
+	};
 };
